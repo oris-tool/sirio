@@ -18,26 +18,26 @@ nets** (STPNs), a probabilistic model where:
   enabling/disabling other transitions.
 
 The available analysis methods can compute **transient and
-steady-state probabilities** (and expected instantaneous/cumulative
-**rewards**) when the underlying stochastic process of the STPN is:
-- A **Continuous-Time Markov Chain** (CTMC), i.e., all transitions are
+steady-state probabilities** (and instantaneous/cumulative rewards)
+when the underlying stochastic process of the STPN is:
+- A Continuous-Time Markov Chain (CTMC), i.e., all transitions are
   exponential or immediate. In this case, uniformization is used to
   compute transient probabilities.
-- A **Markov-Regenerative Process** (MRP) under enabling restriction,
+- A Markov-Regenerative Process (MRP) under enabling restriction,
   i.e., such that **at most one general transition is enabled** in
   each state. In this case, uniformization is used to analyze CTMCs
   subordinated to the enabling of each general transition.
-- A **Markov-Regenerative Process** (MRP) with **many general
+- A Markov-Regenerative Process (MRP) with **many general
   transitions**, such that, eventually, they are all reset within a
   bounded number of a transition firing. The resulting condition
   (i.e., all general transitions are disabled or newly-enabled) is
   called a **regeneration**.
 
 Sirio also allows the analysis of non-deterministic reductions of STPNs:
-- **Time Petri Nets** (TPNs), where each transition has only a minimum
+- Time Petri Nets (TPNs), where each transition has only a minimum
   and maximum value for its timer (instead of a probability
   distribution).
-- *Petri Nets* (PNs), where transitions have no timers (each enabled
+- Petri Nets (PNs), where transitions have no timers (each enabled
   transition can trigger the next event).
 
 At the moment, all implementations use an explicit state encoding.
