@@ -1,0 +1,143 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.oris-tool</groupId>
+  <artifactId>sirio</artifactId>
+  <version>2.0.0-SNAPSHOT</version>
+
+  <name>Sirio</name>
+  <description>Library for the analysis of stochastic Petri nets</description>
+  <url>http://www.oris-tool.org/</url>
+
+  <scm>
+    <url>https://github.com/oris-tool/sirio</url>
+    <connection>scm:git:git://github.com/oris-tool/sirio.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:/oris-tool/sirio.git</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
+  <issueManagement>
+    <url>https://github.com/oris-tool/sirio/issues</url>
+    <system>GitHub Issues</system>
+  </issueManagement>
+
+  <organization>
+    <name>STLAB</name>
+    <url>http://stlab.dinfo.unifi.it</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <name>GNU Affero General Public License 3.0</name>
+      <url>https://www.gnu.org/licenses/agpl-3.0.txt</url>
+    </license>
+  </licenses>
+
+  <properties>
+    <maven.compiler.source>9</maven.compiler.source>
+    <maven.compiler.target>9</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jfree</groupId>
+      <artifactId>jfreechart</artifactId>
+      <version>1.0.19</version>
+    </dependency>
+    <dependency>
+      <groupId>org.tinyjee.jgraphx</groupId>
+      <artifactId>jgraphx</artifactId>
+      <version>2.3.0.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-math3</artifactId>
+      <version>3.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.la4j</groupId>
+      <artifactId>la4j</artifactId>
+      <version>0.5.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.25</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.25</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.0.0</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>8.8</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+          <?m2e ignore ?><!-- execute onIncremental -->
+            <id>validate</id>
+            <phase>validate</phase>
+            <configuration>
+              <configLocation>checkstyle.xml</configLocation>
+              <propertyExpansion>config_loc=${basedir}</propertyExpansion>
+              <includeTestSourceDirectory>true</includeTestSourceDirectory>
+              <encoding>UTF-8</encoding>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+              <failOnViolation>true</failOnViolation>
+              <violationSeverity>error</violationSeverity>
+              <logViolationsToConsole>true</logViolationsToConsole>
+              <linkXRef>false</linkXRef>
+            </configuration>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.9.0</version>
+        <configuration>
+          <failOnViolation>true</failOnViolation>
+          <printFailingErrors>true</printFailingErrors>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
