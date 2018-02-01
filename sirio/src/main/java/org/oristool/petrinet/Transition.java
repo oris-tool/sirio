@@ -20,14 +20,14 @@ package org.oristool.petrinet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.oristool.analyzer.Event;
 import org.oristool.math.expression.Variable;
 import org.oristool.util.Featurizable;
 
 /**
  * Transition of a Petri net.
  */
-public final class Transition extends Featurizable<TransitionFeature> {
-    // TODO Implement Event interface
+public final class Transition extends Featurizable<TransitionFeature> implements Event {
     
     private final String name;
 
@@ -45,6 +45,7 @@ public final class Transition extends Featurizable<TransitionFeature> {
      * 
      * @return name of the place
      */
+    @Override
     public String getName() {
         return name;
     }
