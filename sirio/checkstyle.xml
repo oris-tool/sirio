@@ -21,8 +21,17 @@
         <property name="fileExtensions" value="java"/>
     </module>
 
-    <property name="charset" value="UTF-8"/>
+    <module name="RegexpMultiline">
+        <property name="format" value="\r\n"/>
+        <property name="message" value="Do not use Windows line endings"/>
+    </module>
 
+    <module name="SuppressionFilter">
+      <property name="file" value="${config_loc}/checkstyle_filter.xml"/>
+      <property name="optional" value="false"/>
+    </module>
+
+    <property name="charset" value="UTF-8"/>
     <property name="severity" value="warning"/>
 
     <property name="fileExtensions" value="java, properties, xml"/>
@@ -55,7 +64,7 @@
             <property name="option" value="TEXT"/>
             <property name="tokens" value="LITERAL_TRY, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_SWITCH"/>
         </module>
-        <module name="NeedBraces"/>
+        <!-- <module name="NeedBraces"/> -->
         <module name="LeftCurly"/>
         <module name="RightCurly">
             <property name="id" value="RightCurlySame"/>
@@ -179,7 +188,7 @@
         </module>
         <module name="AbbreviationAsWordInName">
             <property name="ignoreFinal" value="false"/>
-            <property name="allowedAbbreviationLength" value="1"/>
+            <property name="allowedAbbreviationLength" value="3"/>
         </module>
         <module name="OverloadMethodsDeclarationOrder"/>
         <module name="VariableDeclarationUsageDistance"/>

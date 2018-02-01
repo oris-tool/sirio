@@ -14,3 +14,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+package org.oristool.lello.exception;
+
+/**
+ * Describes an exceptional event occurred during an illegal attempt to alter a
+ * read-only value.
+ */
+public class ReadOnlyException extends RuntimeException {
+
+    private static final long serialVersionUID = 844962332199165174L;
+
+    public ReadOnlyException() {
+        super();
+    }
+
+    public ReadOnlyException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ReadOnlyException(String message) {
+        super(message);
+    }
+
+    public ReadOnlyException(Throwable cause) {
+        super(cause);
+    }
+}

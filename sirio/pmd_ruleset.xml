@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  name="pmd" xsi:noNamespaceSchemaLocation="http://pmd.sourceforge.net/ruleset_2_0_0.xsd"
+  xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 http://pmd.sourceforge.net/ruleset_2_0_0.xsd"
+  xmlns="http://pmd.sourceforge.net/ruleset/2.0.0">
+  <description>Sirio coding rulesets</description>
+
+  <rule ref="category/java/bestpractices.xml">
+    <exclude name="AbstractClassWithoutAbstractMethod"/>
+    <exclude name="PositionLiteralsFirstInComparisons"/>
+  </rule>
+  <rule ref="category/java/codestyle.xml">
+    <exclude name="BooleanGetMethodName"/>
+    <exclude name="AtLeastOneConstructor"/>
+    <exclude name="MethodNamingConventions"/>
+    <exclude name="ShortMethodName"/>
+    <exclude name="UselessParentheses"/>
+    <exclude name="ShortVariable"/>
+    <exclude name="ForLoopsMustUseBraces"/>
+    <exclude name="IfStmtsMustUseBraces"/>
+    <exclude name="IfElseStmtsMustUseBraces"/>
+    <exclude name="MethodArgumentCouldBeFinal"/>
+    <exclude name="LocalVariableCouldBeFinal"/>
+    <exclude name="OnlyOneReturn"/>
+    <exclude name="AbstractNaming"/>
+    <exclude name="ConfusingTernary"/>
+    <exclude name="CallSuperInConstructor"/>
+  </rule>
+  <rule ref="category/java/errorprone.xml">
+    <exclude name="NullAssignment"/>
+    <exclude name="AvoidLiteralsInIfCondition"/>
+    <exclude name="BeanMembersShouldSerialize"/>
+    <exclude name="AvoidDuplicateLiterals"/>
+    <exclude name="DataflowAnomalyAnalysis"/>
+  </rule>
+</ruleset>

@@ -93,7 +93,7 @@ public abstract class Featurizable<E extends Feature> {
 
         for (E e : features.values()) {
             b.append(e.toString());
-            b.append("\n");
+            b.append('\n');
         }
 
         return b.toString();

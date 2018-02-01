@@ -14,3 +14,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+package org.oristool.lello.exception;
+
+/**
+ * Describes an exceptional event occurred as a result of attempting an
+ * operation that was illegal for a certain data type.
+ */
+public class ValueException extends RuntimeException {
+
+    private static final long serialVersionUID = 7179000984568964874L;
+
+    public ValueException() {
+        super();
+    }
+
+    public ValueException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ValueException(String message) {
+        super(message);
+    }
+
+    public ValueException(Throwable cause) {
+        super(cause);
+    }
+}

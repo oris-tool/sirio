@@ -14,3 +14,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+package org.oristool.lello.exception;
+
+/**
+ * Describes an exceptional event occurred while attempting to compute the
+ * numeric value of an expression.
+ */
+public class EvalException extends RuntimeException {
+
+    private static final long serialVersionUID = -3005078123434647609L;
+
+    public EvalException() {
+        super();
+    }
+
+    public EvalException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public EvalException(String message) {
+        super(message);
+    }
+
+    public EvalException(Throwable cause) {
+        super(cause);
+    }
+}

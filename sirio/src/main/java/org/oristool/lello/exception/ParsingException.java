@@ -14,3 +14,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+package org.oristool.lello.exception;
+
+/**
+ * Describes an exceptional event detected by the Lello parser.
+ */
+public class ParsingException extends RuntimeException {
+
+    private static final long serialVersionUID = 7752471492497471764L;
+
+    public ParsingException() {
+        super();
+    }
+
+    public ParsingException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public ParsingException(String message) {
+        super(message);
+    }
+
+    public ParsingException(Throwable cause) {
+        super(cause);
+    }
+}

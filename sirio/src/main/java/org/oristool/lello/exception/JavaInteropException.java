@@ -14,3 +14,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+package org.oristool.lello.exception;
+
+/**
+ * Describes an exceptional event occurred while trying to marshal and unmarshal
+ * data types and function calls between Lello and Java.
+ */
+public class JavaInteropException extends RuntimeException {
+
+    private static final long serialVersionUID = -3854765410635271548L;
+
+    public JavaInteropException() {
+        super();
+    }
+
+    public JavaInteropException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public JavaInteropException(String message) {
+        super(message);
+    }
+
+    public JavaInteropException(Throwable cause) {
+        super(cause);
+    }
+}

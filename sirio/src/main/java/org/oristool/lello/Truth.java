@@ -14,3 +14,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+package org.oristool.lello;
+
+/**
+ * Represents truth values and possibly incomplete information.
+ */
+public enum Truth {
+
+    /** It means to be sure that some condition holds. */
+    YES,
+
+    /** It means to be sure that some condition does not hold. */
+    NO,
+
+    /** It means that it is not known whether some condition holds or not. */
+    DONTKNOW
+}

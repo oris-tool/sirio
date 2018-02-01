@@ -14,3 +14,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+package org.oristool.lello.exception;
+
+/**
+ * Describes an exceptional event occurred as a result of referencing an
+ * undefined symbol.
+ */
+public class UndefinedSymbolException extends RuntimeException {
+
+    private static final long serialVersionUID = 5035794596586228802L;
+
+    public UndefinedSymbolException() {
+        super();
+    }
+
+    public UndefinedSymbolException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UndefinedSymbolException(String message) {
+        super(message);
+    }
+
+    public UndefinedSymbolException(Throwable cause) {
+        super(cause);
+    }
+}

@@ -14,3 +14,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+package org.oristool.lello.exception;
+
+/**
+ * Describes an exceptional event such as the attempt to choose an illegal name
+ * for an identifier.
+ */
+public class FormatException extends RuntimeException {
+
+    private static final long serialVersionUID = 5412628585915767899L;
+
+    public FormatException() {
+        super();
+    }
+
+    public FormatException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public FormatException(String message) {
+        super(message);
+    }
+
+    public FormatException(Throwable cause) {
+        super(cause);
+    }
+}

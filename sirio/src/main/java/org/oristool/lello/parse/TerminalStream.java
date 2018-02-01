@@ -14,3 +14,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+package org.oristool.lello.parse;
+
+/**
+ * Represents a stream of terminal symbols, input to Lello parser.
+ */
+public interface TerminalStream {
+
+    /**
+     * Advances the cursor to the next symbol in the stream.
+     */
+    void moveNext();
+
+    /**
+     * Retrieves the current symbol in the stream, <i>without</i> advancing the
+     * cursor.
+     * 
+     * @return The current symbol.
+     */
+    Terminal getCurrent();
+
+    /**
+     * Tells whether there is another symbol in the stream or not.
+     * 
+     * @return true if there is another symbol, false if not.
+     */
+    boolean hasNext();
+}

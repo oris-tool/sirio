@@ -129,6 +129,9 @@
         <configuration>
           <failOnViolation>true</failOnViolation>
           <printFailingErrors>true</printFailingErrors>
+          <rulesets>
+            <ruleset>pmd_ruleset.xml</ruleset>
+          </rulesets>
         </configuration>
         <executions>
           <execution>
