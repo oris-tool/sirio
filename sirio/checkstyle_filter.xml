@@ -5,4 +5,5 @@
     
 <suppressions>
     <suppress checks="MethodName" files="org[\\/]oristool[\\/]lello"/>
+    <suppress checks="LocalVariableName" files="org[\\/]oristool"/>
 </suppressions>
