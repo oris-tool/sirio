@@ -108,6 +108,7 @@ public class Constant extends Expression {
     /**
      * Creates a copy of this object.
      */
+    @Override
     public Constant copy() {
 
         return new Constant(value);

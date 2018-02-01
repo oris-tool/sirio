@@ -160,6 +160,7 @@ public class UnaryExpression extends Expression {
     /**
      * Creates a copy of this object.
      */
+    @Override
     public UnaryExpression copy() {
 
         return new UnaryExpression(type, op, expr.copy());

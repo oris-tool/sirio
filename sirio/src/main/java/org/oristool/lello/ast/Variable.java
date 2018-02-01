@@ -190,6 +190,7 @@ public class Variable extends Expression {
     /**
      * Creates a copy of this object.
      */
+    @Override
     public Variable copy() {
 
         return new Variable(name);

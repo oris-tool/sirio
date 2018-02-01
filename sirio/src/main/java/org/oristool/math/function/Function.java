@@ -29,9 +29,11 @@ public interface Function extends PartitionedFunction {
 
     Expolynomial getDensity();
 
+    @Override
     default List<? extends Function> getFunctions() {
         return Collections.singletonList(this);
     }
 
+    @Override
     String toMathematicaString();
 }

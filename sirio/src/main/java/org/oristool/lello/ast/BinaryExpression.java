@@ -171,6 +171,7 @@ public class BinaryExpression extends Expression {
         return Collections.unmodifiableSet(s);
     }
 
+    @Override
     public BinaryExpression copy() {
 
         return new BinaryExpression(left.copy(), op, right.copy());

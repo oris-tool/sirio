@@ -345,6 +345,7 @@ public class FunctionCall extends Expression {
     /**
      * Creates a copy of this object.
      */
+    @Override
     public Expression copy() {
         List<Expression> copied = new ArrayList<Expression>();
 
