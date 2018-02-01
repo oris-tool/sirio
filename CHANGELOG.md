@@ -5,6 +5,7 @@
 ### Functional changes
 
 - Analysis methods now use builders for configuration.
+- Class `Synchronization` is now inside package `math` instead of `models.stpn`.
 
 
 ### Bug fixed
