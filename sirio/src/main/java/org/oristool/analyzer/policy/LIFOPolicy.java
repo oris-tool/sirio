@@ -25,7 +25,8 @@ import org.oristool.analyzer.Succession;
  * LIFO enumeration policy.
  */
 public final class LIFOPolicy implements EnumerationPolicy {
-    private Stack<Succession> stack = new Stack<>();
+
+    private final Stack<Succession> stack = new Stack<>();
 
     @Override
     public void add(Succession succession) {

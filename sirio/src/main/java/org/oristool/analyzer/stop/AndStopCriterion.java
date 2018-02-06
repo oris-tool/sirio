@@ -27,7 +27,7 @@ import org.oristool.analyzer.Succession;
  */
 public final class AndStopCriterion implements StopCriterion {
 
-    List<StopCriterion> criteria;
+    private final List<StopCriterion> criteria;
 
     public AndStopCriterion(List<StopCriterion> criteria) {
         this.criteria = criteria;

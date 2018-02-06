@@ -27,7 +27,7 @@ import org.oristool.analyzer.log.AnalysisMonitor;
 public class MonitorStopCriterion extends AnalyzerObserverAdapter implements
         StopCriterion {
 
-    private AnalysisMonitor monitor;
+    private final AnalysisMonitor monitor;
     private boolean interruptedExecution;
     private int enumeratedClasses;
 

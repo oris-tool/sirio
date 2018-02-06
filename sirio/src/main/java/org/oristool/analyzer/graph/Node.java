@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class Node {
     private static final AtomicInteger counter = new AtomicInteger(0);
-    private int id = 0;
+    private final int id;
 
     public Node() {
         this.id = counter.addAndGet(1);
@@ -35,7 +35,7 @@ public final class Node {
      *
      * @return node id
      */
-    public int getId() {
+    public int id() {
         return id;
     }
 }

@@ -55,19 +55,19 @@ import org.oristool.analyzer.stop.StopCriterion;
  */
 public final class Analyzer<M, E extends Event> {
     private final Set<AnalyzerObserver> observers = new LinkedHashSet<>();
-    private SuccessionGraph graph = new SuccessionGraph();
+    private final SuccessionGraph graph = new SuccessionGraph();
 
-    private M model;
-    private State initialState;
+    private final M model;
+    private final State initialState;
 
     private AnalyzerComponentsFactory<M, E> componentsFactory;
-    EnumerationPolicy enumerationPolicy;
-    EnabledEventsBuilder<M, E> enabledEventsBuilder;
-    SuccessionEvaluator<M, E> successionEvaluator;
-    SuccessionProcessor preProcessor;
-    SuccessionProcessor postProcessor;
-    StopCriterion globalStopCriterion;
-    StopCriterion localStopCriterion;
+    private EnumerationPolicy enumerationPolicy;
+    private EnabledEventsBuilder<M, E> enabledEventsBuilder;
+    private SuccessionEvaluator<M, E> successionEvaluator;
+    private SuccessionProcessor preProcessor;
+    private SuccessionProcessor postProcessor;
+    private StopCriterion globalStopCriterion;
+    private StopCriterion localStopCriterion;
 
     /**
      * Creates an analyzer that will use the objects provided by the given factory

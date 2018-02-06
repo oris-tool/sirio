@@ -21,12 +21,20 @@ package org.oristool.analyzer.graph;
  * Edge of a {@code SuccessionGraph}.
  */
 public final class Edge {
-    final Node predecessor;
-    final Node successor;
+    private final Node predecessor;
+    private final Node successor;
 
     public Edge(Node predecessor, Node successor) {
         this.predecessor = predecessor;
         this.successor = successor;
+    }
+
+    public Node predecessor() {
+        return predecessor;
+    }
+
+    public Node successor() {
+        return successor;
     }
 
     @Override

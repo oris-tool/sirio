@@ -28,11 +28,11 @@ import org.oristool.analyzer.Succession;
  */
 public final class PriorityPolicy implements EnumerationPolicy {
 
+    private final Queue<Succession> queue;
+
     public PriorityPolicy(Comparator<Succession> cos) {
         this.queue = new PriorityQueue<>(11, cos);
     }
-
-    private Queue<Succession> queue;
 
     @Override
     public void add(Succession succession) {
@@ -48,5 +48,4 @@ public final class PriorityPolicy implements EnumerationPolicy {
     public boolean isEmpty() {
         return queue.isEmpty();
     }
-
 }

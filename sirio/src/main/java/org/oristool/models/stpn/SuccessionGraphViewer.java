@@ -315,7 +315,7 @@ public class SuccessionGraphViewer extends JPanel {
         } else {
             Marking marking = s.getFeature(PetriStateFeature.class)
                     .getMarking();
-            int id = g.getNode(s).getId();
+            int id = g.getNode(s).id();
 
             String style = "";
             if (s == g.getState(g.getRoot()))

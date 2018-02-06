@@ -285,9 +285,9 @@ public class TransientAnalysis implements Engine {
                 if (l != null && verbose) {
                     l.log(offset);
                     if (s.hasFeature(Regeneration.class))
-                        l.log("{" + n.getId() + "}");
+                        l.log("{" + n.id() + "}");
                     else
-                        l.log("(" + n.getId() + ")");
+                        l.log("(" + n.id() + ")");
                     l.log(" "
                             + formatProbability(transientFeature
                                     .getReachingProbability()));
@@ -334,9 +334,9 @@ public class TransientAnalysis implements Engine {
                         l.log("->");
 
                         if (succ.getChild().hasFeature(Regeneration.class))
-                            l.log("{" + m.getId() + "}");
+                            l.log("{" + m.id() + "}");
                         else
-                            l.log("(" + m.getId() + ")");
+                            l.log("(" + m.id() + ")");
                     }
 
                     Set<Transition> notFiredEnabledTransitions = petriNet

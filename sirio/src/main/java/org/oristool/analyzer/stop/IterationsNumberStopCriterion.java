@@ -27,8 +27,8 @@ import org.oristool.analyzer.Succession;
 public final class IterationsNumberStopCriterion extends AnalyzerObserverAdapter
         implements StopCriterion {
 
-    int currentIterationsCount;
-    int maxIterationsCount;
+    private final int maxIterationsCount;
+    private int currentIterationsCount;
 
     public IterationsNumberStopCriterion(int maxIterationsCount) {
         this.maxIterationsCount = maxIterationsCount;
