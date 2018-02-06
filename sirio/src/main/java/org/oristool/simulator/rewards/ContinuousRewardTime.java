@@ -15,28 +15,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator.rewards;
 
-import java.io.PrintStream;
+import java.math.BigDecimal;
+
+import org.oristool.analyzer.Succession;
+import org.oristool.petrinet.Transition;
+import org.oristool.simulator.TimedSimulatorStateFeature;
 
 /**
- * Analysis logger printing to stdout.
+ * Continuous reward time: time steps are arbitrary and sojourn times are those
+ * associated with a firing event.
  */
-public class PrintStreamLogger implements AnalysisLogger {
+public final class ContinuousRewardTime implements RewardTime {
 
-    private final PrintStream ps;
+    private final BigDecimal timeStep;
 
-    public PrintStreamLogger(PrintStream printStream) {
-        this.ps = printStream;
+    public ContinuousRewardTime(BigDecimal timeStep) {
+        this.timeStep = timeStep;
     }
 
     @Override
-    public void log(String message) {
-        ps.print(message);
+    public BigDecimal getTimeStep() {
+        return timeStep;
     }
 
     @Override
-    public void debug(String string) {
-        // discard
+    public BigDecimal getSojournTime(Succession succession) {
+        return succession.getParent().getFeature(TimedSimulatorStateFeature.class)
+                .getTimeToFire((Transition) succession.getEvent());
     }
 }

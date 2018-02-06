@@ -15,14 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator.rewards;
+
+import org.oristool.simulator.rewards.RewardEvaluator.RewardEvaluatorEvent;
 
 /**
- * Generic logger interface.
+ * Common interface for observers of a reward evaluator.
  */
-public interface AnalysisLogger {
+public interface RewardEvaluatorObserver {
 
-    void log(String message);
-
-    void debug(String string);
+    void update(RewardEvaluatorEvent event);
 }

@@ -15,14 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator.rewards;
+
+import java.math.BigDecimal;
 
 /**
- * Generic logger interface.
+ * A single numeric result.
  */
-public interface AnalysisLogger {
+public final class NumericRewardResult {
 
-    void log(String message);
+    private final BigDecimal result;
 
-    void debug(String string);
+    public NumericRewardResult(BigDecimal result) {
+        this.result = result;
+    }
+
+    public BigDecimal getResult() {
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return result.toString();
+    }
 }

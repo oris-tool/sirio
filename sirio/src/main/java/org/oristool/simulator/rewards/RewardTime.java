@@ -15,14 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator.rewards;
+
+import java.math.BigDecimal;
+import org.oristool.analyzer.Succession;
 
 /**
- * Generic logger interface.
+ * Common interface of discrete and continuous reward times.
  */
-public interface AnalysisLogger {
+public interface RewardTime {
 
-    void log(String message);
+    BigDecimal getTimeStep();
 
-    void debug(String string);
+    BigDecimal getSojournTime(Succession succession);
 }

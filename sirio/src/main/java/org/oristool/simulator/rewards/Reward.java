@@ -15,14 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator.rewards;
+
+import org.oristool.simulator.Sequencer;
+import org.oristool.simulator.SequencerObserver;
 
 /**
- * Generic logger interface.
+ * General reward interface.
  */
-public interface AnalysisLogger {
+public interface Reward extends SequencerObserver {
 
-    void log(String message);
+    public enum RewardEvent {
+        RUN_END
+    }
 
-    void debug(String string);
+    Sequencer getSequencer();
+
+    RewardTime getRewardTime();
+
+    Object evaluate();
+
+    void addObserver(RewardObserver observer);
+
+    void removeObserver(RewardObserver observer);
 }

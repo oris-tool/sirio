@@ -15,14 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator;
+
+import org.oristool.analyzer.state.State;
+import org.oristool.petrinet.Marking;
+import org.oristool.petrinet.PetriNet;
 
 /**
- * Generic logger interface.
+ * Builder for the initial {@link State} of simulations.
  */
-public interface AnalysisLogger {
+public interface SimulatorInitialStateBuilder {
 
-    void log(String message);
-
-    void debug(String string);
+    State build(PetriNet petriNet, Marking initialMarking);
 }

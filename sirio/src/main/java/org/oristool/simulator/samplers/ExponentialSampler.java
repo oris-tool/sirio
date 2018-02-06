@@ -15,14 +15,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator.samplers;
+
+import java.math.BigDecimal;
+
+import org.oristool.math.function.EXP;
 
 /**
- * Generic logger interface.
+ * Sampler for exponential random variables.
  */
-public interface AnalysisLogger {
+public final class ExponentialSampler implements Sampler {
 
-    void log(String message);
+    private final BigDecimal rate;
 
-    void debug(String string);
+    public ExponentialSampler(BigDecimal rate) {
+        this.rate = rate;
+    }
+
+    public ExponentialSampler(EXP f) {
+        this.rate = f.getLambda();
+    }
+
+    @Override
+    public BigDecimal getSample() {
+
+        return new BigDecimal(-Math.log(1 - Math.random()) / rate.doubleValue());
+    }
 }

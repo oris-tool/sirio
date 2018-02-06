@@ -15,14 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator.samplers;
+
+import java.math.BigDecimal;
 
 /**
- * Generic logger interface.
+ * Common interface of samplers.
  */
-public interface AnalysisLogger {
-
-    void log(String message);
-
-    void debug(String string);
+public interface Sampler {
+    /**
+     * Returns the next sample.
+     *
+     * @return next sample
+     */
+    BigDecimal getSample();
 }

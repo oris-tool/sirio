@@ -15,14 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator;
+
+import org.oristool.analyzer.EnabledEventsBuilder;
+import org.oristool.analyzer.Event;
 
 /**
- * Generic logger interface.
+ * Factory of components used during the simulation.
+ *
+ * @param <M> type of the model
+ * @param <E> type of the events
  */
-public interface AnalysisLogger {
+public interface SimulatorComponentsFactory<M, E extends Event> {
 
-    void log(String message);
+    SimulatorInitialStateBuilder getInitialStateBuilder();
 
-    void debug(String string);
+    SimulatorSuccessorEvaluator getSuccessorEvaluator();
+
+    EnabledEventsBuilder<M, E> getFirableTransitionSetBuilder();
 }

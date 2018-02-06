@@ -15,14 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator.rewards;
+
+import java.math.BigDecimal;
+
+import org.oristool.analyzer.Succession;
 
 /**
- * Generic logger interface.
+ * Discrete reward time: time steps and sojourn times are always equal to 1.
  */
-public interface AnalysisLogger {
+public final class DiscreteRewardTime implements RewardTime {
 
-    void log(String message);
+    @Override
+    public BigDecimal getTimeStep() {
+        return BigDecimal.ONE;
+    }
 
-    void debug(String string);
+    @Override
+    public BigDecimal getSojournTime(Succession succession) {
+        return BigDecimal.ONE;
+    }
 }

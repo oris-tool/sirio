@@ -14,15 +14,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+/**
+ *
+ */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator.samplers;
+
+import java.math.BigDecimal;
 
 /**
- * Generic logger interface.
+ * Sampler for uniform random variables.
  */
-public interface AnalysisLogger {
+public class UniformSampler implements Sampler {
 
-    void log(String message);
+    private BigDecimal min;
+    private BigDecimal max;
 
-    void debug(String string);
+    public UniformSampler(BigDecimal min, BigDecimal max) {
+        this.min = min;
+        this.max = max;
+    }
+
+    @Override
+    public BigDecimal getSample() {
+
+        if (min.compareTo(max) == 0)
+            return min;
+        else
+            return new BigDecimal(Math.random()).multiply(max.subtract(min)).add(min);
+
+    }
 }

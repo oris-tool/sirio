@@ -15,14 +15,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator.samplers;
+
+import java.math.BigDecimal;
+
+import org.oristool.math.function.Erlang;
 
 /**
- * Generic logger interface.
+ * Sampler for Erlang random variables.
  */
-public interface AnalysisLogger {
+public final class ErlangSampler implements Sampler {
 
-    void log(String message);
+    private final BigDecimal rate;
+    private final int shape;
 
-    void debug(String string);
+    public ErlangSampler(Erlang f) {
+        this.rate = f.getLambda();
+        this.shape = f.getShape();
+    }
+
+    @Override
+    public BigDecimal getSample() {
+
+        double sample = 0.0;
+        for (int i = 0; i < shape; ++i)
+            sample += -Math.log(1 - Math.random()) / rate.doubleValue();
+
+        return new BigDecimal(sample);
+    }
 }

@@ -15,14 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator;
 
-/**
- * Generic logger interface.
- */
-public interface AnalysisLogger {
+import org.oristool.analyzer.Succession;
+import org.oristool.analyzer.state.State;
+import org.oristool.petrinet.PetriNet;
+import org.oristool.petrinet.Transition;
 
-    void log(String message);
+public interface SimulatorSuccessorEvaluator {
 
-    void debug(String string);
+    Succession computeSuccessor(PetriNet petriNet, State state, Transition fired);
 }

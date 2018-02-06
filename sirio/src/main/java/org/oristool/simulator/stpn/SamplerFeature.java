@@ -15,14 +15,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator.stpn;
+
+import java.math.BigDecimal;
+
+import org.oristool.petrinet.TransitionFeature;
+import org.oristool.simulator.samplers.Sampler;
 
 /**
- * Generic logger interface.
+ * Transition feature associating a time-to-fire sampler.
  */
-public interface AnalysisLogger {
+public final class SamplerFeature implements TransitionFeature {
 
-    void log(String message);
+    private Sampler sampler;
 
-    void debug(String string);
+    public SamplerFeature(Sampler sampler) {
+        this.sampler = sampler;
+    }
+
+    public BigDecimal getSample() {
+        return sampler.getSample();
+    }
 }

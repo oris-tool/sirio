@@ -15,14 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer.log;
+package org.oristool.simulator;
+
+import org.oristool.simulator.Sequencer.SequencerEvent;
 
 /**
- * Generic logger interface.
+ * Common interface of simulation observers.
  */
-public interface AnalysisLogger {
+public interface SequencerObserver {
 
-    void log(String message);
-
-    void debug(String string);
+    public void update(SequencerEvent e);
 }
