@@ -24,15 +24,15 @@ public interface AnalysisMonitor {
 
     /**
      * Notifies a message to the user.
-     *  
+     *
      * @param message input message
      */
     void notifyMessage(String message);
-    
+
     /**
      * Notifies an interruption request from the user.
-     * 
-     * @return true if the user requested to stop the analysis 
+     *
+     * @return true if the user requested to stop the analysis
      */
     boolean interruptRequested();
 }

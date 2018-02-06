@@ -36,7 +36,7 @@ public class EventNameStopCriterion extends AnalyzerObserverAdapter
     public String getEventName() {
         return eventName;
     }
-    
+
     @Override
     public void notifySuccessionExtracted(Succession succession) {
         if (succession.getEvent() != null)

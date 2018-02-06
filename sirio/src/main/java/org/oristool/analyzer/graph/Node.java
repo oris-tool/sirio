@@ -32,7 +32,7 @@ public final class Node {
 
     /**
      * Returns the unique ID of this node.
-     * 
+     *
      * @return node id
      */
     public int getId() {

@@ -19,10 +19,10 @@ package org.oristool.analyzer.state;
 
 /**
  * Builds a full state representation from a discrete summary.
- * 
+ *
  * <p>The full state representation may include additional information such as
  * the support and PDF of enabled timers.
- * 
+ *
  * @param <D> type of the discrete state (such as a {@code Marking})
  */
 public interface StateBuilder<D> {

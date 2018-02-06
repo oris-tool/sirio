@@ -30,14 +30,14 @@ public interface TerminalStream {
     /**
      * Retrieves the current symbol in the stream, <i>without</i> advancing the
      * cursor.
-     * 
+     *
      * @return The current symbol.
      */
     Terminal getCurrent();
 
     /**
      * Tells whether there is another symbol in the stream or not.
-     * 
+     *
      * @return true if there is another symbol, false if not.
      */
     boolean hasNext();

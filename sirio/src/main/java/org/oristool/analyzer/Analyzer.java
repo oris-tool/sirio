@@ -28,25 +28,25 @@ import org.oristool.analyzer.stop.StopCriterion;
 /**
  * General state-space expansion algorithm.
  * <pre>{@code
- * 
+ *
  *   create succession (null, s0)        // and notify
  *   post-process succession (null, s0)  // and notify
  *   add succession (null, s0) to queue  // and notify
- * 
+ *
  *   while not queue.isEmpty() and not globalStop():
- *     
+ *
  *     (parent, i) = queue.remove()      // and notify
  *     preprocess succession (parent, i) // and notify
  *     isNewChild = G.add((parent, i))   // and notify
- *     
+ *
  *     if isNewChild and not localStop((parent, i)):
  *       for j in postprocessed non-null successors of i
  *       // (notified creation and postprocessing)
- *       
+ *
  *         queue.add((i,j))              // and notify
  *         if globalStop():
  *           break
- * 
+ *
  *   while not queue.isEmpty()           // ended because of global stop
  *     (parent, i) = queue.remove()      // and notify
  *     pre-process (parent, i)           // and notify
@@ -72,8 +72,8 @@ public final class Analyzer<M, E extends Event> {
     /**
      * Creates an analyzer that will use the objects provided by the given factory
      * to analyze a model from some initial state.
-     * 
-     * @param componentsFactory factory of objects used during the analysis 
+     *
+     * @param componentsFactory factory of objects used during the analysis
      * @param model input model
      * @param initialState initial state of the model
      */
@@ -94,7 +94,7 @@ public final class Analyzer<M, E extends Event> {
 
     /**
      * Starts the analysis.
-     * 
+     *
      * @return the graph resulting from the enumeration
      */
     public SuccessionGraph analyze() {

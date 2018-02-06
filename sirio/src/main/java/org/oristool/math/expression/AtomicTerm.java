@@ -26,28 +26,28 @@ public interface AtomicTerm {
 
     /**
      * Multiplies with another term.
-     * 
+     *
      * @param term to be multiplied
      */
     void multiply(AtomicTerm term);
 
     /**
      * Duplicates an atomic term.
-     * 
+     *
      * @return a copy of this term
      */
     AtomicTerm duplicate();
 
     /**
      * Checks if this term the constant 1.
-     * 
+     *
      * @return true if the term is one, false otherwise
      */
     boolean isOne();
 
     /**
      * Evaluates the atomic term substituting value to its variable.
-     * 
+     *
      * @param value the value to be substituted to {@code x}
      * @return the result of the evaluation
      */
@@ -55,7 +55,7 @@ public interface AtomicTerm {
 
     /**
      * Substitutes oldVar with newVar in the atomic term.
-     * 
+     *
      * @param oldVar variable to be substituted
      * @param newVar new variable
      */
@@ -63,7 +63,7 @@ public interface AtomicTerm {
 
     /**
      * Returns the variable associated with the atomic term.
-     * 
+     *
      * @return the associated variable
      */
     Variable getVariable();

@@ -50,7 +50,7 @@ public class FunctionCall extends Expression {
 
     /**
      * Initializes a new function call expression.
-     * 
+     *
      * @param name
      *            The name of the function being called.
      * @param parameters
@@ -74,7 +74,7 @@ public class FunctionCall extends Expression {
 
     /**
      * Retrieves the name of the function being called.
-     * 
+     *
      * @return The name of the function being called.
      */
     public String getName() {
@@ -83,7 +83,7 @@ public class FunctionCall extends Expression {
 
     /**
      * Retrieves the argument list of the call.
-     * 
+     *
      * @return The argument list of the call.
      */
     public List<Expression> getParameters() {
@@ -93,7 +93,7 @@ public class FunctionCall extends Expression {
     /**
      * Finds a static method within a class, using reflection. For internal use
      * only.
-     * 
+     *
      * @param className
      *            The class name.
      * @param methodName
@@ -137,7 +137,7 @@ public class FunctionCall extends Expression {
     /**
      * Advanced wrapper around some Java reflection methods; it is able to
      * resolve function calls in overload. For internal use only.
-     * 
+     *
      * @param className
      *            The class name.
      * @param methodName

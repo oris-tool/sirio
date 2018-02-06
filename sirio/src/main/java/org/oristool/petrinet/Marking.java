@@ -41,7 +41,7 @@ public final class Marking {
 
     /**
      * Builds the copy of a marking.
-     * 
+     *
      * @param m input marking
      */
     public Marking(Marking m) {
@@ -50,7 +50,7 @@ public final class Marking {
 
     /**
      * Resets this marking to the token counts of the input one.
-     * 
+     *
      * @param m input marking
      */
     public void setTokensFrom(Marking m) {
@@ -59,7 +59,7 @@ public final class Marking {
 
     /**
      * Returns the number of tokens in a place.
-     * 
+     *
      * @return token count of the place
      */
     public int getTokens(Place place) {
@@ -68,7 +68,7 @@ public final class Marking {
 
     /**
      * Returns the number of tokens of a place from its string name.
-     * 
+     *
      * @param placeName name of the place
      * @return number of tokens of the place
      */
@@ -81,7 +81,7 @@ public final class Marking {
 
     /**
      * Sets the number of tokens of a place.
-     * 
+     *
      * @param place target place
      * @param tokens count of the place
      */
@@ -91,7 +91,7 @@ public final class Marking {
 
     /**
      * Sets the number of tokens of a place from its string name.
-     * 
+     *
      * @param placeName name of the place
      * @param tokens number of tokens of the palce
      */
@@ -109,7 +109,7 @@ public final class Marking {
 
     /**
      * Adds a specified number of tokens in a place.
-     * 
+     *
      * @param place target place
      * @param number tokens to be added
      */
@@ -119,7 +119,7 @@ public final class Marking {
 
     /**
      * Adds a specified number of tokens in a place from its string name.
-     * 
+     *
      * @param placeName name of the place
      * @param number tokens to be added
      */
@@ -135,7 +135,7 @@ public final class Marking {
 
     /**
      * Removes a specified number of tokens from a place.
-     * 
+     *
      * @param place target place
      * @param number tokens to be removed
      */
@@ -145,7 +145,7 @@ public final class Marking {
 
     /**
      * Removes a specified number of tokens from a place using its string name.
-     * 
+     *
      * @param placeName name of the place
      * @param number tokens to be removed
      */
@@ -217,7 +217,7 @@ public final class Marking {
     /**
      * Checks whether this marking contains the same token counts for a subset of
      * places.
-     * 
+     *
      * @param subMarking marking for a subset of places
      * @return true if this marking contains (as a subset) the same token
      *         assignments of the input one
@@ -228,8 +228,8 @@ public final class Marking {
 
     /**
      * Returns the names of places with nonzero token counts.
-     * 
-     * @return a set of strings of place names 
+     *
+     * @return a set of strings of place names
      */
     public Set<String> getNonEmptyPlacesNames() {
         return map.keySet();

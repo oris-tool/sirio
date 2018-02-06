@@ -30,7 +30,7 @@ public class ValueOperations {
 
     /**
      * Implements addition.
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -55,7 +55,7 @@ public class ValueOperations {
 
     /**
      * Implements subtraction.
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -78,7 +78,7 @@ public class ValueOperations {
 
     /**
      * Implements multiplication.
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -101,7 +101,7 @@ public class ValueOperations {
 
     /**
      * Implements division.
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -124,7 +124,7 @@ public class ValueOperations {
 
     /**
      * Implements modulus (also floating point modulus).
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -152,7 +152,7 @@ public class ValueOperations {
 
     /**
      * Implements power. The result is always REAL.
-     * 
+     *
      * @param lhs
      *            Base.
      * @param rhs
@@ -171,7 +171,7 @@ public class ValueOperations {
 
     /**
      * Implements less than comparison.
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -193,7 +193,7 @@ public class ValueOperations {
 
     /**
      * Implements less than or equal comparison.
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -215,7 +215,7 @@ public class ValueOperations {
 
     /**
      * Implements greater than comparison.
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -237,7 +237,7 @@ public class ValueOperations {
 
     /**
      * Implements greater than or equal comparison.
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -259,7 +259,7 @@ public class ValueOperations {
 
     /**
      * Implements equality comparison.
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -281,7 +281,7 @@ public class ValueOperations {
 
     /**
      * Implements inequality comparison.
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -303,7 +303,7 @@ public class ValueOperations {
 
     /**
      * Implements logical AND.
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -321,7 +321,7 @@ public class ValueOperations {
 
     /**
      * Implements logical OR.
-     * 
+     *
      * @param lhs
      *            Left hand side operand.
      * @param rhs
@@ -339,7 +339,7 @@ public class ValueOperations {
 
     /**
      * Implements unary plus.
-     * 
+     *
      * @param u
      *            The operand.
      * @return Value +u.
@@ -359,7 +359,7 @@ public class ValueOperations {
 
     /**
      * Implements unary minus.
-     * 
+     *
      * @param u
      *            The operand.
      * @return Value -u.
@@ -379,7 +379,7 @@ public class ValueOperations {
 
     /**
      * Implements logical NOT.
-     * 
+     *
      * @param u
      *            The operand.
      * @return Value NOT(u).

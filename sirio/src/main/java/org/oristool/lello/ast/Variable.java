@@ -43,7 +43,7 @@ public class Variable extends Expression {
 
     /**
      * Initializes a new variable reference expression.
-     * 
+     *
      * @param name
      *            The name of the variable being referenced.
      */
@@ -60,7 +60,7 @@ public class Variable extends Expression {
 
     /**
      * Retrieves the name of the variable being referenced.
-     * 
+     *
      * @return The name of the variable being referenced.
      */
     public String getName() {
@@ -70,7 +70,7 @@ public class Variable extends Expression {
     /**
      * Finds a static field within a class, using reflection. For internal use
      * only.
-     * 
+     *
      * @param className
      *            The name of the class.
      * @param fieldName
@@ -96,7 +96,7 @@ public class Variable extends Expression {
      * uniformity with class FunctionCall, in which getFieldSmart is really
      * smart and implements enough logic to resolve function calls in overload.
      * For internal use only.
-     * 
+     *
      * @param className
      *            The name of the class.
      * @param fieldName

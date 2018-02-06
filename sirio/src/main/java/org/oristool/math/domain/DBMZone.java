@@ -34,7 +34,7 @@ import org.oristool.math.OmegaBigDecimal;
 import org.oristool.math.expression.Variable;
 
 /**
- * A DBM zone encoding pairwise constraints between variables.  
+ * A DBM zone encoding pairwise constraints between variables.
  */
 public final class DBMZone {
     private OmegaBigDecimal[][] matrix;
@@ -52,7 +52,7 @@ public final class DBMZone {
 
     /**
      * Creates a zone for the given variables, without constraints.
-     * 
+     *
      * @param vars zone variables
      */
     public DBMZone(Collection<Variable> vars) {
@@ -76,7 +76,7 @@ public final class DBMZone {
 
     /**
      * Creates a copy of a DBM zone.
-     * 
+     *
      * @param dbm input zone
      */
     public DBMZone(DBMZone dbm) {
@@ -95,8 +95,8 @@ public final class DBMZone {
     /**
      * Returns the constant {@code c} for the constraint {@code left-right <= c}.
      *
-     * <p>Use {@code getBound} if the DBM is not normalized. 
-     * 
+     * <p>Use {@code getBound} if the DBM is not normalized.
+     *
      * @param left first variable
      * @param right second variable
      * @return upper bound
@@ -109,7 +109,7 @@ public final class DBMZone {
      * Returns the upper bound for the difference {@code left-right} between two
      * variables, which is the constant {@code c} of a constraint
      * {@code left-right <= c}.
-     * 
+     *
      * @param left first variable
      * @param right second variable
      * @return upper bound
@@ -122,9 +122,9 @@ public final class DBMZone {
     /**
      * Returns the minimum value that any of the input variables can take inside
      * this zone.
-     * 
+     *
      * @param vars input variables
-     * @return minimum allowed value for the input variables 
+     * @return minimum allowed value for the input variables
      */
     public OmegaBigDecimal getMinLFT(Set<Variable> vars) {
 
@@ -140,7 +140,7 @@ public final class DBMZone {
 
     /**
      * Sets the constant {@code c} for the constraints {@code left-right}.
-     * 
+     *
      * @param left first variable
      * @param right second variable
      * @param coefficient upper bound for {@code left-right}
@@ -167,7 +167,7 @@ public final class DBMZone {
     }
 
     /** Introduces new variables in this zone.
-     *  
+     *
      * @param vars input variables
      */
     public void addVariables(Collection<Variable> vars) {
@@ -205,9 +205,9 @@ public final class DBMZone {
 
         return Collections.unmodifiableSet(index.keySet());
     }
-    
+
     /**
-     * Normalizes this zone, so that upper bounds satisfy the triangular inequality.  
+     * Normalizes this zone, so that upper bounds satisfy the triangular inequality.
      */
     public void normalize() {
 
@@ -221,7 +221,7 @@ public final class DBMZone {
         for (int k = 0; k < matrix.length; k++)
             for (int i = 0; i < matrix.length; i++)
                 for (int j = 0; j < matrix.length; j++) {
-                    // ruling out the case k==i || k==j to avoid the 
+                    // ruling out the case k==i || k==j to avoid the
                     // propagation of negative diagonal elements
                     if (k != i && k != j) {
                         OmegaBigDecimal ikkj = matrix[i][k].add(matrix[k][j]);
@@ -265,7 +265,7 @@ public final class DBMZone {
     /**
      * Computes the Cartesian product with another zone (with distinct set of
      * variables).
-     * 
+     *
      * @param other another zone
      * @return the Cartesian product with this zone
      */
@@ -342,7 +342,7 @@ public final class DBMZone {
 
     /**
      * Checks if this zone is fully-dimensional in its variable space.
-     * 
+     *
      * @return true if the zone is fully dimensional, false otherwise
      */
     public boolean isFullDimensional() {
@@ -363,7 +363,7 @@ public final class DBMZone {
 
     /**
      * Checks if this zone has unsatisfiable constraints.
-     *  
+     *
      * @return true if the zone is empty, false otherwise
      */
     public boolean isEmpty() {
@@ -383,7 +383,7 @@ public final class DBMZone {
     /**
      * Imposes an upper bound for the difference {@code left-right}. If a stricter
      * constraint already exists, no change is applied.
-     * 
+     *
      * @param left first variable
      * @param right second variable
      * @param coefficient upper bound
@@ -409,7 +409,7 @@ public final class DBMZone {
 
     /**
      * Imposes the bound {@code var-x <= 0} for each x in {@code others}.
-     * 
+     *
      * @param var a variable
      * @param others a set of variables
      */
@@ -431,7 +431,7 @@ public final class DBMZone {
     /**
      * Imposes the bound {@code var-x <= 0} for each x in {@code others}. This
      * method may result in a faster computation time if normalization is required.
-     * 
+     *
      * @param var a variable
      * @param others a set of variables
      */
@@ -444,7 +444,7 @@ public final class DBMZone {
 
     /**
      * Checks if a variable can be the minimum in the zone.
-     * 
+     *
      * @param var a variable
      * @returns true if the variable can be the minimum
      */
@@ -469,7 +469,7 @@ public final class DBMZone {
 
     /**
      * Checks if a variable can be the minimum among a set of variables.
-     * 
+     *
      * @param var a variable
      * @param others a set of variables
      * @returns true if the variable can be the minimum
@@ -494,7 +494,7 @@ public final class DBMZone {
 
     /**
      * Discards the constraints of the input variable and uses it as the new ground.
-     * 
+     *
      * @param v a variable
      */
     public void setNewGround(Variable v) {
@@ -505,7 +505,7 @@ public final class DBMZone {
 
     /**
      * Discards the constraints of the input variable.
-     * 
+     *
      * @param v a variable
      */
     public void projectVariable(Variable v) {
@@ -554,7 +554,7 @@ public final class DBMZone {
 
     /**
      * Discards the constraints of a set of variables.
-     * 
+     *
      * @param vars a set of variables
      */
     public void projectVariables(Collection<Variable> vars) {
@@ -620,7 +620,7 @@ public final class DBMZone {
 
     /**
      * Replaces the name of a variable in all of its constraints.
-     * 
+     *
      * @param oldVar the old name
      * @param newVar the new name
      */
@@ -642,7 +642,7 @@ public final class DBMZone {
 
     /**
      * Replaces the name of a variable and applies a constant shift.
-     * 
+     *
      * @param oldVar the old name
      * @param newVar the new name
      * @param coefficient shift value
@@ -665,7 +665,7 @@ public final class DBMZone {
 
     /**
      * Applies a constant shift to all variables.
-     * 
+     *
      * @param constant shift value
      */
     public void constantShift(BigDecimal constant) {
@@ -675,7 +675,7 @@ public final class DBMZone {
 
     /**
      * Applies a constant shift to a set of variables.
-     * 
+     *
      * @param constant shift amount
      * @param variables target variables
      */
@@ -718,7 +718,7 @@ public final class DBMZone {
 
     /**
      * Finds the variables synchronized with the input one.
-     *  
+     *
      * @param v input variable
      * @return set of synchronized variables
      */
@@ -815,7 +815,7 @@ public final class DBMZone {
 
     /**
      * Intersects this zone with the input one.
-     * 
+     *
      * @param other a zone
      */
     public void intersect(DBMZone other) {
@@ -850,7 +850,7 @@ public final class DBMZone {
 
     /**
      * Checks whether this zone fully contains an input one.
-     *  
+     *
      * @param other a zone
      * @return true if the input zone is fully contained
      */
@@ -885,7 +885,7 @@ public final class DBMZone {
 
     /**
      * Checks if this zone contains the input point.
-     * 
+     *
      * @param point a point
      * @return true if this zone contains the point
      */
@@ -988,7 +988,7 @@ public final class DBMZone {
 
     /**
      * Produces a representation of the zone constraints as "and" {@code &&} operators.
-     *  
+     *
      * @return string representation of the zone as and operators
      */
     public String toAndString() {
@@ -1021,7 +1021,7 @@ public final class DBMZone {
 
     /**
      * Produces a representation of the zone constraints Mathematica {@code RegionPlot}.
-     *  
+     *
      * @return string representation of the zone as region plots
      */
     public String toRegionPlotString() {
@@ -1061,7 +1061,7 @@ public final class DBMZone {
 
         /**
          * Creates a representation of a subzone resulting from a projection.
-         * 
+         *
          * @param domain the original zone
          * @param projectedVar the variable that was projected
          * @param minVar the variable attaining the minimum

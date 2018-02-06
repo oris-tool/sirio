@@ -20,12 +20,12 @@ package org.oristool.lello;
 /**
  * This class is a container of static fields which can be accessed from within
  * the Lello interpreter with their qualified or unqualified Java name.
- * 
+ *
  * <p>This class is intended for programmers who can modify the Lello source
  * code and that want a fast and easy way to extend the language with new
  * predefined variables which they think will be useful also for someone else
  * later. All fields must be declared static.
- * 
+ *
  * <p>Programmers which can not modify the Lello source, or programmers that
  * have a very specific need and do not want to add clutter to this class, can
  * declare static fields anywhere else in their source code; as long as Lello is

@@ -20,9 +20,9 @@ package org.oristool.analyzer.state;
 import org.oristool.util.Featurizable;
 
 /**
- * A state collecting data as features. 
+ * A state collecting data as features.
  */
-public final class State extends Featurizable<StateFeature> {
+public class State extends Featurizable<StateFeature> {
 
     @Override
     public boolean equals(Object obj) {
@@ -30,7 +30,7 @@ public final class State extends Featurizable<StateFeature> {
         if (obj == this) {
             return true;
         }
-        
+
         if (!(obj instanceof State)) {
             return false;
         }

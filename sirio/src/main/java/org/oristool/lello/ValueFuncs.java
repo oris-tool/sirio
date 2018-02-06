@@ -27,12 +27,12 @@ import org.oristool.lello.exception.ValueException;
  * the Lello interpreter with their qualified or unqualified Java name; it also
  * acts as a container of shared resources on which the methods may depend, such
  * as output streams and open files.
- * 
+ *
  * <p>This class is intended for programmers who can modify the Lello source
  * code and that want a fast and easy way to extend the language with new
  * predefined functions which they think will be useful also for someone else
  * later. All functions must be declared static.
- * 
+ *
  * <p>Programmers which can not modify the Lello source, or programmers that
  * have a very specific need and do not want to add clutter to this class, can
  * declare static functions anywhere else in their source code; as long as Lello
@@ -48,7 +48,7 @@ public class ValueFuncs {
 
     /**
      * Sets the shared PrintWriter which methods can use to write output.
-     * 
+     *
      * @param printWriter
      *            The PrintWriter to which output will be written to.
      */
@@ -59,7 +59,7 @@ public class ValueFuncs {
 
     /**
      * Finds the maximum of a list of values.
-     * 
+     *
      * @param params
      *            A list of numeric values.
      * @return The maximum of the list.
@@ -89,7 +89,7 @@ public class ValueFuncs {
 
     /**
      * Finds the minimum of a list of values.
-     * 
+     *
      * @param params
      *            A list of numeric values.
      * @return The minimum of the list.
@@ -119,7 +119,7 @@ public class ValueFuncs {
 
     /**
      * Computes the mean of a list of values.
-     * 
+     *
      * @param params
      *            A list of numeric values.
      * @return The mean.
@@ -149,7 +149,7 @@ public class ValueFuncs {
 
     /**
      * Returns one of two values depending on a boolean condition.
-     * 
+     *
      * @param condition
      *            The tested condition.
      * @param a
@@ -168,7 +168,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to STRING.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -179,7 +179,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to BOOLEAN.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -196,7 +196,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to BOOLEAN.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -207,7 +207,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to BOOLEAN.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -218,7 +218,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to BOOLEAN.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -229,7 +229,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to INTEGER.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -240,7 +240,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to INTEGER.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -251,7 +251,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to INTEGER.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -262,7 +262,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to INTEGER.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -273,7 +273,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to REAL.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -284,7 +284,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to REAL.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -295,7 +295,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to REAL.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -306,7 +306,7 @@ public class ValueFuncs {
 
     /**
      * Converts a value to REAL.
-     * 
+     *
      * @param x
      *            The value to be converted.
      * @return The converted value.
@@ -317,7 +317,7 @@ public class ValueFuncs {
 
     /**
      * Retrieves the type name of a value.
-     * 
+     *
      * <p>The name can be one of the following:
      * <ul>
      * <li>NIL</li>
@@ -326,7 +326,7 @@ public class ValueFuncs {
      * <li>REAL</li>
      * <li>BOOLEAN</li>
      * </ul>
-     * 
+     *
      * @param v The value whose type name is to be retrieved.
      * @return The type name.
      */
@@ -336,7 +336,7 @@ public class ValueFuncs {
 
     /**
      * Returns a value as it is.
-     * 
+     *
      * @param v
      *            The value.
      * @return The same identical value.
@@ -347,7 +347,7 @@ public class ValueFuncs {
 
     /**
      * Writes a message to the shared PrintWriter.
-     * 
+     *
      * @param msg
      *            The message to be written.
      */
@@ -361,7 +361,7 @@ public class ValueFuncs {
     /**
      * Writes a value preceded by a label to the shared PrintWriter; the value
      * itself is also returned.
-     * 
+     *
      * @param label
      *            The label.
      * @param v
@@ -378,7 +378,7 @@ public class ValueFuncs {
 
     /**
      * Returns the length of a STRING.
-     * 
+     *
      * @param s
      *            The string.
      * @return The string length.
@@ -390,7 +390,7 @@ public class ValueFuncs {
     /**
      * Acts as a constant function which is always zero. The input value is not
      * taken into account in any way.
-     * 
+     *
      * @param v
      *            The input value.
      * @return 0 of type INTEGER.
@@ -402,7 +402,7 @@ public class ValueFuncs {
     /**
      * Acts as a constant function which is always zero. The input value is not
      * taken into account in any way.
-     * 
+     *
      * @param v
      *            The input value.
      * @return 1 of type INTEGER.

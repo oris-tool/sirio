@@ -21,28 +21,28 @@ import org.oristool.analyzer.Succession;
 
 /**
  * Enumeration policy to select the next state to expand.
- * 
+ *
  * <p>States are added to the policy as successions, together with their parent.
  */
 public interface EnumerationPolicy {
 
     /**
      * Adds the succession child as a new state to be explored.
-     * 
+     *
      * @param succession succession to be added
      */
     void add(Succession succession);
-    
+
     /**
      * Extracts a succession: its child node is the next state to be explored.
-     * 
+     *
      * @return succession with next state
      */
     Succession remove();
-    
+
     /**
      * Checks whether the set of states to explore is empty.
-     * 
+     *
      * @return true if no more states should be explored.
      */
     boolean isEmpty();

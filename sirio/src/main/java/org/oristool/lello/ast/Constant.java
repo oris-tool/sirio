@@ -38,7 +38,7 @@ public class Constant extends Expression {
 
     /**
      * Initializes a new constant expression.
-     * 
+     *
      * @param value
      *            The value of the constant.
      */
@@ -51,7 +51,7 @@ public class Constant extends Expression {
 
     /**
      * Retrieves the value of this constant.
-     * 
+     *
      * @return the value of this constant.
      */
     public Value getValue() {

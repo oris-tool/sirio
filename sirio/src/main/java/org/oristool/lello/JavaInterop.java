@@ -26,7 +26,7 @@ public class JavaInterop {
 
     /**
      * Converts a Lello value to a Java object.
-     * 
+     *
      * @param v
      *            The Lello value.
      * @return The Java object.
@@ -56,7 +56,7 @@ public class JavaInterop {
 
     /**
      * Converts a Lello value to a Java object of a specific class.
-     * 
+     *
      * <p>The allowed classes are:
      * <ul>
      * <li>Byte.class</li>
@@ -68,7 +68,7 @@ public class JavaInterop {
      * <li>String.class</li>
      * <li>Boolean.class</li>
      * </ul>
-     * 
+     *
      * @param v
      *            The Lello value.
      * @param a
@@ -120,7 +120,7 @@ public class JavaInterop {
 
     /**
      * Converts a Java object to a Lello value.
-     * 
+     *
      * @param o
      *            The Java object.
      * @return The Lello value.
@@ -165,7 +165,7 @@ public class JavaInterop {
      * passing SomeWrapperClass.TYPE will cause the method to return
      * SomeWrapperClass.class; in this example SomeWrapperClass is any of the
      * Java wrapper classes for primitive types, such as Integer or Double.
-     * 
+     *
      * @param t
      *            The class or primitive type.
      * @return If t is a class, t itself is returned; if it is a primitive type,

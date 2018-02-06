@@ -20,7 +20,7 @@ package org.oristool.analyzer;
 import org.oristool.util.Feature;
 
 /**
- * Common interface of features allowed on a succesion.
+ * Common interface of features allowed on a succession.
  */
 public interface SuccessionFeature extends Feature {
 

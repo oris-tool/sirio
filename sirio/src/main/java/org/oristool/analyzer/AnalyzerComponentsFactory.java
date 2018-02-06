@@ -19,10 +19,12 @@ package org.oristool.analyzer;
 
 import org.oristool.analyzer.policy.EnumerationPolicy;
 import org.oristool.analyzer.stop.StopCriterion;
+import org.oristool.petrinet.PetriNet;
+import org.oristool.petrinet.Transition;
 
 /**
  * Factory for all the components used by the analyzer.
- *  
+ *
  * @param <M> type of the model (such as a {@link PetriNet}
  * @param <E> type of the event (such as the firing of a {@link Transition}
  */
@@ -30,50 +32,50 @@ public interface AnalyzerComponentsFactory<M, E extends Event> {
 
     /**
      * Returns the policy selecting the next event to explore.
-     *  
-     * @return policy used by the analyzer 
+     *
+     * @return policy used by the analyzer
      */
     EnumerationPolicy getEnumerationPolicy();
 
     /**
      * Returns the builder for the events enabled in a state.
-     *  
-     * @return enabled events builder used by the analyzer 
+     *
+     * @return enabled events builder used by the analyzer
      */
     EnabledEventsBuilder<M, E> getEnabledEventsBuilder();
 
     /**
      * Returns the builder for the successor states after an event.
-     *  
-     * @return succession evaluator used by the analyzer  
+     *
+     * @return succession evaluator used by the analyzer
      */
     SuccessionEvaluator<M, E> getSuccessionEvaluator();
 
     /**
      * Returns the pre-processor used before computing the enabled events.
-     *  
-     * @return pre-processor used by the analyzer  
+     *
+     * @return pre-processor used by the analyzer
      */
     SuccessionProcessor getPreProcessor();
 
     /**
      * Returns the post-processor used after computing a successor state.
-     *  
-     * @return post-processor used by the analyzer  
+     *
+     * @return post-processor used by the analyzer
      */
     SuccessionProcessor getPostProcessor();
 
     /**
      * Returns the criterion to arrest the enumeration on a specific node.
-     *  
-     * @return local criterion used by the analyzer  
+     *
+     * @return local criterion used by the analyzer
      */
     StopCriterion getLocalStopCriterion();
 
     /**
      * Returns the criterion to arrest the entire graph enumeration.
-     *  
-     * @return global criterion used by the analyzer  
+     *
+     * @return global criterion used by the analyzer
      */
     StopCriterion getGlobalStopCriterion();
 }

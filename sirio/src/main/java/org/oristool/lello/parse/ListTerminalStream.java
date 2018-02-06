@@ -35,7 +35,7 @@ public class ListTerminalStream implements TerminalStream {
     /**
      * Initializes a stream of symbols based on a list; the symbols will be
      * received from the stream in the same order they appear in the list.
-     * 
+     *
      * @param terminals
      *            The list of symbols.
      */

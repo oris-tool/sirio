@@ -19,7 +19,7 @@ package org.oristool.util;
 
 /**
  * The common interface of all dynamic features.
- * 
+ *
  * @see Featurizable
  */
 public interface Feature {

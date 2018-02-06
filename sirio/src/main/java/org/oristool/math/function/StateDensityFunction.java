@@ -146,7 +146,7 @@ public class StateDensityFunction {
                 throw new IllegalArgumentException("The variable " + v
                         + " is not the only variable of " + f);
         }
-        
+
         if (deterministicVariables.keySet().contains(v)
                 || synchronizedVariables.keySet().contains(v)
                 || partitionedGEN.getVariables().contains(v))
@@ -161,7 +161,7 @@ public class StateDensityFunction {
             g.getDensity().substitute(Variable.X, v);
             piecesRenamed.add(g);
         }
-        
+
         this.partitionedGEN = this.partitionedGEN.cartesianProduct(new PartitionedGEN(piecesRenamed));
     }
 
@@ -960,14 +960,14 @@ public class StateDensityFunction {
     }
 
     public BigDecimal computeMeanValue(Variable v) {
-        
+
         if (deterministicVariables.containsKey(v)) {
             return deterministicVariables.get(v);
-            
+
         } else if (synchronizedVariables.containsKey(v)) {
             Synchronization s = synchronizedVariables.get(v);
             return computeMeanValue(s.getDistributed()).add(s.getDelay());
-            
+
         } else {
             PartitionedGEN f = new PartitionedGEN(this.partitionedGEN);
             for (GEN g: f.getFunctions()) {
@@ -975,7 +975,7 @@ public class StateDensityFunction {
                 meanArgument.substitute(Variable.X, v);
                 g.getDensity().multiply(meanArgument);
             }
-            
+
             return f.integrateOverDomain().bigDecimalValue();
         }
     }

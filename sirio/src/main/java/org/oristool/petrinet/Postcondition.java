@@ -30,7 +30,7 @@ public class Postcondition extends Featurizable<PostconditionFeature> {
 
     /**
      * Builds a postcondition with multiplicity 1.
-     * 
+     *
      * @param transition target transition
      * @param place output place
      */
@@ -40,7 +40,7 @@ public class Postcondition extends Featurizable<PostconditionFeature> {
 
     /**
      * Builds a postcondition with the given multiplicity.
-     * 
+     *
      * @param transition target transition
      * @param place output place
      * @param multiplicity postcondition multiplicity
@@ -53,7 +53,7 @@ public class Postcondition extends Featurizable<PostconditionFeature> {
 
     /**
      * Returns the target transition of this postcondition.
-     * 
+     *
      * @return target transition
      */
     public Transition getTransition() {
@@ -62,7 +62,7 @@ public class Postcondition extends Featurizable<PostconditionFeature> {
 
     /**
      * Returns the output place of this postcondition.
-     * 
+     *
      * @return output place
      */
     public Place getPlace() {
@@ -71,7 +71,7 @@ public class Postcondition extends Featurizable<PostconditionFeature> {
 
     /**
      * Returns the multiplicity of this postcondition.
-     * 
+     *
      * @return multiplicity
      */
     public int getMultiplicity() {

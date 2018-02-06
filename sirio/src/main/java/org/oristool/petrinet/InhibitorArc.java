@@ -21,10 +21,10 @@ import org.oristool.util.Featurizable;
 
 /**
  * An inhibitor arc connecting a place to a transition.
- * 
+ *
  * <p>The transition will be enabled only if the place contains fewer tokens
  * than the multiplicity of the inhibitor arc.
- * 
+ *
  * <p>This class implements the interface {@link TranstionFeature} to be added
  * dynamically as feature to any {@link Transition}.
  */
@@ -36,7 +36,7 @@ public final class InhibitorArc extends Featurizable<InhibitorArcFeature> {
 
     /**
      * Constructs an inhibitor arc with multiplicity 1.
-     * 
+     *
      * @param transition the target transition
      * @param place the inhibitor place
      */
@@ -46,7 +46,7 @@ public final class InhibitorArc extends Featurizable<InhibitorArcFeature> {
 
     /**
      * Constructs an inhibitor arc with the given multiplicity.
-     * 
+     *
      * @param transition the target transition
      * @param place the inhibitor place
      * @param multiplicity minimum number of tokens in the place to inhibit the
@@ -60,7 +60,7 @@ public final class InhibitorArc extends Featurizable<InhibitorArcFeature> {
 
     /**
      * Returns the inhibitor place.
-     * 
+     *
      * @return inhibitor place
      */
     public Place getPlace() {
@@ -69,7 +69,7 @@ public final class InhibitorArc extends Featurizable<InhibitorArcFeature> {
 
     /**
      * Returns the target transition.
-     * 
+     *
      * @return target transition
      */
     public Transition getTransition() {
@@ -78,7 +78,7 @@ public final class InhibitorArc extends Featurizable<InhibitorArcFeature> {
 
     /**
      * Returns the multiplicity of the inhibitor arc.
-     * 
+     *
      * @return multiplicity
      */
     public int getMultiplicity() {

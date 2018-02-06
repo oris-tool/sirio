@@ -24,7 +24,7 @@ public interface AnalyzerObserver {
     /**
      * Notifies the observer that the analyzer has extracted the given succession
      * from the policy.
-     * 
+     *
      * @param succession succession extracted by the analyzer
      */
     void notifySuccessionExtracted(Succession succession);
@@ -32,7 +32,7 @@ public interface AnalyzerObserver {
     /**
      * Notifies the observer that the analyzer has pre-processed the given
      * succession.
-     * 
+     *
      * @param succession succession pre-processed by the analyzer
      */
     void notifySuccessionPreProcessed(Succession succession);
@@ -40,7 +40,7 @@ public interface AnalyzerObserver {
     /**
      * Notifies the observer that the analyzer has added the child node of the given
      * succession to the graph.
-     * 
+     *
      * @param succession succession added to the graph by the analyzer
      */
     void notifyNodeAdded(Succession succession);
@@ -48,7 +48,7 @@ public interface AnalyzerObserver {
     /**
      * Notifies the observer that the analyzer has created the given succession
      * after firing one of the events in the extracted succession.
-     * 
+     *
      * @param succession succession created by the analyzer
      */
     void notifySuccessionCreated(Succession succession);
@@ -56,7 +56,7 @@ public interface AnalyzerObserver {
     /**
      * Notifies the observer that the analyzer has post-processed the given
      * succession.
-     * 
+     *
      * @param succession succession post-processed by the analyzer
      */
     void notifySuccessionPostProcessed(Succession succession);
@@ -64,7 +64,7 @@ public interface AnalyzerObserver {
     /**
      * Notifies the observer that the analyzer has inserted the given succession
      * into the policy queue.
-     * 
+     *
      * @param succession succession added by the analyzer to the policy queue
      */
     void notifySuccessionInserted(Succession succession);

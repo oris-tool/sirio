@@ -44,7 +44,7 @@ public abstract class Featurizable<E extends Feature> {
         if (features.containsKey(feature.getClass())) {
             throw new IllegalArgumentException("Feature type already present");
         }
-        
+
         features.put((Class<? extends E>) feature.getClass(), feature);
     }
 

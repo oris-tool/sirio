@@ -86,7 +86,7 @@ public class GEN implements Function {
     /**
      * Normalizzazione della funzione. Corrisponde a normalizzare il dominio DBM
      * e scalare la densità in modo tale che l'integrale sul dominio sia 1
-     * 
+     *
      * @return funzione <code>GEN</code> normalizzata
      * @throws FunctionException
      *             integrale sul dominio nullo
@@ -109,7 +109,7 @@ public class GEN implements Function {
      * Effettua il prodotto cartesiano con un'altra <code> Function </code>:
      * corrisponde a eseguire il prodotto cartesiano fra i domini e il prodotto
      * algebrico tra le densit?.
-     * 
+     *
      * @param f
      *            funzione con la quale eseguire il prodotto cartesiano
      * @return prodotto risultante
@@ -125,7 +125,7 @@ public class GEN implements Function {
 
     /**
      * Integrates density over domain
-     * 
+     *
      * @return integration result
      */
     public OmegaBigDecimal integrateOverDomain() {
@@ -223,7 +223,7 @@ public class GEN implements Function {
     /**
      * Calcola le zone derivanti dall'aggiunta dei vincoli del dominio di una
      * nuova GEN con quella di partenza
-     * 
+     *
      * @param gen
      *            la GEN da confrontare con quella di riferimento
      * @param finalFunctions
@@ -264,7 +264,7 @@ public class GEN implements Function {
 
     /**
      * Calcola le GEN derivanti dalla sovrapposizione dei domini di due GEN
-     * 
+     *
      * @param gen
      *            la seconda GEN da confrontare con quella di riferimento
      * @return lista di GEN derivanti dal partizionamento
@@ -386,7 +386,7 @@ public class GEN implements Function {
 
         BigDecimal integral = this.integrateOverDomain().bigDecimalValue();
         //Integral is zero because its duration is end. To avoid a division by zero error, GEN is replaced by an IMM.
-        if(integral.compareTo(BigDecimal.ZERO) == 0){ 
+        if(integral.compareTo(BigDecimal.ZERO) == 0){
             Variable x = Variable.X;
             OmegaBigDecimal omegaValue = OmegaBigDecimal.ZERO;
             DBMZone domain = new DBMZone();
@@ -397,7 +397,7 @@ public class GEN implements Function {
             this.density = Expolynomial.newOneInstance();
             return BigDecimal.ZERO;
         }
-        
+
         this.getDensity().divide(integral);
         return integral;
     }
@@ -419,7 +419,7 @@ public class GEN implements Function {
 
     /**
      * Stampa la funzione secondo il formato di Mathematica
-     * 
+     *
      * @return stringa rappresentante la funzione nel formato di Mathematica
      */
     @Override
@@ -455,7 +455,7 @@ public class GEN implements Function {
      * Creates an EXP function over a truncated domain [eft, lft]. Note that the
      * created function is not normalized, and thus integrateOverDomain yields
      * the probability P{eft <= EXP <= lft}
-     * 
+     *
      * @return rate*exp(-rate*v) over [eft, lft]
      */
     public static GEN newTruncatedExp(Variable v, BigDecimal rate,
@@ -508,12 +508,12 @@ public class GEN implements Function {
 
         return new GEN(domain, e);
     }
-    
+
     public static GEN newHyperExp(List<BigDecimal> probs, List<BigDecimal> rates) {
-        
+
         if (probs.size() != rates.size())
             throw new IllegalArgumentException("The number of initial probabilities should equal the number of rates");
-        
+
         // prob1 * rate1 * e^{-rate1 * x} + prob2 * rate2 * e^{-rate2 * x}
         Expolynomial expol =  new Expolynomial();
         for(int i = 0; i < probs.size(); i++) {
@@ -522,13 +522,13 @@ public class GEN implements Function {
 
             if (prob.compareTo(BigDecimal.ZERO) <= 0)
                 throw new IllegalArgumentException("Initial probabilities must be positive");
-            
+
             if (prob.compareTo(BigDecimal.ONE) >= 0)
                 throw new IllegalArgumentException("Initial probabilities must be lower or equal to one");
-            
+
             if (rate.compareTo(BigDecimal.ZERO) <= 0)
                 throw new IllegalArgumentException("Rates must be positive");
-            
+
             Exmonomial monomial = new Exmonomial(prob.multiply(rate));
             monomial.addAtomicTerm(new ExponentialTerm(Variable.X, rate));
             expol.addExmonomial(monomial);
@@ -542,7 +542,7 @@ public class GEN implements Function {
     }
 
     public static GEN newHypoExp(BigDecimal rate1, BigDecimal rate2) {
-        
+
         if (rate1.compareTo(BigDecimal.ZERO) <= 0)
             throw new IllegalArgumentException("Rate1 must be positive");
 
@@ -551,7 +551,7 @@ public class GEN implements Function {
 
         // (rate1 * rate2) / (rate1 - rate2) * [e^{-rate2 * x} - e^{-rate1 * x}
         BigDecimal c = rate1.multiply(rate2).divide(rate1.subtract(rate2), MathContext.DECIMAL128);
-        
+
         Exmonomial monomial1 = new Exmonomial(c);
         monomial1.addAtomicTerm(new ExponentialTerm(Variable.X, rate2));
 
@@ -561,14 +561,14 @@ public class GEN implements Function {
         Expolynomial expol =  new Expolynomial();
         expol.addExmonomial(monomial1);
         expol.addExmonomial(monomial2);
-        
+
         DBMZone domain = new DBMZone(Variable.X);
         domain.setCoefficient(Variable.X, Variable.TSTAR, OmegaBigDecimal.POSITIVE_INFINITY);
         domain.setCoefficient(Variable.TSTAR, Variable.X, OmegaBigDecimal.ZERO);
 
         return new GEN(domain, expol);
     }
-    
+
     public static GEN newShiftedExp(BigDecimal shift, BigDecimal rate) {
 
         if (shift.compareTo(BigDecimal.ZERO) < 0)
@@ -576,10 +576,10 @@ public class GEN implements Function {
 
         if (rate.compareTo(BigDecimal.ZERO) <= 0)
             throw new IllegalArgumentException("Rate must be positive");
-        
+
         // rate * exp(rate*shift) * exp(-rate*X)
-        Exmonomial monomial = new Exmonomial(rate); 
-        monomial.multiply(new ExponentialTerm(Variable.X, rate.negate()).evaluate(new OmegaBigDecimal(shift))); 
+        Exmonomial monomial = new Exmonomial(rate);
+        monomial.multiply(new ExponentialTerm(Variable.X, rate.negate()).evaluate(new OmegaBigDecimal(shift)));
         monomial.addAtomicTerm(new ExponentialTerm(Variable.X, rate));
 
         Expolynomial expol = new Expolynomial();

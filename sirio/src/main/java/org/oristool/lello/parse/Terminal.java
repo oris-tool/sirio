@@ -54,7 +54,7 @@ public class Terminal {
 
     /**
      * Initializes a new terminal symbol.
-     * 
+     *
      * @param kind
      *            The kind of the terminal symbol.
      * @param token
@@ -75,7 +75,7 @@ public class Terminal {
 
     /**
      * Retrieves the kind of the terminal symbol.
-     * 
+     *
      * @return The kind of the terminal symbol.
      */
     public TerminalKind getKind() {
@@ -84,7 +84,7 @@ public class Terminal {
 
     /**
      * Retrieves the token of the terminal symbol.
-     * 
+     *
      * @return The token of the terminal symbol.
      */
     public String getToken() {
@@ -94,7 +94,7 @@ public class Terminal {
     /**
      * Retrieves the row number in the input file at which this terminal symbol
      * was located.
-     * 
+     *
      * @return Row number.
      */
     public int getRow() {
@@ -104,7 +104,7 @@ public class Terminal {
     /**
      * Retrieves the column number in the input file at which this terminal
      * symbol was located.
-     * 
+     *
      * @return Column number.
      */
     public int getCol() {

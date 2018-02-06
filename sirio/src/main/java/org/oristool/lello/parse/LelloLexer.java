@@ -24,7 +24,7 @@ import org.oristool.lello.exception.FormatException;
 
 /**
  * Lello lexical analyzer (lexer).
- * 
+ *
  * <p>This class is responsible for reading a string representing an expression and
  * breaking it up in terminal symbols.
  */
@@ -76,7 +76,7 @@ public class LelloLexer {
 
     /**
      * Analyzes a string.
-     * 
+     *
      * @param s
      *            The string to be analyzed.
      * @return The terminal symbols that make up the string.
@@ -114,7 +114,7 @@ public class LelloLexer {
      * Reads a character. Calling this method triggers the analysis routines and
      * can lead to new terminals being added to the symbol list. This method is
      * for internal use only.
-     * 
+     *
      * @param c
      *            The character to read.
      */
@@ -277,7 +277,7 @@ public class LelloLexer {
      * required in order to disambiguate between unary and binary versions of
      * some operators, such as '+' and '-'. This method is for internal use
      * only.
-     * 
+     *
      * @return The
      */
     private Terminal analyzeToken() {
@@ -359,7 +359,7 @@ public class LelloLexer {
     /**
      * Returns whether the argument is a whitespace. This method is for internal
      * use only.
-     * 
+     *
      * @param c
      *            The character to be tested.
      * @return true if c is a whitespace, false otherwise.
@@ -371,7 +371,7 @@ public class LelloLexer {
     /**
      * Returns whether the argument is a valid single-character operator or not.
      * This method is for internal use only.
-     * 
+     *
      * @param c
      *            The character to be tested.
      * @return true if c is a single character operator, false otherwise.
@@ -384,7 +384,7 @@ public class LelloLexer {
     /**
      * Returns whether the argument could be the beginning of a two-character
      * operator. This method is for internal use only.
-     * 
+     *
      * @param c
      *            The character to be tested.
      * @return true if c could be the beginning of a two character operator,
@@ -399,7 +399,7 @@ public class LelloLexer {
     /**
      * Returns whether the argument is the end of a two-character operator whose
      * first character is given. This method is for internal use only.
-     * 
+     *
      * @param beg
      *            The first character of the operator.
      * @param c
@@ -416,7 +416,7 @@ public class LelloLexer {
     /**
      * Checkes whether a string is a valid identifier. If it is not an exception
      * will be thrown.
-     * 
+     *
      * @param n
      *            The string to be tested.
      */

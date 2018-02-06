@@ -20,11 +20,13 @@ package org.oristool.analyzer;
 import java.util.Set;
 
 import org.oristool.analyzer.state.State;
+import org.oristool.petrinet.PetriNet;
+import org.oristool.petrinet.Transition;
 
 /**
  * Common interface used by the analyzer to enumerate the events enabled in a
  * state for a model.
- * 
+ *
  * @param <M> type of the model (such as a {@link PetriNet}
  * @param <E> type of the event (such as the firing of a {@link Transition}
  */

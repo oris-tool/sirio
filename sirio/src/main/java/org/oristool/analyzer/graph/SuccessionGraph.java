@@ -28,7 +28,7 @@ import org.oristool.analyzer.state.State;
 
 /**
  * A graph of {@code Succession} objects.
- * 
+ *
  * <p>Multiple successions can be associated with the same ordered pair of
  * nodes.
  */
@@ -51,9 +51,9 @@ public final class SuccessionGraph {
 
     /**
      * Adds a node and an associated {@code State} instance.
-     * 
-     * <p>The node is added only if not present. 
-     * 
+     *
+     * <p>The node is added only if not present.
+     *
      * @param n node
      * @param s state
      * @return true if the node was not already present
@@ -74,9 +74,9 @@ public final class SuccessionGraph {
 
     /**
      * Adds an edge between existing nodes.
-     * 
+     *
      * <p>The edge is added only if not present.
-     * 
+     *
      * @param n1 source node
      * @param n2 destination node
      * @return true if the edge was not already present
@@ -94,12 +94,12 @@ public final class SuccessionGraph {
 
     /**
      * Adds a succession to the graph.
-     * 
+     *
      * <p>The parent state of the succession must be already present in the graph.
-     * 
+     *
      * <p>If the succession has no parent state, the child state is used as root of
      * the graph.
-     * 
+     *
      * @param s input succession
      * @return true if the child node of the succession was not present in the graph
      */
@@ -164,7 +164,7 @@ public final class SuccessionGraph {
 
     /**
      * Returns a copy of all successions in the graph.
-     * 
+     *
      * @return a set of successions
      */
     public Set<Succession> getSuccessions() {
@@ -182,7 +182,7 @@ public final class SuccessionGraph {
 
     /**
      * Returns a copy of all incoming successions of a node.
-     * 
+     *
      * @return a set of successions
      */
     public Set<Succession> getIncomingSuccessions(Node n) {
@@ -196,7 +196,7 @@ public final class SuccessionGraph {
 
     /**
      * Returns a copy of all outgoing successions of a node.
-     * 
+     *
      * @return a set of successions
      */
     public Set<Succession> getOutgoingSuccessions(Node n) {

@@ -64,7 +64,7 @@ public class Brackets extends Expression {
 
     /**
      * Initializes a new expression in brackets.
-     * 
+     *
      * @param enclosed
      *            The enclosed expression.
      */
@@ -79,7 +79,7 @@ public class Brackets extends Expression {
     /**
      * Initializes a new vector, which is a list of expressions enclosed in
      * brackets.
-     * 
+     *
      * @param expressions The enclosed expressions (vector components).
      */
     public Brackets(List<Expression> expressions) {
@@ -93,7 +93,7 @@ public class Brackets extends Expression {
     /**
      * Retrieves the enclosed expression. If this object actually represents a
      * vector an exception will be thrown.
-     * 
+     *
      * @return The enclosed expression.
      */
     public Expression getExpr() {
@@ -109,7 +109,7 @@ public class Brackets extends Expression {
      * vector. This method will never throw an exception, however it should be
      * used only when this object is being considered with the semantics of a
      * vector.
-     * 
+     *
      * @return The enclosed expressions (vector components).
      */
     public List<Expression> getExpressions() {

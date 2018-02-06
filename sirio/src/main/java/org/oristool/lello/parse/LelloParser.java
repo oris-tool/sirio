@@ -33,14 +33,14 @@ import org.oristool.lello.exception.ParsingException;
 
 /**
  * Lello syntax analyzer (parser).
- * 
+ *
  * <p>This class is responsible for reading a stream of terminal symbols and build
  * the expression they represent.
- * 
+ *
  * <p>This class implements a recursive descent parser, so it basically consists in
  * a set of methods which are mutually recursive. Such methods have names that
  * starts with the word 'rule'.
- * 
+ *
  * <p>Concerning the language it parses, it is C-like; variables and function calls
  * are supported; the modulus operator '%' works also with floating point
  * numbers according to the IEEE 754 specification. More information is
@@ -57,7 +57,7 @@ public class LelloParser {
      * Parses a stream of terminal symbols and returns the parsed expression. It
      * delegates all the work to the root rule, which is implemented by the
      * ruleExpr method.
-     * 
+     *
      * @param terminals
      *            Stream of terminal symbols to parse.
      * @return The parsed expression.
@@ -75,7 +75,7 @@ public class LelloParser {
 
     /**
      * Checks whether the current symbol is of the specified kind or not.
-     * 
+     *
      * @param k
      *            The kind to be tested.
      * @return true if the current symbol is of kind k, false otherwise; false
@@ -101,7 +101,7 @@ public class LelloParser {
      * Checks whether the current symbol is of the specified kind or not; in the
      * former case it then advances to the next symbol; in the latter it throws
      * an exception. This method is for internal use only.
-     * 
+     *
      * @param k
      *            The kind to be tested.
      */
@@ -118,7 +118,7 @@ public class LelloParser {
      * be preceded by a label which will contain the row and column numbers of
      * where in the input file the error occurred. This method is for internal
      * use only.
-     * 
+     *
      * @param message
      *            The message to be presented as an exception.
      */
@@ -130,7 +130,7 @@ public class LelloParser {
 
     /**
      * Retrieves the token of the current symbol.
-     * 
+     *
      * @return The token of the current symbol.
      */
     private String token() {
@@ -140,7 +140,7 @@ public class LelloParser {
     /**
      * Parses the expression starting at the current symbol. This method is for
      * internal use only.
-     * 
+     *
      * @return The parsed expression.
      */
     private Expression ruleExpr() {
@@ -168,7 +168,7 @@ public class LelloParser {
     /**
      * Parses the expression list starting at the current symbol. This method is
      * for internal use only.
-     * 
+     *
      * @param i
      *            If the expression list is the argument list of a function
      *            call, this parameter will contain the identifier of the
@@ -201,7 +201,7 @@ public class LelloParser {
     /**
      * Continues parsing an expression list. This method is for internal use
      * only.
-     * 
+     *
      * @param i
      *            If the expression list is the argument list of a function
      *            call, this parameter will contain the identifier of the
@@ -232,7 +232,7 @@ public class LelloParser {
     /**
      * Parses the logic term starting at the current symbol. This method is for
      * internal use only.
-     * 
+     *
      * @return The parsed expression.
      */
     private Expression ruleLogicTerm() {
@@ -260,7 +260,7 @@ public class LelloParser {
     /**
      * Continues parsing a logical or (or something of equal precedence). This
      * method is for internal use only.
-     * 
+     *
      * @param l
      *            The left logic term.
      * @return The parsed expression.
@@ -284,7 +284,7 @@ public class LelloParser {
     /**
      * Parses the logic factor starting at the current symbol. This method is
      * for internal use only.
-     * 
+     *
      * @return The parsed logic factor.
      */
     private Expression ruleLogicFactor() {
@@ -316,7 +316,7 @@ public class LelloParser {
     /**
      * Continues parsing a logical and (or something of equal precedence). This
      * method is for internal use only.
-     * 
+     *
      * @param l
      *            The left logic factor.
      * @return The parsed expression.
@@ -340,7 +340,7 @@ public class LelloParser {
     /**
      * Parses the relational expression starting at the current symbol. This
      * method is for internal use only.
-     * 
+     *
      * @return The parsed expression.
      */
     private Expression ruleRel() {
@@ -366,7 +366,7 @@ public class LelloParser {
 
     /**
      * Continues parsing a relational expression.
-     * 
+     *
      * @param l
      *            The left side operand.
      * @return The parsed expression.
@@ -390,7 +390,7 @@ public class LelloParser {
     /**
      * Parses the arithmetic term starting at the current symbol. This method is
      * for internal use only.
-     * 
+     *
      * @return The parsed expression.
      */
     private Expression ruleTerm() {
@@ -417,7 +417,7 @@ public class LelloParser {
     /**
      * Continues parsing an expression list. This method is for internal use
      * only.
-     * 
+     *
      * @param i
      *            If the expression list is the argument list of a function
      *            call, this parameter will contain the identifier of the
@@ -445,7 +445,7 @@ public class LelloParser {
     /**
      * Parses the arithmetic factor starting at the current symbol. This method
      * is for internal use only.
-     * 
+     *
      * @return The parsed expression.
      */
     private Expression ruleFactor() {
@@ -476,7 +476,7 @@ public class LelloParser {
     /**
      * Continues parsing an arithmetic addition (or something of equal
      * precedence). This method is for internal use only.
-     * 
+     *
      * @param l
      *            The left arithmetic factor.
      * @return The parsed expression.
@@ -500,7 +500,7 @@ public class LelloParser {
     /**
      * Parses the arithmetic power starting at the current symbol. This method
      * is for internal use only.
-     * 
+     *
      * @return The parsed expression.
      */
     private Expression rulePower() {
@@ -546,7 +546,7 @@ public class LelloParser {
     /**
      * Continues parsing an arithmetic power. This method is for internal use
      * only.
-     * 
+     *
      * @param l
      *            The base of this power.
      * @return The parsed expression.
@@ -569,7 +569,7 @@ public class LelloParser {
 
     /**
      * Parses an expression between brackets.
-     * 
+     *
      * @param i
      *            If the expression list is the argument list of a function
      *            call, this parameter will contain the identifier of the

@@ -42,7 +42,7 @@ public abstract class Expression {
     /**
      * Checks whether a value is equal to 0 (with respect to the EPSILON
      * tolerance).
-     * 
+     *
      * @param x
      *            The value to be tested.
      * @return true if x is equal to 0, false otherwise.
@@ -60,7 +60,7 @@ public abstract class Expression {
      * tolerance). This method is internally called by isZeroNumber(Value) but
      * it is also exposed so that the same identical rule to address the
      * tolerance issue is available to programmers.
-     * 
+     *
      * @param x
      *            The double to be tested.
      * @return true if x is equal to 0, false otherwise.
@@ -72,11 +72,11 @@ public abstract class Expression {
         else
             return true;
     }
-    
+
     /**
      * Checks whether a value is equal to 1 (with respect to the EPSILON
      * tolerance).
-     * 
+     *
      * @param x
      *            The value to be tested.
      * @return true if x is equal to 1, false otherwise.
@@ -95,7 +95,7 @@ public abstract class Expression {
      * tolerance). This method is internally called by isOneNumber(Value) but it
      * is also exposed so that the same identical rule to address the tolerance
      * issue is available to programmers.
-     * 
+     *
      * @param x
      *            The double to be tested.
      * @return true if x is equal to 1, false otherwise.
@@ -108,12 +108,12 @@ public abstract class Expression {
     /**
      * Evaluates this expression using the specified variable bindings. Calling this
      * method does not alter this expression.
-     * 
+     *
      * <p>It is important to note that this method <i>will not</i> attempt any kind
      * of simplification on the expression, which means that all the variables
      * appearing in it must be either bound or correspond to Java static fields
      * defined somewhere; if this is not the case an exception will be thrown.
-     * 
+     *
      * @param bindings Variable bindings.
      * @return The value of the expression.
      */
@@ -122,11 +122,11 @@ public abstract class Expression {
     /**
      * Tries to simplify this expression. Calling this method does not alter
      * this expression.
-     * 
+     *
      * <p>This method will not throw an exception if some variables appearing in
      * the expression are not bound. However it may still be able to cancel a
      * variable, if an appropriate rule is found.
-     * 
+     *
      * @param bindings
      *            Variable bindings.
      * @param visitor
@@ -140,10 +140,10 @@ public abstract class Expression {
     /**
      * Checks whether this expression is equal to 0 (with respect to the EPSILON
      * tolerance).
-     * 
+     *
      * <p>To decrease the probability that this method will return DONTKNOW,
      * simplify or eval should be preventively called on this expression.
-     * 
+     *
      * @return YES if this expression is equal to 0, NO if it is not, DONTKNOW
      *         if it is not known.
      */
@@ -152,10 +152,10 @@ public abstract class Expression {
     /**
      * Checks whether this expression is equal to 1 (with respect to the EPSILON
      * tolerance).
-     * 
+     *
      * <p>To decrease the probability that this method will return DONTKNOW,
      * simplify or eval should be preventively called on this expression.
-     * 
+     *
      * @return YES if this expression is equal to 1, NO if it is not, DONTKNOW
      *         if it is not known.
      */
@@ -163,21 +163,21 @@ public abstract class Expression {
 
     /**
      * Retrieves the names of all the variables appearing in this expression.
-     * 
+     *
      * @return
      */
     public abstract Set<String> variables();
 
     /**
      * Creates a copy of the object.
-     * 
+     *
      * @return
      */
     public abstract Expression copy();
 
     /**
      * Formats this expression.
-     * 
+     *
      * @param visitor
      *            The visitor implementing the formatting rules.
      * @return The formatted string.

@@ -30,7 +30,7 @@ public class MonomialTerm implements AtomicTerm {
     /**
      * Class constructor specifying the {@link variable} of the monomial term
      * and its exponent
-     * 
+     *
      * @param variable
      *            of the monomial term
      * @param alpha
@@ -48,7 +48,7 @@ public class MonomialTerm implements AtomicTerm {
 
     /**
      * Returns the {@link Variable} of the monomial term
-     * 
+     *
      * @return Variable of the term
      */
     @Override
@@ -58,7 +58,7 @@ public class MonomialTerm implements AtomicTerm {
 
     /**
      * Sets the {@link Variable} of the monomial term
-     * 
+     *
      * @param Variable
      *            of the term
      */
@@ -68,7 +68,7 @@ public class MonomialTerm implements AtomicTerm {
 
     /**
      * Returns the exponent of the monomial term
-     * 
+     *
      * @return exponent alpha of the term
      */
     public Integer getAlpha() {
@@ -77,7 +77,7 @@ public class MonomialTerm implements AtomicTerm {
 
     /**
      * Sets the exponent of the monomial term
-     * 
+     *
      * @param alpha
      *            exponent of the term
      */

@@ -168,12 +168,12 @@ public class Erlang implements Function {
     public DBMZone getDomain() {
         return domain;
     }
-    
+
     //XXX All methods under this line are duplicated
     public void conditionToMin(Variable v, OmegaBigDecimal min) {
         conditionToBound(v, min, OmegaBigDecimal.POSITIVE_INFINITY);
     }
-    
+
     public void conditionToBound(Variable v, OmegaBigDecimal min,
             OmegaBigDecimal max) {
 
@@ -182,7 +182,7 @@ public class Erlang implements Function {
 
         BigDecimal integral = this.integrateOverDomain().bigDecimalValue();
         //Integral is zero because its duration is end. To avoid a division by zero error, GEN is replaced by an IMM.
-        if(integral.compareTo(BigDecimal.ZERO) == 0){ 
+        if(integral.compareTo(BigDecimal.ZERO) == 0){
             Variable x = Variable.X;
             OmegaBigDecimal omegaValue = OmegaBigDecimal.ZERO;
             DBMZone domain = new DBMZone();
@@ -193,10 +193,10 @@ public class Erlang implements Function {
             this.density = Expolynomial.newOneInstance();
             return;
         }
-        
+
         this.getDensity().divide(integral);
     }
-    
+
     public OmegaBigDecimal integrateOverDomain() {
 
         domain.normalize();
@@ -270,10 +270,10 @@ public class Erlang implements Function {
                             .bigDecimalValue());
 
         upper.sub(lower);
-        
-        return new Erlang(new DBMZone(s.getDomain()), upper, x, k, lambda); 
+
+        return new Erlang(new DBMZone(s.getDomain()), upper, x, k, lambda);
     }
-    
+
     /**
      * var -> var + coefficient
      */

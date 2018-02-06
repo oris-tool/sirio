@@ -38,7 +38,7 @@ public class Exmonomial {
 
     /**
      * Builds a constant instance.
-     * 
+     *
      * @param constantTerm the constant value
      */
     public Exmonomial(OmegaBigDecimal constantTerm) {
@@ -51,7 +51,7 @@ public class Exmonomial {
 
     /**
      * Builds a copy of the input instance.
-     * 
+     *
      * @param exmon input instance
      */
     public Exmonomial(Exmonomial exmon) {
@@ -63,7 +63,7 @@ public class Exmonomial {
 
     /**
      * Gets the constant multiplier of the term.
-     * 
+     *
      * @return constant multiplier
      */
     public OmegaBigDecimal getConstantTerm() {
@@ -72,7 +72,7 @@ public class Exmonomial {
 
     /**
      * Sets the constant multiplier of the term.
-     * 
+     *
      * @param constantTerm constant multiplier to set
      */
     public void setConstantTerm(OmegaBigDecimal constantTerm) {
@@ -80,8 +80,8 @@ public class Exmonomial {
     }
 
     /**
-     * Gets the variable atomic terms of the exmonomial. 
-     * 
+     * Gets the variable atomic terms of the exmonomial.
+     *
      * @return the atomic terms
      */
     public List<AtomicTerm> getAtomicTerms() {
@@ -91,7 +91,7 @@ public class Exmonomial {
 
     /**
      * Adds a new atomic term to the product.
-     * 
+     *
      * @param term the atomic term to be added
      */
     public void addAtomicTerm(AtomicTerm term) {
@@ -100,8 +100,8 @@ public class Exmonomial {
     }
 
     /**
-     * Collects the variable names of the exmonomial. 
-     * 
+     * Collects the variable names of the exmonomial.
+     *
      * @return variable names of all terms
      */
     public Collection<Variable> getVariables() {
@@ -148,7 +148,7 @@ public class Exmonomial {
 
     /**
      * Multiplies this term by an input exmonomial.
-     * 
+     *
      * @param exmon input exmonomial
      */
     public void multiply(Exmonomial exmon) {
@@ -162,9 +162,9 @@ public class Exmonomial {
 
     /**
      * Checks whether the input exmonomial has the same set of terms.
-     * 
-     * <p>Both exmonomials must be normalized first. 
-     * 
+     *
+     * <p>Both exmonomials must be normalized first.
+     *
      * @param exmon input exmonomial
      * @return true if both exmonomials have the same set of terms.
      */
@@ -185,7 +185,7 @@ public class Exmonomial {
 
     /**
      * Divide per una costante e normalizza
-     * 
+     *
      * @param k
      *            costante per cui dividere
      * @return exmonomio risultante
@@ -200,7 +200,7 @@ public class Exmonomial {
     /**
      * Restituisce un nuovo exmonomio dove si effettua la sostituzione di
      * variabile <code>oldVar</code> -> <code>newVar</code>
-     * 
+     *
      * @param oldVar
      *            variabile da sostituire
      * @param newVar
@@ -216,7 +216,7 @@ public class Exmonomial {
 
     /**
      * Integrazione indefinita dell'exmonomio
-     * 
+     *
      * @param var
      *            variabile di integrazione
      * @return expolinomio risultante dall'integrazione dell'exmonomio
@@ -299,7 +299,7 @@ public class Exmonomial {
 
     /**
      * Integrazione definita all'interno di un intervallo
-     * 
+     *
      * @param var
      *            variabile di integrazione
      * @param lower
@@ -329,7 +329,7 @@ public class Exmonomial {
     /**
      * Sostituisce al posto della variabile <code> base </code> ->
      * <code>base</code> + <code>offset</code>
-     * 
+     *
      * @param base
      *            variabile da sostituire
      * @param offset
@@ -389,7 +389,7 @@ public class Exmonomial {
 
     /**
      * Valuta l'exmonomio lungo tutte le variabili
-     * 
+     *
      * @return valutazione exmonomio
      */
     public OmegaBigDecimal evaluate(Map<Variable, OmegaBigDecimal> m) {
@@ -410,7 +410,7 @@ public class Exmonomial {
 
     /**
      * Valuta l'exmonomio in una sola variabile
-     * 
+     *
      * @param var
      *            variabile presso cui valutare l'exmonomio
      * @return exmonomio risultante dalla valutazione presso <code>var</code>
@@ -434,7 +434,7 @@ public class Exmonomial {
     /**
      * Valuta l'exmonomio sostituendo al posto di <code>base</code> -> +/-
      * <code>offset</code> + <code>constant</code>
-     * 
+     *
      * @param base
      *            variabile da sostuire
      * @param sign
@@ -519,7 +519,7 @@ public class Exmonomial {
     /**
      * Valuta l'exmonomio sostituendo al posto di <code>base</code> -> +/-
      * <code>offset1</code> +/- <code>offset2</code> + <code>constant</code>
-     * 
+     *
      * @param base
      *            variabile da sostuire
      * @param sign1
@@ -630,7 +630,7 @@ public class Exmonomial {
 
     /**
      * Multiplies by a constant
-     * 
+     *
      * @param c
      *            constant
      */

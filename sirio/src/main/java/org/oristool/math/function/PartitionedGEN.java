@@ -89,7 +89,7 @@ public class PartitionedGEN implements PartitionedFunction {
 
     /**
      * Prodotto cartesiano di una PartitionedGEN per una Function
-     * 
+     *
      * @param f
      *            funzione di riferimento
      * @return una PartitionedGEN dove ogni GEN è ottenuta facendo il prodotto
@@ -109,7 +109,7 @@ public class PartitionedGEN implements PartitionedFunction {
 
     /**
      * Prodotto cartesiano di una PartitionedGEN per una PartitionedFunction
-     * 
+     *
      * @param f
      *            funzione di riferimento
      * @return una PartitionedGEN dove ogni GEN è ottenuta facendo il prodotto
@@ -127,7 +127,7 @@ public class PartitionedGEN implements PartitionedFunction {
         PartitionedGEN partitionedGEN = new PartitionedGEN(newGEN);
         return partitionedGEN;
     }
-    
+
     public void conditionToMin(Variable v, OmegaBigDecimal min) {
         conditionToBound(v, min, OmegaBigDecimal.POSITIVE_INFINITY);
     }
@@ -172,7 +172,7 @@ public class PartitionedGEN implements PartitionedFunction {
 
     /**
      * Operazione di shift e proiezione
-     * 
+     *
      * @param var
      *            variabile rispetto alla quale operare
      * @return PartitionedGEN risultante dell'operazione
@@ -219,7 +219,7 @@ public class PartitionedGEN implements PartitionedFunction {
 
     /**
      * Operazione di proiezione
-     * 
+     *
      * @param var
      *            variabile rispetto alla quale operare
      * @return PartitionedGEN risultante dell'operazione
@@ -265,7 +265,7 @@ public class PartitionedGEN implements PartitionedFunction {
 
     /**
      * Shift rispetto ad una costante
-     * 
+     *
      * @param constant
      *            costante di riferimento
      * @return PartitionedGEN risultante dallo shift
@@ -320,7 +320,7 @@ public class PartitionedGEN implements PartitionedFunction {
 
     /**
      * Integrale sul dominio partizionato della densit? piecewise
-     * 
+     *
      * @return somma degli integrali sulle varie zone
      * @throws IntegrationException
      * @throws DomainDefinitionException
@@ -345,7 +345,7 @@ public class PartitionedGEN implements PartitionedFunction {
      * Confronto approssimato fra due PartitionedGEN. Esse sono uguali se le
      * zone coincidono, e la somma della norma delle differenze fra le densità
      * corrispondenti calcolata in modo discreto è sotto ad <code>epsilon</code>
-     * 
+     *
      * @param other
      *            partizione di confronto
      * @param numSamples
@@ -474,7 +474,7 @@ public class PartitionedGEN implements PartitionedFunction {
     public String toMathematicaString() {
 
         //example: Piecewise[{{[function:x^2],[range:0<x<1]}, {[function:x],[range:x>1]}}]
-        
+
         StringBuilder b = new StringBuilder();
         String separator = "Piecewise[{";
         for (GEN g: functions) {

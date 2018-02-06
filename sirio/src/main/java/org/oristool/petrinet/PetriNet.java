@@ -31,23 +31,23 @@ import org.oristool.util.Featurizable;
  */
 public final class PetriNet extends Featurizable<PetriNetFeature> {
 
-    private final Map<String, Place> places = 
+    private final Map<String, Place> places =
             new LinkedHashMap<>();
-    private final Map<String, Transition> transitions = 
+    private final Map<String, Transition> transitions =
             new LinkedHashMap<>();
-    private final Map<Transition, Map<Place, Precondition>> preconditions = 
+    private final Map<Transition, Map<Place, Precondition>> preconditions =
             new LinkedHashMap<>();
-    private Map<Transition, Map<Place, Postcondition>> postconditions = 
+    private Map<Transition, Map<Place, Postcondition>> postconditions =
             new LinkedHashMap<>();
-    private Map<Transition, Map<Place, InhibitorArc>> inhibitorArcs = 
+    private Map<Transition, Map<Place, InhibitorArc>> inhibitorArcs =
             new LinkedHashMap<>();
 
     /**
      * Adds a place to the Petri net.
-     * 
+     *
      * <p>If a place with the same name already exists, the existing place is
      * returned.
-     * 
+     *
      * @param placeName the name of the place
      * @return the place instance
      */
@@ -64,7 +64,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Gets an existing place with the given name.
-     * 
+     *
      * @param placeName name of the place
      * @return place instance, or {@code null} if no place exists with the given
      *         name
@@ -75,7 +75,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Removes an existing place.
-     * 
+     *
      * @param p place to be removed
      * @return the removed place
      */
@@ -85,7 +85,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Returns the places of the Petri net.
-     * 
+     *
      * @return collection of places
      */
     public Collection<Place> getPlaces() {
@@ -94,7 +94,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Returns the names of the places in the Petri net.
-     * 
+     *
      * @return names of the places
      */
     public Collection<String> getPlaceNames() {
@@ -104,10 +104,10 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Adds a transition to the Petri net.
-     * 
+     *
      * <p>If a transition with the same name already exists, the existing transition
      * is returned.
-     * 
+     *
      * @param transitionName the name of the transition
      * @return the transition instance
      */
@@ -124,7 +124,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Gets an existing transition with the given name.
-     * 
+     *
      * @param transitionName name of the transition
      * @return transition instance, or {@code null} if no transition exists with the
      *         given name
@@ -135,7 +135,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Removes an existing transition.
-     * 
+     *
      * @param t transition to be removed
      * @return the removed transition
      */
@@ -145,7 +145,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Returns the transitions of the Petri net.
-     * 
+     *
      * @return collection of transitions
      */
     public Collection<Transition> getTransitions() {
@@ -154,7 +154,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Returns the names of the transitions in the Petri net.
-     * 
+     *
      * @return names of the transitions
      */
     public Collection<String> getTransitionNames() {
@@ -164,7 +164,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Adds a precondition with multiplicity 1.
-     * 
+     *
      * @param p place
      * @param t transition
      * @return the added precondition
@@ -175,10 +175,10 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Adds a precondition with given multiplicity.
-     * 
+     *
      * @param p input place
      * @param t target transition
-     * @param multiplicity precondition multiplicity 
+     * @param multiplicity precondition multiplicity
      * @return the added precondition
      */
     public Precondition addPrecondition(Place p, Transition t, int multiplicity) {
@@ -200,7 +200,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Returns the existing precondition between a place and a transition.
-     * 
+     *
      * @param p input place
      * @param t target transition
      * @return precondition between the place and the transition, or {@code null} if
@@ -217,7 +217,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Removes the existing precondition between a place and a transition.
-     * 
+     *
      * @param pre existing precondition
      * @return precondition between the place and the transition
      */
@@ -228,7 +228,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Gets all the preconditions of a transition.
-     * 
+     *
      * @param t transition
      * @return preconditions of the transition
      */
@@ -244,7 +244,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Adds an inhibitor arc with multiplicity 1.
-     * 
+     *
      * @param p place
      * @param t transition
      * @return the added inhibitor arc
@@ -255,10 +255,10 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Adds an inhibitor arc with given multiplicity.
-     * 
+     *
      * @param p input place
      * @param t target transition
-     * @param multiplicity inhibitor arc multiplicity 
+     * @param multiplicity inhibitor arc multiplicity
      * @return the added inhibitor arc
      */
     public InhibitorArc addInhibitorArc(Place p, Transition t, int multiplicity) {
@@ -280,7 +280,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Returns the existing inhibitor arc between a place and a transition.
-     * 
+     *
      * @param p input place
      * @param t target transition
      * @return inhibitor arc between the place and the transition, or {@code null} if
@@ -297,7 +297,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Removes the existing inhibitor arc between a place and a transition.
-     * 
+     *
      * @param ia existing inhibitor arc
      * @return inhibitor arc between the place and the transition
      */
@@ -308,7 +308,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
     * Gets all the inhibitor arcs of a transition.
-    * 
+    *
     * @param t transition
     * @return inhibitor arcs of the transition
     */
@@ -324,7 +324,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Adds a postcondition with multiplicity 1.
-     * 
+     *
      * @param p place
      * @param t transition
      * @return the added postcondition
@@ -335,10 +335,10 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Adds a postcondition with given multiplicity.
-     * 
+     *
      * @param p input place
      * @param t target transition
-     * @param multiplicity postcondition multiplicity 
+     * @param multiplicity postcondition multiplicity
      * @return the added postcondition
      */
     public Postcondition addPostcondition(Transition t, Place p,
@@ -362,7 +362,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Returns the existing postcondition between a place and a transition.
-     * 
+     *
      * @param p input place
      * @param t target transition
      * @return postcondition between the place and the transition, or {@code null} if
@@ -380,7 +380,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Removes the existing postcondition between a place and a transition.
-     * 
+     *
      * @param post existing postcondition
      * @return postcondition between the place and the transition
      */
@@ -391,7 +391,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Gets all the postconditions of a transition.
-     * 
+     *
      * @param t transition
      * @return postconditions of the transition
      */
@@ -426,7 +426,7 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
         for (Transition t : postconditions.keySet())
             for (Postcondition post : this.postconditions.get(t).values())
                 b.append(post + "\n");
-        
+
         b.append("> Inhibitor\n");
         for (Transition t : inhibitorArcs.keySet())
             for (InhibitorArc inhibitor : this.inhibitorArcs.get(t).values())
@@ -439,9 +439,9 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
 
     /**
      * Returns the set of transitions enabled by a given marking.
-     * 
+     *
      * @param marking any marking
-     * @return set of transitions enabled by the marking 
+     * @return set of transitions enabled by the marking
      */
     public Set<Transition> getEnabledTransitions(Marking marking) {
 

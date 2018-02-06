@@ -57,7 +57,7 @@ public class UnaryExpression extends Expression {
 
     /**
      * Initializes a new unary expression.
-     * 
+     *
      * @param type
      *            The operator version.
      * @param op
@@ -82,7 +82,7 @@ public class UnaryExpression extends Expression {
 
     /**
      * Retrieves the operator version.
-     * 
+     *
      * @return The operator version.
      */
     public UnaryOperationType getType() {
@@ -91,7 +91,7 @@ public class UnaryExpression extends Expression {
 
     /**
      * Retrieves the unary operator.
-     * 
+     *
      * @return The unary operator.
      */
     public String getOp() {
@@ -100,7 +100,7 @@ public class UnaryExpression extends Expression {
 
     /**
      * Retrieves the operand expression.
-     * 
+     *
      * @return The operand expression.
      */
     public Expression getExpr() {

@@ -30,7 +30,7 @@ public final class Precondition extends Featurizable<PreconditionFeature> {
 
     /**
      * Builds a precondition with multiplicity 1.
-     * 
+     *
      * @param place input place
      * @param transition target transition
      */
@@ -40,7 +40,7 @@ public final class Precondition extends Featurizable<PreconditionFeature> {
 
     /**
      * Builds a precondition with the given multiplicity.
-     * 
+     *
      * @param place input place
      * @param transition target transition
      * @param multiplicity precondition multiplicity
@@ -53,7 +53,7 @@ public final class Precondition extends Featurizable<PreconditionFeature> {
 
     /**
      * Returns the input place of this precondition.
-     * 
+     *
      * @return input place
      */
     public Place getPlace() {
@@ -62,7 +62,7 @@ public final class Precondition extends Featurizable<PreconditionFeature> {
 
     /**
      * Returns the target transition of this precondition.
-     * 
+     *
      * @return target transition
      */
     public Transition getTransition() {
@@ -71,7 +71,7 @@ public final class Precondition extends Featurizable<PreconditionFeature> {
 
     /**
      * Returns the multiplicity of this precondition.
-     * 
+     *
      * @return multiplicity
      */
     public int getMultiplicity() {

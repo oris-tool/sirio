@@ -19,7 +19,7 @@ package org.oristool.petrinet;
 
 /**
  * The enabling function of a transition.
- * 
+ *
  * <p>The transition will be enabled only if:
  * <ul>
  * <li>input places contain at least the number of tokens required by their
@@ -28,7 +28,7 @@ package org.oristool.petrinet;
  * their inhibitor arcs;
  * <li>the enabling function evaluates to true.
  * </ul>
- * 
+ *
  * <p>This class implements the interface {@link TranstionFeature} to be added
  * dynamically as feature to any {@link Transition}.
  */
@@ -48,7 +48,7 @@ public final class EnablingFunction implements TransitionFeature {
 
     /**
      * Creates a copy the input instance.
-     * 
+     *
      * @param other input instance
      */
     public EnablingFunction(EnablingFunction other) {

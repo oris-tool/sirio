@@ -15,13 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer;
+package org.oristool.models;
 
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * A collector of error messages for the user. 
+ * A collector of error messages for the user.
  */
 public final class ValidationMessageCollector {
 
@@ -57,17 +57,17 @@ public final class ValidationMessageCollector {
             if (this == obj) {
                 return true;
             }
-            
+
             if (!(obj instanceof Message)) {
                 return false;
             }
-            
+
             Message other = (Message) obj;
 
             if (this.level != other.level || !this.text.equals(other.text)) {
                 return false;
             }
-            
+
             return true;
         }
 

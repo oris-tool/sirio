@@ -33,7 +33,7 @@ public interface FormatVisitor {
 
     /**
      * Called by an expression when no other method is compatible.
-     * 
+     *
      * @param e The calling expression.
      * @return The formatted expression.
      */
@@ -41,7 +41,7 @@ public interface FormatVisitor {
 
     /**
      * Called by a binary expression.
-     * 
+     *
      * @param e The calling expression.
      * @return The formatted expression.
      */
@@ -49,7 +49,7 @@ public interface FormatVisitor {
 
     /**
      * Called by a bracket expression.
-     * 
+     *
      * @param e The calling expression.
      * @return The formatted expression.
      */
@@ -57,7 +57,7 @@ public interface FormatVisitor {
 
     /**
      * Called by a constant.
-     * 
+     *
      * @param e The calling expression.
      * @return The formatted expression.
      */
@@ -65,7 +65,7 @@ public interface FormatVisitor {
 
     /**
      * Called by a function call expression.
-     * 
+     *
      * @param e The calling expression.
      * @return The formatted expression.
      */
@@ -73,7 +73,7 @@ public interface FormatVisitor {
 
     /**
      * Called by an unary expression.
-     * 
+     *
      * @param e The calling expression.
      * @return The formatted expression.
      */
@@ -81,7 +81,7 @@ public interface FormatVisitor {
 
     /**
      * Called by a variable reference.
-     * 
+     *
      * @param e The calling expression.
      * @return The formatted expression.
      */

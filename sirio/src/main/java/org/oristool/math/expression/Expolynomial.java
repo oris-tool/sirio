@@ -26,11 +26,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.oristool.math.OmegaBigDecimal;
-
 import java.util.Set;
 import java.util.StringTokenizer;
+
+import org.oristool.math.OmegaBigDecimal;
 
 /**
  * A sum of exmonomial terms.
@@ -72,7 +71,7 @@ public class Expolynomial {
 
     /**
      * Costruisce un expolinomio a partire da un altro expolinomio
-     * 
+     *
      * @param expol
      *            expolinomio da copiare
      * @throws NegativeAlphaException
@@ -87,7 +86,7 @@ public class Expolynomial {
 
     /**
      * Restituisce tutti gli exmonomi
-     * 
+     *
      * @return lista di exmonomi componenti l'expolinomio
      */
     public List<Exmonomial> getExmonomials() {
@@ -96,7 +95,7 @@ public class Expolynomial {
 
     /**
      * Aggiunge un exmonomio a quelli già presenti
-     * 
+     *
      * @param exmon
      *            exmonomio da aggiungere
      */

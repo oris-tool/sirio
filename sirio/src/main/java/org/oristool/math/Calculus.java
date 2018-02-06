@@ -66,7 +66,7 @@ public class Calculus {
 
         return new GEN(new DBMZone(s.getDomain()), y);
     }
-    
+
     public static Set<Subzone> cpsz(DBMZone d, Variable v) {
 
         if (d.getVariables().size() < 2)
@@ -135,7 +135,7 @@ public class Calculus {
         Variable t = Variable.TSTAR;
         OmegaBigDecimal p = OmegaBigDecimal.POSITIVE_INFINITY;
         OmegaBigDecimal w = OmegaBigDecimal.ZERO;
-        
+
         DBMZone z = new DBMZone(d);
         z.setNewGround(k);
 
@@ -147,14 +147,14 @@ public class Calculus {
         for (Variable i : rr) {
             sij: for (Variable j : rr) {
                 DBMZone s = new DBMZone(z);
-                OmegaBigDecimal x = i.equals(t) ? 
+                OmegaBigDecimal x = i.equals(t) ?
                         d.getBound(k, t) : d.getBound(i, t);
-                OmegaBigDecimal y = j.equals(t) ? 
+                OmegaBigDecimal y = j.equals(t) ?
                         d.getBound(t, k) : d.getBound(t, j);
 
                 for (Variable r : rr) {
                     if (!r.equals(i)) {
-                        OmegaBigDecimal u = r.equals(t) ? 
+                        OmegaBigDecimal u = r.equals(t) ?
                                 d .getBound(k, t) : d.getBound(r, t);
                         if (x.equals(p) && u.isFinite()) {
                             continue sij;
@@ -166,7 +166,7 @@ public class Calculus {
                     }
 
                     if (!r.equals(j)) {
-                        OmegaBigDecimal u = r.equals(t) ? 
+                        OmegaBigDecimal u = r.equals(t) ?
                                 d.getBound(t, k) : d.getBound(t, r);
                         if (y.equals(p) && u.isFinite()) {
                             continue sij;

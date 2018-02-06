@@ -23,7 +23,7 @@ import java.io.PrintStream;
  * Analysis logger printing to stdout.
  */
 public class PrintStreamLogger implements AnalysisLogger {
-    
+
     private final PrintStream ps;
 
     public PrintStreamLogger(PrintStream printStream) {

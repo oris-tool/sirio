@@ -36,7 +36,7 @@ public class Variable implements Comparable<Variable> {
 
     /**
      * Class constructor specifying the name of the variable to create
-     * 
+     *
      * @param name
      *            of the place
      */

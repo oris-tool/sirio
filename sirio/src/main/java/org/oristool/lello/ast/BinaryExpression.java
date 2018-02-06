@@ -46,7 +46,7 @@ public class BinaryExpression extends Expression {
 
     /**
      * Initializes a new binary expression.
-     * 
+     *
      * @param left
      *            The left hand side expression.
      * @param op
@@ -71,7 +71,7 @@ public class BinaryExpression extends Expression {
 
     /**
      * Retrieves the left hand side expression.
-     * 
+     *
      * @return The left hand side expression.
      */
     public Expression getLeft() {
@@ -80,7 +80,7 @@ public class BinaryExpression extends Expression {
 
     /**
      * Retrieves the binary operator.
-     * 
+     *
      * @return The binary operator.
      */
     public String getOp() {
@@ -89,7 +89,7 @@ public class BinaryExpression extends Expression {
 
     /**
      * Retrieves the right hand side expression.
-     * 
+     *
      * @return The right hand side expression.
      */
     public Expression getRight() {

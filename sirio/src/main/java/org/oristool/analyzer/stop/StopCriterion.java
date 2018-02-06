@@ -20,7 +20,7 @@ package org.oristool.analyzer.stop;
 import org.oristool.analyzer.AnalyzerObserver;
 
 /**
- * Common interface of stop criteria. 
+ * Common interface of stop criteria.
  */
 public interface StopCriterion extends AnalyzerObserver {
     boolean stop();

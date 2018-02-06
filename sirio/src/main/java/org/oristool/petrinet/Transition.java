@@ -28,12 +28,12 @@ import org.oristool.util.Featurizable;
  * Transition of a Petri net.
  */
 public final class Transition extends Featurizable<TransitionFeature> implements Event {
-    
+
     private final String name;
 
     /**
      * Builds a transition from its name.
-     * 
+     *
      * @param transitionName name of the transition
      */
     Transition(String transitionName) {
@@ -42,7 +42,7 @@ public final class Transition extends Featurizable<TransitionFeature> implements
 
     /**
      * Returns the name of this transition as the event name.
-     * 
+     *
      * @return name of the place
      */
     @Override
@@ -57,8 +57,8 @@ public final class Transition extends Featurizable<TransitionFeature> implements
 
     /**
      * Returns the variable associated with this transition.
-     * 
-     * @return variable for this transition 
+     *
+     * @return variable for this transition
      */
     public Variable newVariableInstance() {
         return new Variable(name);
@@ -66,7 +66,7 @@ public final class Transition extends Featurizable<TransitionFeature> implements
 
     /**
      * Variables associated with a set of transitions.
-     * 
+     *
      * @param transitions input transitions
      * @return associated variables
      */

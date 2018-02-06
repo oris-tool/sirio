@@ -28,7 +28,7 @@ public final class Place extends Featurizable<PlaceFeature> {
 
     /**
      * Builds a place from its name.
-     * 
+     *
      * @param placeName name of the place
      */
     Place(String placeName) {
@@ -37,7 +37,7 @@ public final class Place extends Featurizable<PlaceFeature> {
 
     /**
      * Returns the name of this place.
-     * 
+     *
      * @return name of the place
      */
     public String getName() {

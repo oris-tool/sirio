@@ -28,7 +28,7 @@ public class Util {
     /**
      * Calcola il coefficiente binomiale di <code>n</code> su <code>k</code>
      * (con <code>n</code> e <code>k</code> positivi, e <code>n>=k</code>)
-     * 
+     *
      * @param n
      *            primo parametro del coefficiente
      * @param k
@@ -54,7 +54,7 @@ public class Util {
 
     /**
      * Calcola il fattoriale di un numero non negativo
-     * 
+     *
      * @param n
      *            numero di cui calcolare il fattoriale
      * @return <code>n!</code>, ovvero il fattoriale di <code>n</code>
@@ -83,7 +83,7 @@ public class Util {
     /**
      * Compute x^exponent to a given scale. Uses the same algorithm as class
      * numbercruncher.mathutils.IntPower.
-     * 
+     *
      * @param x
      *            the value x
      * @param exponent
@@ -123,7 +123,7 @@ public class Util {
     /**
      * Compute the integral root of x to a given scale, x >= 0. Use Newton's
      * algorithm.
-     * 
+     *
      * @param x
      *            the value of x
      * @param index
@@ -179,7 +179,7 @@ public class Util {
     /**
      * Compute e^x to a given scale. Break x into its whole and fraction parts
      * and compute (e^(1 + fraction/whole))^whole using Taylor's formula.
-     * 
+     *
      * @param x
      *            the value of x
      * @param scale
@@ -234,7 +234,7 @@ public class Util {
 
     /**
      * Compute e^x to a given scale by the Taylor series.
-     * 
+     *
      * @param x
      *            the value of x
      * @param scale
@@ -339,7 +339,7 @@ public class Util {
 
     /**
      * Compute the arctangent of x to a given scale, |x| < 1
-     * 
+     *
      * @param x
      *            the value of x
      * @param scale
@@ -363,7 +363,7 @@ public class Util {
     /**
      * Compute the arctangent of x to a given scale by the Taylor series, |x| <
      * 1
-     * 
+     *
      * @param x
      *            the value of x
      * @param scale
@@ -409,7 +409,7 @@ public class Util {
     /**
      * Compute the square root of x to a given scale, x >= 0. Use Newton's
      * algorithm.
-     * 
+     *
      * @param x
      *            the value of x
      * @param scale

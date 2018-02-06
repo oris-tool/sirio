@@ -26,17 +26,17 @@ import org.oristool.math.expression.Expolynomial;
 import org.oristool.math.expression.Variable;
 
 public interface PartitionedFunction {
-    
+
     List<? extends Function> getFunctions();
 
     default OmegaBigDecimal getDomainsEFT() {
-        
+
         if (getDomains().size() == 0)
             throw new IllegalStateException("At least a partition must be present");
-        
+
         return getDomains().get(0).getBound(Variable.TSTAR, Variable.X).negate();
     }
-    
+
     default OmegaBigDecimal getDomainsLFT() {
 
         if (getDomains().size() == 0)
@@ -44,11 +44,11 @@ public interface PartitionedFunction {
 
         return getDomains().get(getDomains().size()-1).getBound(Variable.X, Variable.TSTAR);
     }
-    
+
     default List<? extends DBMZone> getDomains() {
         return getFunctions().stream().map(f -> f.getDomain()).collect(Collectors.toList());
     }
-    
+
     default List <? extends Expolynomial> getDensities() {
         return getFunctions().stream().map(f -> f.getDensity()).collect(Collectors.toList());
     }

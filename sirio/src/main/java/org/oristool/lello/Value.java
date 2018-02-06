@@ -22,7 +22,7 @@ import org.oristool.lello.exception.ValueException;
 /**
  * Represent a value of one of the supported types in Lello. These are the
  * following:
- * 
+ *
  * <ul>
  * <li>NIL</li>: contains the only value nil, which corresponds to an undefined
  * value;
@@ -31,7 +31,7 @@ import org.oristool.lello.exception.ValueException;
  * <li>REAL</li>: floating point number;
  * <li>BOOLEAN</li>: either true or false.
  * </ul>
- * 
+ *
  * <p>Constructors and factory methods are provided to construct values any of
  * these types from those in Java.
  */
@@ -71,7 +71,7 @@ public class Value {
 
     /**
      * Initializes a value to a given string.
-     * 
+     *
      * @param stringValue The initial value.
      */
     public Value(String stringValue) {
@@ -86,7 +86,7 @@ public class Value {
 
     /**
      * Initializes a value to a given integer.
-     * 
+     *
      * @param integerValue The initial value.
      */
     public Value(int integerValue) {
@@ -97,7 +97,7 @@ public class Value {
 
     /**
      * Initializes a value to a given real.
-     * 
+     *
      * @param realValue The initial value.
      */
     public Value(double realValue) {
@@ -108,7 +108,7 @@ public class Value {
 
     /**
      * Initializes a value to a given boolean.
-     * 
+     *
      * @param booleanValue The initial value.
      */
     public Value(boolean booleanValue) {
@@ -116,7 +116,7 @@ public class Value {
         this.type = Type.BOOLEAN;
         this.booleanValue = booleanValue;
     }
-    
+
     /**
      * Creates a copy of this object.
      */
@@ -139,7 +139,7 @@ public class Value {
 
     /**
      * Returns whether this value is of type STRING or not.
-     * 
+     *
      * @return true if this value is a STRING, false otherwise.
      */
     public boolean isString() {
@@ -149,7 +149,7 @@ public class Value {
 
     /**
      * Returns whether this value is of type INTEGER or not.
-     * 
+     *
      * @return true if this value is a INTEGER, false otherwise.
      */
     public boolean isInteger() {
@@ -159,7 +159,7 @@ public class Value {
 
     /**
      * Returns whether this value is of type REAL or not.
-     * 
+     *
      * @return true if this value is a REAL, false otherwise.
      */
     public boolean isReal() {
@@ -169,7 +169,7 @@ public class Value {
 
     /**
      * Returns whether this value is of type BOOLEAN or not.
-     * 
+     *
      * @return true if this value is a BOOLEAN, false otherwise.
      */
     public boolean isBoolean() {
@@ -179,7 +179,7 @@ public class Value {
 
     /**
      * Returns whether this value is nil or not.
-     * 
+     *
      * @return true if this value is nil, false otherwise.
      */
     public boolean isNil() {
@@ -190,7 +190,7 @@ public class Value {
     /**
      * Returns whether this value is numeric, which means either INTEGER or
      * REAL.
-     * 
+     *
      * @return true if this value is either INTEGER or REAL, false otherwise.
      */
     public boolean isNumeric() {
@@ -200,9 +200,9 @@ public class Value {
 
     /**
      * Casts the numeric value of this object to real.
-     * 
+     *
      * <p>This method requires this value to be numeric.
-     * 
+     *
      * @return The value as real.
      */
     public double getNumericValueAsReal() {
@@ -217,9 +217,9 @@ public class Value {
 
     /**
      * Casts the numeric value of this object to integer.
-     * 
+     *
      * <p>This method requires this value to be numeric.
-     * 
+     *
      * @return The value as integer.
      */
     public int getNumericValueAsInteger() {
@@ -234,7 +234,7 @@ public class Value {
 
     /**
      * Returns the nil value.
-     * 
+     *
      * @return The nil value.
      */
     public static Value nil() {
@@ -244,7 +244,7 @@ public class Value {
 
     /**
      * Creates a BOOLEAN value from a Java string.
-     * 
+     *
      * @param s
      *            The input Java string.
      * @return The parsed value.
@@ -262,7 +262,7 @@ public class Value {
 
     /**
      * Creates an INTEGER value from a Java string.
-     * 
+     *
      * @param s
      *            The input Java string.
      * @return The parsed value.
@@ -280,7 +280,7 @@ public class Value {
 
     /**
      * Creates a REAL value from a Java string.
-     * 
+     *
      * @param s
      *            The input Java string.
      * @return The parsed value.
@@ -298,7 +298,7 @@ public class Value {
 
     /**
      * Creates a STRING value from a Java string.
-     * 
+     *
      * @param s
      *            The input Java string.
      * @return The parsed value.
@@ -316,7 +316,7 @@ public class Value {
 
     /**
      * Returns the type of this value.
-     * 
+     *
      * @return The type of this value.
      */
     public Type getType() {
@@ -327,7 +327,7 @@ public class Value {
     /**
      * Retrieves the Java string contained in this STRING value; if this value
      * is not a STRING an exception is thrown.
-     * 
+     *
      * @return
      */
     public String getStringValue() {
@@ -341,7 +341,7 @@ public class Value {
     /**
      * Retrieves the Java string contained in this INTEGER value; if this value
      * is not a INTEGER an exception is thrown.
-     * 
+     *
      * @return
      */
     public int getIntegerValue() {
@@ -355,7 +355,7 @@ public class Value {
     /**
      * Retrieves the Java string contained in this REAL value; if this value is
      * not a REAL an exception is thrown.
-     * 
+     *
      * @return
      */
     public double getRealValue() {
@@ -369,7 +369,7 @@ public class Value {
     /**
      * Retrieves the Java string contained in this BOOLEAN value; if this value
      * is not a BOOLEAN an exception is thrown.
-     * 
+     *
      * @return
      */
     public boolean getBooleanValue() {

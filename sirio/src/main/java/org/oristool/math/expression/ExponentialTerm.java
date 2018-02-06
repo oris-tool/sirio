@@ -33,7 +33,7 @@ public class ExponentialTerm implements AtomicTerm {
     /**
      * Class constructor specifying the {@link variable} of the exponential term
      * and its rate
-     * 
+     *
      * @param variable
      *            of the exponential term
      * @param lambda
@@ -46,7 +46,7 @@ public class ExponentialTerm implements AtomicTerm {
 
     /**
      * Returns the {@link Variable} of the exponential term
-     * 
+     *
      * @return Variable of the term
      */
     @Override
@@ -56,7 +56,7 @@ public class ExponentialTerm implements AtomicTerm {
 
     /**
      * Sets the {@link Variable} of the exponential term
-     * 
+     *
      * @param Variable
      *            of the term
      */
@@ -66,7 +66,7 @@ public class ExponentialTerm implements AtomicTerm {
 
     /**
      * Returns the rate of the exponential term
-     * 
+     *
      * @return rate lambda of the term
      */
     public BigDecimal getLambda() {
@@ -75,7 +75,7 @@ public class ExponentialTerm implements AtomicTerm {
 
     /**
      * Sets the rate of the exponential term
-     * 
+     *
      * @param lambda
      *            rate of the term
      */
@@ -126,7 +126,7 @@ public class ExponentialTerm implements AtomicTerm {
             return OmegaBigDecimal.POSITIVE_INFINITY;
         else
             return new OmegaBigDecimal(BigDecimal.valueOf(Math.exp(new OmegaBigDecimal(lambda).negate().multiply(value).doubleValue())));
-        
+
 //         return new OmegaBigDecimal(Util.exp(new OmegaBigDecimal(lambda).multiply(value).negate().bigDecimalValue(), 100));
     }
 

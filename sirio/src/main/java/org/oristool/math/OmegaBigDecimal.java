@@ -24,7 +24,7 @@ import java.math.MathContext;
  * Immutable, arbitrary-precision signed decimal numbers with positive and
  * negative infinity. Every actual computation is delegated to a
  * {@code java.math.BigDecimal} instance.
- * 
+ *
  * <p>All methods and constructors for this class throw
  * {@code NullPointerException} when passed a {@code null} object reference for
  * any input parameter.
@@ -382,7 +382,7 @@ public class OmegaBigDecimal extends Number implements
 
     /**
      * Returns an {@code OmegaBigDecimal} whose value is <tt>(this &times;
-     * multiplicand)</tt>. In case of a <tt>(0 &times; +/- infinity) 
+     * multiplicand)</tt>. In case of a <tt>(0 &times; +/- infinity)
      * indeterminate form, an exception is thrown.
      *
      * @param multiplicand
@@ -457,7 +457,7 @@ public class OmegaBigDecimal extends Number implements
      * @param mc
      *            the context to use.
      * @return {@code this / divisor}, rounded as necessary.
-     * 
+     *
      * @throws IllegalArgumentException
      *             if the divisor is BigDecimal.ZERO
      * @throws ArithmeticException
@@ -522,7 +522,7 @@ public class OmegaBigDecimal extends Number implements
      * Returns an {@code OmegaBigDecimal} whose value is
      * <tt>(this<sup>n</sup>)</tt>, The power is computed exactly, to unlimited
      * precision.
-     * 
+     *
      * <p>
      * The parameter {@code n} must be in the range 0 through 999999999,
      * inclusive. {@code ZERO.pow(0)} returns {@link #ONE}.

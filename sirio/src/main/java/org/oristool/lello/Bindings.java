@@ -54,11 +54,11 @@ public class Bindings {
 
     /**
      * Initializes an empty set of bindings.
-     * 
+     *
      * <p>If the argument is true this constructor initializes the empty set of
      * bindings to be read-only; this is for internal use only, to allow for
      * creation of the NOBINDINGS field.
-     * 
+     *
      * @param readOnly
      *            true if these bindings are to be read-only, false otherwise.
      */
@@ -70,7 +70,7 @@ public class Bindings {
 
     /**
      * Assigns a value to a variable.
-     * 
+     *
      * @param name
      *            The name of the variable to set.
      * @param value
@@ -95,7 +95,7 @@ public class Bindings {
 
     /**
      * Retrieves a value.
-     * 
+     *
      * @param name
      *            The name of the variable whose value must be retrieved.
      * @return The associated value.
@@ -114,7 +114,7 @@ public class Bindings {
 
     /**
      * Destroys a variable.
-     * 
+     *
      * @param name
      *            The name of the variable to be destroyed.
      */
@@ -135,7 +135,7 @@ public class Bindings {
 
     /**
      * Tells if a given variable is bound to a value or not.
-     * 
+     *
      * @param name
      *            The name of the variable to be tested.
      * @return true if bound, false otherwise.
@@ -150,7 +150,7 @@ public class Bindings {
 
     /**
      * Retrieves all the name/value mappings.
-     * 
+     *
      * @return A map describing all the bindings.
      */
     public Map<String, Value> mapValues() {

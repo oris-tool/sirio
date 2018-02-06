@@ -29,7 +29,7 @@ import org.oristool.lello.parse.ListTerminalStream;
 import org.oristool.lello.parse.Terminal;
 
 /**
- * A predicate on token counts.   
+ * A predicate on token counts.
  */
 public abstract class MarkingCondition {
 
@@ -59,9 +59,9 @@ public abstract class MarkingCondition {
 
     /**
      * Builds a marking condition that matches only one of the input markings.
-     * 
+     *
      * @param givenMarkings markings to match
-     * @return true a marking condition matching the input markings  
+     * @return true a marking condition matching the input markings
      */
     public static final MarkingCondition getMarkingMatcherInstance(
             Marking... givenMarkings) {
@@ -79,9 +79,9 @@ public abstract class MarkingCondition {
     /**
      * Builds a marking condition that matches those markings that include the same
      * token counts for a subset of places.
-     * 
+     *
      * @param subMarking a marking
-     * @return a marking condition matching markings with a subset of token counts 
+     * @return a marking condition matching markings with a subset of token counts
      */
     public static final MarkingCondition getSubMarkingMatcherInstance(
             Marking subMarking) {
@@ -97,14 +97,14 @@ public abstract class MarkingCondition {
     /**
      * Checks whether the input marking satisfies the predicate encoded by this
      * marking condition.
-     * 
+     *
      * @param m a marking
      * @return true if the marking satisfies this marking condition
      */
     public abstract boolean evaluate(Marking m);
 
     /** Parses a marking condition from a string.
-     * 
+     *
      * @param expression input string
      * @return a marking condition object
      */

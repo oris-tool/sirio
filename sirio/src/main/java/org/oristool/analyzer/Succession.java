@@ -31,7 +31,7 @@ public final class Succession extends Featurizable<SuccessionFeature> {
 
     /**
      * Creates a succession from parent to child.
-     *  
+     *
      * @param parent parent state
      * @param event event triggering the succession
      * @param child child state
