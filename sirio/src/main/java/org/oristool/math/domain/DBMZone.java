@@ -446,7 +446,7 @@ public final class DBMZone {
      * Checks if a variable can be the minimum in the zone.
      *
      * @param var a variable
-     * @returns true if the variable can be the minimum
+     * @return true if the variable can be the minimum
      */
     public boolean canVariableBeLowestOrEqual(Variable var) {
 
@@ -472,7 +472,7 @@ public final class DBMZone {
      *
      * @param var a variable
      * @param others a set of variables
-     * @returns true if the variable can be the minimum
+     * @return true if the variable can be the minimum
      */
     public boolean canVariableBeLowerOrEqual(Variable var,
             Collection<Variable> others) {

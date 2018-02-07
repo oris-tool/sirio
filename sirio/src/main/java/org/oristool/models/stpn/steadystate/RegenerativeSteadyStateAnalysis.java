@@ -182,6 +182,7 @@ public class RegenerativeSteadyStateAnalysis<R> implements Engine {
     /**
      * Computes steady-state probabilities for each state.
      *
+     * @param <R> regeneration type
      * @param petriNet Petri net
      * @param initialRegeneration initial regeneration ofthe analysis
      * @param stateBuilder builder to be used

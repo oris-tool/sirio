@@ -32,6 +32,9 @@ import org.oristool.math.domain.DBMZone;
 import org.oristool.math.expression.Expolynomial;
 import org.oristool.math.expression.Variable;
 
+/**
+ * Multidimensional PDF on a support (piecewise).
+ */
 public class PartitionedGEN implements PartitionedFunction {
 
     private List<GEN> functions;
@@ -87,17 +90,6 @@ public class PartitionedGEN implements PartitionedFunction {
         this.functions = functions;
     }
 
-    /**
-     * Prodotto cartesiano di una PartitionedGEN per una Function
-     *
-     * @param f
-     *            funzione di riferimento
-     * @return una PartitionedGEN dove ogni GEN è ottenuta facendo il prodotto
-     *         cartesiano per la funzione passata come riferimento
-     * @throws DomainDefinitionException
-     * @throws DomainException
-     * @throws ExpressionException
-     */
     public PartitionedGEN cartesianProduct(Function f) {
         List<GEN> newFunctions = new ArrayList<GEN>();
         for (GEN g: functions)
@@ -107,17 +99,6 @@ public class PartitionedGEN implements PartitionedFunction {
         return partitionedGEN;
     }
 
-    /**
-     * Prodotto cartesiano di una PartitionedGEN per una PartitionedFunction
-     *
-     * @param f
-     *            funzione di riferimento
-     * @return una PartitionedGEN dove ogni GEN è ottenuta facendo il prodotto
-     *         cartesiano per la funzione passata come riferimento
-     * @throws DomainDefinitionException
-     * @throws DomainException
-     * @throws ExpressionException
-     */
     public PartitionedGEN cartesianProduct(PartitionedFunction partitionedFunction) {
         List<GEN> newGEN = new ArrayList<GEN>();
         for (GEN g: functions)
@@ -158,7 +139,8 @@ public class PartitionedGEN implements PartitionedFunction {
         for (GEN f: nonNullFunctions)
             f.getDensity().divide(totalProbability);
 
-        //Integral is zero because its duration is end. To avoid a division by zero error, PartitionedGEN is replaced by an IMM.
+        // Integral is zero because its duration is end. To avoid a division by zero
+        // error, PartitionedGEN is replaced by an IMM.
         if(totalProbability.compareTo(BigDecimal.ZERO) == 0){
             GEN immediate = GEN.getDETInstance(Variable.X, BigDecimal.ZERO);
             functions = new ArrayList<>();
@@ -170,16 +152,7 @@ public class PartitionedGEN implements PartitionedFunction {
         }
     }
 
-    /**
-     * Operazione di shift e proiezione
-     *
-     * @param var
-     *            variabile rispetto alla quale operare
-     * @return PartitionedGEN risultante dell'operazione
-     * @throws FunctionException
-     * @throws DomainException
-     * @throws ExpressionException
-     */
+
     public void shiftAndProject(Variable var) {
 
         List<GEN> allFunctions = new ArrayList<GEN>();
@@ -217,16 +190,6 @@ public class PartitionedGEN implements PartitionedFunction {
         }
     }
 
-    /**
-     * Operazione di proiezione
-     *
-     * @param var
-     *            variabile rispetto alla quale operare
-     * @return PartitionedGEN risultante dell'operazione
-     * @throws FunctionException
-     * @throws DomainException
-     * @throws ExpressionException
-     */
     public void project(Variable var) {
 
         List<GEN> allFunctions = new ArrayList<GEN>();
@@ -263,16 +226,6 @@ public class PartitionedGEN implements PartitionedFunction {
         }
     }
 
-    /**
-     * Shift rispetto ad una costante
-     *
-     * @param constant
-     *            costante di riferimento
-     * @return PartitionedGEN risultante dallo shift
-     * @throws IllegalConstraintException
-     * @throws DomainDefinitionException
-     * @throws ExpressionException
-     */
     public void constantShift(BigDecimal constant) {
 
         for (int c = 0; c < functions.size(); c++)
@@ -286,18 +239,12 @@ public class PartitionedGEN implements PartitionedFunction {
             functions.get(c).constantShift(constant, others);
     }
 
-    /**
-     * oldVar -> newVar
-     */
     public void substitute(Variable oldVar, Variable newVar) {
 
         for (int c = 0; c < functions.size(); c++)
             functions.get(c).substitute(oldVar, newVar);
     }
 
-    /**
-     * oldVar -> newVar + coefficient
-     */
     public void substitute(Variable oldVar, Variable newVar,
             BigDecimal coefficient) {
 
@@ -305,12 +252,6 @@ public class PartitionedGEN implements PartitionedFunction {
             functions.get(c).substitute(oldVar, newVar, coefficient);
     }
 
-    /**
-     * oldVar -> newVar (in the domain for oldVar) var -> var + constant (in the
-     * domain for all variables) oldVar -> - newVar + constant (in the density
-     * for oldVar) otherVar -> otherVar - newVar + constant (in the density for
-     * other variables)
-     */
     public void substituteAndShift(Variable oldVar, Variable newVar,
             BigDecimal coefficient) {
 
@@ -318,15 +259,6 @@ public class PartitionedGEN implements PartitionedFunction {
             functions.get(c).substituteAndShift(oldVar, newVar, coefficient);
     }
 
-    /**
-     * Integrale sul dominio partizionato della densit? piecewise
-     *
-     * @return somma degli integrali sulle varie zone
-     * @throws IntegrationException
-     * @throws DomainDefinitionException
-     * @throws DomainException
-     * @throws ExpressionException
-     */
     public OmegaBigDecimal integrateOverDomain() {
 
         // Return one in case of a deterministic-only state density function
@@ -341,19 +273,6 @@ public class PartitionedGEN implements PartitionedFunction {
         return integral;
     }
 
-    /**
-     * Confronto approssimato fra due PartitionedGEN. Esse sono uguali se le
-     * zone coincidono, e la somma della norma delle differenze fra le densità
-     * corrispondenti calcolata in modo discreto è sotto ad <code>epsilon</code>
-     *
-     * @param other
-     *            partizione di confronto
-     * @param numSamples
-     *            numero di campioni da prelevare per ogni dimensione
-     * @param epsilon
-     *            soglia di confronto
-     * @return esito del confronto
-     */
     public boolean equals(PartitionedGEN other, int numSamples,
             BigDecimal epsilon) {
 
@@ -366,32 +285,6 @@ public class PartitionedGEN implements PartitionedFunction {
             return false;
 
         return false;
-        // // total discrete error norm over all the partitions
-        // BigDecimal totalDifference = BigDecimal.ZERO;
-        //
-        // // TODO Stabilire un ordinamento dei domini per evitare la ricerca
-        // quadratica
-        // // (magari mantenendo un hash dominio -> GEN con quel dominio, o un
-        // tree con un comparator)
-        // for(int i=0; i<functions.size(); i++){
-        // boolean found = false;
-        // for(int j=0; j<other.getFunctions().size() && !found; j++){
-        // if(functions.get(i).getDomain().equals(other.getFunctions().get(j).getDomain()))
-        // {
-        // found = true;
-        // Expolynomial difference = new
-        // Expolynomial(functions.get(i).getDensity());
-        // difference.sub(other.getFunctions().get(j).getDensity());
-        // GEN f = new GEN(functions.get(i).getDomain(), difference);
-        // totalDifference = totalDifference.add(f.discreteDNorm(numSamples));
-        // }
-        // }
-        //
-        // if (!found)
-        // return false;
-        // }
-        //
-        // return totalDifference.compareTo(epsilon) < 0;
     }
 
     @Override

@@ -85,6 +85,10 @@ public final class EnablingSyncsFeature implements StateFeature {
     /**
      * Returns the enabling delay of a deterministic variable with respect to a
      * general one.
+     *
+     * @param det deterministic variable
+     * @param gen general variable
+     * @return enabling delay
      */
     public BigDecimal get(Variable det, Variable gen) {
         if (!enablingSyncs.containsKey(det)
@@ -97,6 +101,10 @@ public final class EnablingSyncsFeature implements StateFeature {
     /**
      * Returns the enabling delay of a determinstic variable with respect to a
      * general one.
+     *
+     * @param det deterministic variable
+     * @param gen general variable
+     * @param enablingTime delay
      */
     public void set(Variable det, Variable gen, BigDecimal enablingTime) {
         // at the firing of `det`, Variable `gen` will be

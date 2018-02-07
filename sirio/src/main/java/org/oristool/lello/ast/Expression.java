@@ -164,14 +164,14 @@ public abstract class Expression {
     /**
      * Retrieves the names of all the variables appearing in this expression.
      *
-     * @return
+     * @return set of variables
      */
     public abstract Set<String> variables();
 
     /**
      * Creates a copy of the object.
      *
-     * @return
+     * @return a copy
      */
     public abstract Expression copy();
 

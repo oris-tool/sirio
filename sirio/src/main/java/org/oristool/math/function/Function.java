@@ -23,6 +23,9 @@ import java.util.List;
 import org.oristool.math.domain.DBMZone;
 import org.oristool.math.expression.Expolynomial;
 
+/**
+ * Generic piecewise function interface.
+ */
 public interface Function extends PartitionedFunction {
 
     DBMZone getDomain();

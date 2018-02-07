@@ -27,13 +27,19 @@ import org.oristool.math.expression.Expolynomial;
 import org.oristool.math.expression.ExponentialTerm;
 import org.oristool.math.expression.Variable;
 
+/**
+ * The Exponential PDF.
+ */
 public class EXP implements Function {
 
     private DBMZone domain;
     private Expolynomial density;
 
     /**
-     * e^(-lambda x) function on [0, +infty) domain
+     * Builds the function {@code e^(-lambda x)} over {@code [0, +infty)}.
+     *
+     * @param x PDF variable
+     * @param lambda rate (before the negation)
      */
     public EXP(Variable x, BigDecimal lambda) {
 
@@ -68,6 +74,11 @@ public class EXP implements Function {
                 .bigDecimalValue();
     }
 
+    /**
+     * Returns the variable of this PDF.
+     *
+     * @return variable of this PDF
+     */
     public Variable getVariable() {
 
         for (Variable v : domain.getVariables())
@@ -105,9 +116,6 @@ public class EXP implements Function {
 
     @Override
     public String toString() {
-        // if(domain.getVariables().size().getConstraints().size()==0)
-        // return "<empty function>\n";
-
         String result = "Domain\n";
         result = result + domain.toString();
         result = result + "Density\n";

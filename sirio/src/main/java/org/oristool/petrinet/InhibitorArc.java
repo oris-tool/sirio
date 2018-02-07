@@ -25,7 +25,7 @@ import org.oristool.util.Featurizable;
  * <p>The transition will be enabled only if the place contains fewer tokens
  * than the multiplicity of the inhibitor arc.
  *
- * <p>This class implements the interface {@link TranstionFeature} to be added
+ * <p>This class implements the interface {@link TransitionFeature} to be added
  * dynamically as feature to any {@link Transition}.
  */
 public final class InhibitorArc extends Featurizable<InhibitorArcFeature> {

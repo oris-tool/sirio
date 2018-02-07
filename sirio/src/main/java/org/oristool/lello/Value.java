@@ -24,12 +24,12 @@ import org.oristool.lello.exception.ValueException;
  * following:
  *
  * <ul>
- * <li>NIL</li>: contains the only value nil, which corresponds to an undefined
+ * <li>NIL: contains the only value nil, which corresponds to an undefined
  * value;
- * <li>STRING</li>: Unicode string;
- * <li>INTEGER</li>: signed integer type;
- * <li>REAL</li>: floating point number;
- * <li>BOOLEAN</li>: either true or false.
+ * <li>STRING: Unicode string;
+ * <li>INTEGER: signed integer type;
+ * <li>REAL: floating point number;
+ * <li>BOOLEAN: either true or false.
  * </ul>
  *
  * <p>Constructors and factory methods are provided to construct values any of
@@ -119,6 +119,8 @@ public class Value {
 
     /**
      * Creates a copy of this object.
+     *
+     * @return a copy
      */
     public Value copy() {
 
@@ -328,7 +330,7 @@ public class Value {
      * Retrieves the Java string contained in this STRING value; if this value
      * is not a STRING an exception is thrown.
      *
-     * @return
+     * @return the string value
      */
     public String getStringValue() {
 
@@ -342,7 +344,7 @@ public class Value {
      * Retrieves the Java string contained in this INTEGER value; if this value
      * is not a INTEGER an exception is thrown.
      *
-     * @return
+     * @return the integer value
      */
     public int getIntegerValue() {
 
@@ -356,7 +358,7 @@ public class Value {
      * Retrieves the Java string contained in this REAL value; if this value is
      * not a REAL an exception is thrown.
      *
-     * @return
+     * @return the real value
      */
     public double getRealValue() {
 
@@ -370,7 +372,7 @@ public class Value {
      * Retrieves the Java string contained in this BOOLEAN value; if this value
      * is not a BOOLEAN an exception is thrown.
      *
-     * @return
+     * @return the boolean value
      */
     public boolean getBooleanValue() {
 

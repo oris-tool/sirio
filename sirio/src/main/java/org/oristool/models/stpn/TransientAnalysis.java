@@ -175,6 +175,9 @@ public class TransientAnalysis implements Engine {
      * @param stopCondition
      *            the analysis is stopped on nodes satisfying this condition
      *            complete transient analysis)
+     * @param l analysis logger
+     * @param monitor monitor to interrupt the analysis
+     * @param verbose true to enable verbose logging
      * @return Result of the analysis
      */
     public static TransientAnalysis compute(PetriNet petriNet,
@@ -458,8 +461,8 @@ public class TransientAnalysis implements Engine {
      *            time limit of the solution
      * @param step
      *            time step for evaluation points
-     * @return A representation of the solution
-     * @throws Exception
+     * @param l analysis logger
+     * @return a representation of the solution
      */
     public TransientSolution<Marking, Marking> solveDiscretizedBeingProbabilities(
             BigDecimal timeLimit, BigDecimal step,
@@ -507,8 +510,8 @@ public class TransientAnalysis implements Engine {
      *            time limit of the solution
      * @param step
      *            time step for evaluation points
-     * @return A representation of the solution
-     * @throws Exception
+     * @param l analysis logger
+     * @return a representation of the solution
      */
     public TransientSolution<Marking, Marking> solveDiscretizedVisitedProbabilities(
             BigDecimal timeLimit, BigDecimal step,

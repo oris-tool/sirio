@@ -183,6 +183,7 @@ public final class SuccessionGraph {
     /**
      * Returns a copy of all incoming successions of a node.
      *
+     * @param n input node
      * @return a set of successions
      */
     public Set<Succession> getIncomingSuccessions(Node n) {
@@ -197,6 +198,7 @@ public final class SuccessionGraph {
     /**
      * Returns a copy of all outgoing successions of a node.
      *
+     * @param n input node
      * @return a set of successions
      */
     public Set<Succession> getOutgoingSuccessions(Node n) {

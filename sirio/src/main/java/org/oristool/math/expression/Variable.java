@@ -20,25 +20,18 @@ package org.oristool.math.expression;
 /**
  * A generic variable-name holder.
  */
-public class Variable implements Comparable<Variable> {
+public final class Variable implements Comparable<Variable> {
+
+    public static final Variable TSTAR = new Variable("t*");
+    public static final Variable AGE = new Variable("age");
+    public static final Variable X = new Variable("x");
+
+    private final String name;
 
     /**
-     * Definition of TSTAR and AGE variables
-     */
-    public static Variable TSTAR = new Variable("t*");
-    public static Variable AGE = new Variable("age");
-    public static Variable X = new Variable("x");
-
-    /**
-     * Name of the variable
-     */
-    private String name;
-
-    /**
-     * Class constructor specifying the name of the variable to create
+     * Builds a variable from a string.
      *
-     * @param name
-     *            of the place
+     * @param name name of the variable
      */
     public Variable(String name) {
         this.name = name.intern();

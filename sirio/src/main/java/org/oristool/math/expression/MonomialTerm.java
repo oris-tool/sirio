@@ -20,21 +20,18 @@ package org.oristool.math.expression;
 import org.oristool.math.OmegaBigDecimal;
 
 /**
- * An exponential atomic term {@code x^alpha}, where x is a {@link Variable}.
+ * An atomic term of the form {@code x^alpha}.
  */
-public class MonomialTerm implements AtomicTerm {
+public final class MonomialTerm implements AtomicTerm {
 
     private int alpha;
     private Variable variable;
 
     /**
-     * Class constructor specifying the {@link variable} of the monomial term
-     * and its exponent
+     * Builds an instance for a given variable and exponent.
      *
-     * @param variable
-     *            of the monomial term
-     * @param alpha
-     *            exponent of the monomial term
+     * @param variable variable of the monomial term
+     * @param alpha exponent
      */
     public MonomialTerm(Variable variable, int alpha) {
 
@@ -46,41 +43,19 @@ public class MonomialTerm implements AtomicTerm {
         this.alpha = alpha;
     }
 
-    /**
-     * Returns the {@link Variable} of the monomial term
-     *
-     * @return Variable of the term
-     */
     @Override
     public Variable getVariable() {
         return variable;
     }
 
-    /**
-     * Sets the {@link Variable} of the monomial term
-     *
-     * @param Variable
-     *            of the term
-     */
     public void setVariable(Variable variable) {
         this.variable = variable;
     }
 
-    /**
-     * Returns the exponent of the monomial term
-     *
-     * @return exponent alpha of the term
-     */
     public Integer getAlpha() {
         return alpha;
     }
 
-    /**
-     * Sets the exponent of the monomial term
-     *
-     * @param alpha
-     *            exponent of the term
-     */
     public void setAlpha(int alpha) {
         this.alpha = alpha;
     }
@@ -140,7 +115,6 @@ public class MonomialTerm implements AtomicTerm {
 
         if (this.variable.equals(oldVar))
             this.variable = newVar;
-        // FIXME lanciare errore se variable è diversa da oldVar?
     }
 
     @Override
@@ -152,9 +126,6 @@ public class MonomialTerm implements AtomicTerm {
             return false;
     }
 
-    /**
-     * toString function of the exponential term
-     */
     @Override
     public String toString() {
         return this.getVariable() + "^" + this.alpha;

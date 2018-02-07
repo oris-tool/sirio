@@ -22,63 +22,37 @@ import java.math.BigDecimal;
 import org.oristool.math.OmegaBigDecimal;
 
 /**
- * An exponential atomic term {@code Exp[-lambda * x]}, where {@code x} is a
- * {@link Variable}.
+ * An atomic term of the form {@code exp(-lambda * x)}.
  */
-public class ExponentialTerm implements AtomicTerm {
+public final class ExponentialTerm implements AtomicTerm {
 
     private Variable variable;
     private BigDecimal lambda;
 
     /**
-     * Class constructor specifying the {@link variable} of the exponential term
-     * and its rate
+     * Builds an instance for a given variable and rate.
      *
-     * @param variable
-     *            of the exponential term
-     * @param lambda
-     *            rate of the exponential term
+     * @param variable variable of the exponential term
+     * @param lambda rate (before the negation)
      */
     public ExponentialTerm(Variable variable, BigDecimal lambda) {
         this.variable = variable;
         this.lambda = lambda;
     }
 
-    /**
-     * Returns the {@link Variable} of the exponential term
-     *
-     * @return Variable of the term
-     */
     @Override
     public Variable getVariable() {
         return variable;
     }
 
-    /**
-     * Sets the {@link Variable} of the exponential term
-     *
-     * @param Variable
-     *            of the term
-     */
     public void setVariable(Variable variable) {
         this.variable = variable;
     }
 
-    /**
-     * Returns the rate of the exponential term
-     *
-     * @return rate lambda of the term
-     */
     public BigDecimal getLambda() {
         return lambda;
     }
 
-    /**
-     * Sets the rate of the exponential term
-     *
-     * @param lambda
-     *            rate of the term
-     */
     public void setLambda(BigDecimal lambda) {
         this.lambda = lambda;
     }
@@ -122,12 +96,12 @@ public class ExponentialTerm implements AtomicTerm {
             return res;
         else if (res.equals(OmegaBigDecimal.NEGATIVE_INFINITY))
             return OmegaBigDecimal.ZERO;
-        else if (Math.exp(new OmegaBigDecimal(lambda).negate().multiply(value).doubleValue()) == Double.POSITIVE_INFINITY)
+        else if (Math.exp(new OmegaBigDecimal(lambda).negate().multiply(value)
+                .doubleValue()) == Double.POSITIVE_INFINITY)
             return OmegaBigDecimal.POSITIVE_INFINITY;
         else
-            return new OmegaBigDecimal(BigDecimal.valueOf(Math.exp(new OmegaBigDecimal(lambda).negate().multiply(value).doubleValue())));
-
-//         return new OmegaBigDecimal(Util.exp(new OmegaBigDecimal(lambda).multiply(value).negate().bigDecimalValue(), 100));
+            return new OmegaBigDecimal(BigDecimal.valueOf(
+                    Math.exp(new OmegaBigDecimal(lambda).negate().multiply(value).doubleValue())));
     }
 
     @Override
@@ -161,9 +135,6 @@ public class ExponentialTerm implements AtomicTerm {
         return result;
     }
 
-    /**
-     * toString function of the exponential term
-     */
     @Override
     public String toString() {
         if (lambda.compareTo(BigDecimal.ZERO) > 0)

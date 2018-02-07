@@ -53,6 +53,11 @@ public class OmegaBigDecimal extends Number implements
     private boolean isRightNeighborhood = false;
     private volatile int hashCode;
 
+    /**
+     * Returns the left neighborhood of this value.
+     *
+     * @return left neighborhood
+     */
     public OmegaBigDecimal toLeftNeighborhood() {
 
         if (isLeftNeighborhood || isPositiveInfinity || isNegativeInfinity)
@@ -64,6 +69,11 @@ public class OmegaBigDecimal extends Number implements
         return leftNeighborhood;
     }
 
+    /**
+     * Returns the right neighborhood of this value.
+     *
+     * @return right neighborhood
+     */
     public OmegaBigDecimal toRightNeighborhood() {
 
         if (isRightNeighborhood || isPositiveInfinity || isNegativeInfinity)
@@ -75,6 +85,11 @@ public class OmegaBigDecimal extends Number implements
         return rightNeighborhood;
     }
 
+    /**
+     * Parses a number from the input string.
+     *
+     * @param number a string
+     */
     public OmegaBigDecimal(String number) {
 
         if (number.equals("+inf") || number.equals("inf"))
@@ -88,7 +103,12 @@ public class OmegaBigDecimal extends Number implements
 
     }
 
-    public OmegaBigDecimal(OmegaBigDecimal number) {
+    /**
+     * Creates a copy of an input number.
+     *
+     * @param number a string
+     */
+    private OmegaBigDecimal(OmegaBigDecimal number) {
 
         if (number.isPositiveInfinity)
             isPositiveInfinity = true;
@@ -114,7 +134,6 @@ public class OmegaBigDecimal extends Number implements
         value = BigDecimal.valueOf(number);
     }
 
-    // from Object
     @Override
     public String toString() {
         if (isPositiveInfinity)
@@ -241,7 +260,6 @@ public class OmegaBigDecimal extends Number implements
             return value.doubleValue();
     }
 
-    // from Comparable<OmegaBigDecimal>
     @Override
     public int compareTo(OmegaBigDecimal o) {
 
@@ -291,7 +309,11 @@ public class OmegaBigDecimal extends Number implements
         return value;
     }
 
-    // Operations
+    /**
+     * Returns the absolute value of this number.
+     *
+     * @return absolute value
+     */
     public OmegaBigDecimal abs() {
 
         if (this.compareTo(ZERO) < 0)
@@ -300,6 +322,11 @@ public class OmegaBigDecimal extends Number implements
             return this;
     }
 
+    /**
+     * Returns the opposite of this number.
+     *
+     * @return opposite
+     */
     public OmegaBigDecimal negate() {
 
         if (isPositiveInfinity)
@@ -324,10 +351,8 @@ public class OmegaBigDecimal extends Number implements
      * augend)}. In case of a +infinity -infinity indeterminate form, an
      * exception is thrown.
      *
-     * @param augend
-     *            value to be added to this {@code OmegaBigDecimal}.
+     * @param augend value to be added to this number
      * @return {@code this + augend}
-     * @throws IllegalStateException
      */
     public OmegaBigDecimal add(OmegaBigDecimal augend) {
 
@@ -371,10 +396,8 @@ public class OmegaBigDecimal extends Number implements
      * subtrahend)}. In case of a +infinity -infinity indeterminate form, an
      * exception is thrown.
      *
-     * @param subtrahend
-     *            value to be subtracted from this {@code OmegaBigDecimal}.
+     * @param subtrahend value to be subtracted from this {@code OmegaBigDecimal}.
      * @return {@code this - subtrahend}
-     * @throws IllegalStateException
      */
     public OmegaBigDecimal subtract(OmegaBigDecimal subtrahend) {
         return add(subtrahend.negate());
@@ -382,11 +405,10 @@ public class OmegaBigDecimal extends Number implements
 
     /**
      * Returns an {@code OmegaBigDecimal} whose value is <tt>(this &times;
-     * multiplicand)</tt>. In case of a <tt>(0 &times; +/- infinity)
+     * multiplicand)</tt>. In case of a <tt>(0 &times; +/- infinity)</tt>
      * indeterminate form, an exception is thrown.
      *
-     * @param multiplicand
-     *            value to be multiplied by this {@code BigDecimal}.
+     * @param multiplicand value to be multiplied by this {@code OmegaBigDecimal}.
      * @return {@code this * multiplicand}
      */
     public OmegaBigDecimal multiply(OmegaBigDecimal multiplicand) {
@@ -464,7 +486,6 @@ public class OmegaBigDecimal extends Number implements
      *             if the result is inexact but the rounding mode is
      *             {@code UNNECESSARY} or {@code mc.precision == 0} and the
      *             quotient has a non-terminating decimal expansion.
-     * @see #divide(java.math.BigDecimal)
      */
     public OmegaBigDecimal divide(BigDecimal divisor, MathContext mc) {
         // TODO handle left and right neighborhoods
@@ -523,12 +544,8 @@ public class OmegaBigDecimal extends Number implements
      * <tt>(this<sup>n</sup>)</tt>, The power is computed exactly, to unlimited
      * precision.
      *
-     * <p>
-     * The parameter {@code n} must be in the range 0 through 999999999,
+     * <p>The parameter {@code n} must be in the range 0 through 999999999,
      * inclusive. {@code ZERO.pow(0)} returns {@link #ONE}.
-     *
-     * Note that future releases may expand the allowable exponent range of this
-     * method.
      *
      * @param n
      *            power to raise this {@code BigDecimal} to.

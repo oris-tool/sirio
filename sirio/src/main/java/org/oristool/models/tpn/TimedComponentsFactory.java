@@ -108,6 +108,8 @@ public final class TimedComponentsFactory implements
      * @param policy state enumeration policy
      * @param stopCondition stop condition
      * @param monitor analysis monitor
+     * @param tokensRemover component used to remove tokens
+     * @param tokensAdder component used to add tokens
      */
     public TimedComponentsFactory(boolean transientAnalysis,
             boolean checkNewlyEnabled, boolean excludeZeroProb,

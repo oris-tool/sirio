@@ -28,13 +28,12 @@ import java.util.Set;
 import org.oristool.math.OmegaBigDecimal;
 
 /**
- * An exmonomial term made of a constant term multiplied by a set of
- * {@link AtomicTerm}.
+ * A constant term multiplied by a set of {@link AtomicTerm}.
  */
-public class Exmonomial {
+public final class Exmonomial {
 
     private OmegaBigDecimal constantTerm;
-    private List<AtomicTerm> atomicTerms = new ArrayList<AtomicTerm>();
+    private List<AtomicTerm> atomicTerms = new ArrayList<>();
 
     /**
      * Builds a constant instance.
@@ -106,7 +105,7 @@ public class Exmonomial {
      */
     public Collection<Variable> getVariables() {
 
-        Set<Variable> variables = new LinkedHashSet<Variable>();
+        Set<Variable> variables = new LinkedHashSet<>();
         for (AtomicTerm a : atomicTerms)
             variables.add(a.getVariable());
         return variables;
@@ -161,6 +160,16 @@ public class Exmonomial {
     }
 
     /**
+     * Multiplies this exmonomial by a constant.
+     *
+     * @param c constant
+     */
+    public void multiply(OmegaBigDecimal c) {
+
+        this.constantTerm = this.constantTerm.multiply(c);
+    }
+
+    /**
      * Checks whether the input exmonomial has the same set of terms.
      *
      * <p>Both exmonomials must be normalized first.
@@ -184,11 +193,9 @@ public class Exmonomial {
     }
 
     /**
-     * Divide per una costante e normalizza
+     * Divides by a constant and normalizes.
      *
-     * @param k
-     *            costante per cui dividere
-     * @return exmonomio risultante
+     * @param k constant
      */
     public void divide(BigDecimal k) {
 
@@ -198,14 +205,10 @@ public class Exmonomial {
     }
 
     /**
-     * Restituisce un nuovo exmonomio dove si effettua la sostituzione di
-     * variabile <code>oldVar</code> -> <code>newVar</code>
+     * Replaces <code>oldVar</code> with <code>newVar</code>.
      *
-     * @param oldVar
-     *            variabile da sostituire
-     * @param newVar
-     *            nuova variabile
-     * @return exmonomio risultante dalla sostituzione
+     * @param oldVar variable to be replaced
+     * @param newVar new variable
      */
     public void substitute(Variable oldVar, Variable newVar) {
 
@@ -215,17 +218,10 @@ public class Exmonomial {
     }
 
     /**
-     * Integrazione indefinita dell'exmonomio
+     * Computes the primitive function of this exmonomial.
      *
-     * @param var
-     *            variabile di integrazione
-     * @return expolinomio risultante dall'integrazione dell'exmonomio
-     * @throws FactorialException
-     *             eccezione nel calcolo del fattoriale
-     * @throws NegativeAlphaException
-     *             esponente negativo su un monomio
-     * @throws ArgumentException
-     *             argomento non expolinomiale
+     * @param var integration variable
+     * @return primitive function
      */
     public Expolynomial integrate(Variable var) {
 
@@ -256,8 +252,8 @@ public class Exmonomial {
 
             for (int k = 0; k <= monterm.getAlpha(); k++) {
                 BigDecimal alpha_fatt = new BigDecimal(
-                        Util.calculateFactorial(monterm.getAlpha()));
-                BigDecimal k_fatt = new BigDecimal(Util.calculateFactorial(k));
+                        MathUtil.calculateFactorial(monterm.getAlpha()));
+                BigDecimal k_fatt = new BigDecimal(MathUtil.calculateFactorial(k));
                 BigDecimal lambda_power = expterm.getLambda().pow(
                         1 + monterm.getAlpha() - k);
 
@@ -298,21 +294,12 @@ public class Exmonomial {
     }
 
     /**
-     * Integrazione definita all'interno di un intervallo
+     * Integrates this exmonomial over an interval.
      *
-     * @param var
-     *            variabile di integrazione
-     * @param lower
-     *            limite inferiore di integrazione
-     * @param upper
-     *            limite superiore di integrazione
-     * @return expolinomio risultante dall'integrazione dell'exmonomio
-     * @throws FactorialException
-     *             eccezione nel calcolo del fattoriale
-     * @throws NegativeAlphaException
-     *             esponente negativo su un monomio
-     * @throws ArgumentException
-     *             argomento non expolinomiale
+     * @param var integration variable
+     * @param lower lower bound
+     * @param upper upper bound
+     * @return definite integral value
      */
     public Expolynomial integrate(Variable var, OmegaBigDecimal lower,
             OmegaBigDecimal upper) {
@@ -327,22 +314,11 @@ public class Exmonomial {
     }
 
     /**
-     * Sostituisce al posto della variabile <code> base </code> ->
-     * <code>base</code> + <code>offset</code>
+     * Replaces <code>base</code> with <code>base</code> + <code>offset</code>.
      *
-     * @param base
-     *            variabile da sostituire
-     * @param offset
-     *            variabile per cui shiftare
-     * @return expolinomio risultante
-     * @throws FactorialException
-     *             eccezione nel calcolo del fattoriale
-     * @throws BinomialException
-     *             eccezione nel calcolo del coefficiente binomiale
-     * @throws NegativeAlphaException
-     *             esponente negativo su un monomio
-     * @throws ArgumentException
-     *             argomento non expolinomiale
+     * @param base variable to be replaced
+     * @param offset offset to be applied
+     * @return resulting expolynomial
      */
     public Expolynomial shift(Variable base, Variable offset) {
 
@@ -359,7 +335,7 @@ public class Exmonomial {
                     for (int k = 0; k <= ((MonomialTerm) term).getAlpha(); k++) {
                         Exmonomial newton_mon = new Exmonomial(
                                 new OmegaBigDecimal(new BigDecimal(
-                                        (Util.calculateBinomialCoefficient(
+                                        (MathUtil.calculateBinomialCoefficient(
                                                 ((MonomialTerm) term)
                                                         .getAlpha(), k)))));
                         newton_mon.addAtomicTerm(new MonomialTerm(base,
@@ -388,13 +364,14 @@ public class Exmonomial {
     }
 
     /**
-     * Valuta l'exmonomio lungo tutte le variabili
+     * Evaluates the exmonomial.
      *
-     * @return valutazione exmonomio
+     * @param m map with values for all the variables
+     * @return exmonomial value
      */
     public OmegaBigDecimal evaluate(Map<Variable, OmegaBigDecimal> m) {
 
-        OmegaBigDecimal result = new OmegaBigDecimal(constantTerm);
+        OmegaBigDecimal result = constantTerm;
         for (int i = 0; i < atomicTerms.size(); i++) {
             Variable v = atomicTerms.get(i).getVariable();
             OmegaBigDecimal value = m.get(v);
@@ -409,13 +386,11 @@ public class Exmonomial {
     }
 
     /**
-     * Valuta l'exmonomio in una sola variabile
+     * Replaces a variable with its value.
      *
-     * @param var
-     *            variabile presso cui valutare l'exmonomio
-     * @return exmonomio risultante dalla valutazione presso <code>var</code>
-     * @throws NegativeAlphaException
-     *             esponente negativo su un monomio
+     * @param var variable to be replaced
+     * @param value value of the variable
+     * @return exmonomial after the substitution
      */
     public Exmonomial evaluate(Variable var, OmegaBigDecimal value) {
         Exmonomial exmon = new Exmonomial(constantTerm);
@@ -423,7 +398,7 @@ public class Exmonomial {
             AtomicTerm term = atomicTerms.get(i);
             if (term.getVariable().equals(var))
                 exmon.setConstantTerm(exmon.getConstantTerm().multiply(
-                        new OmegaBigDecimal(term.evaluate(value))));
+                        term.evaluate(value)));
             else
                 exmon.getAtomicTerms().add(term);
         }
@@ -432,26 +407,14 @@ public class Exmonomial {
     }
 
     /**
-     * Valuta l'exmonomio sostituendo al posto di <code>base</code> -> +/-
-     * <code>offset</code> + <code>constant</code>
+     * Replaces <code>base</code> with +/- <code>offset</code> +
+     * <code>constant</code>.
      *
-     * @param base
-     *            variabile da sostuire
-     * @param sign
-     *            true/false corrisponde a +/-
-     * @param offset
-     *            variabile per lo shift
-     * @param constant
-     *            costante da aggiungere
-     * @return expolinomio risultante
-     * @throws NegativeAlphaException
-     *             esponente negativo su un monomio
-     * @throws FactorialException
-     *             eccezione nel calcolo del fattoriale
-     * @throws BinomialException
-     *             eccezione nel calcolo del coefficiente binomiale
-     * @throws ArgumentException
-     *             argomento non expolinomiale
+     * @param base variable to be replaced
+     * @param sign true if sign of the offset is positive
+     * @param offset offset to be added
+     * @param constant constant to be added
+     * @return resulting {@link Expolynomial}
      */
     public Expolynomial evaluate(Variable base, Boolean sign, Variable offset,
             BigDecimal constant) {
@@ -468,7 +431,7 @@ public class Exmonomial {
                         Variable xapp = new Variable("xapp");
                         MonomialTerm power = new MonomialTerm(xapp, k);
                         Exmonomial newton_mon = new Exmonomial(
-                                new OmegaBigDecimal(new BigDecimal((Util
+                                new OmegaBigDecimal(new BigDecimal((MathUtil
                                         .calculateBinomialCoefficient(
                                                 ((MonomialTerm) term)
                                                         .getAlpha(), k)))
@@ -517,24 +480,16 @@ public class Exmonomial {
     }
 
     /**
-     * Valuta l'exmonomio sostituendo al posto di <code>base</code> -> +/-
-     * <code>offset1</code> +/- <code>offset2</code> + <code>constant</code>
+     * Replaces <code>base</code> with +/- <code>offset1</code> +/-
+     * <code>offset2</code> + <code>constant</code>.
      *
-     * @param base
-     *            variabile da sostuire
-     * @param sign1
-     *            true/false corrisponde a +/- per il primo offset
-     * @param offset1
-     *            prima variabile per lo shift
-     * @param sign2
-     *            true/false corrisponde a +/- per il secondo offset
-     * @param offset2
-     *            secondo variabile per lo shift
-     * @param constant
-     *            costante da aggiungere
-     * @return expolinomio risultante
-     * @throws NegativeAlphaException
-     * @throws ArgumentException
+     * @param base variable to be replaced
+     * @param sign1 true if sign of the first offset is positive
+     * @param offset1 first offset to be added
+     * @param sign2 true if sign of the second offset is positive
+     * @param offset2 second offset to be added
+     * @param constant constant to be added
+     * @return resulting {@link Expolynomial}
      */
     public Expolynomial evaluate(Variable base, Boolean sign1,
             Variable offset1, Boolean sign2, Variable offset2,
@@ -548,7 +503,6 @@ public class Exmonomial {
             if (term.getVariable().equals(base)) {
                 if (term instanceof MonomialTerm) {
 
-                    Expolynomial trinomial = new Expolynomial();
                     Exmonomial exmon1 = new Exmonomial(new OmegaBigDecimal(1));
                     exmon1.addAtomicTerm(new MonomialTerm(offset1, 1));
                     if (!sign1)
@@ -562,6 +516,7 @@ public class Exmonomial {
                     Exmonomial exmon3 = new Exmonomial(new OmegaBigDecimal(
                             constant));
 
+                    Expolynomial trinomial = new Expolynomial();
                     trinomial.addExmonomial(exmon1);
                     trinomial.addExmonomial(exmon2);
                     trinomial.addExmonomial(exmon3);
@@ -610,9 +565,6 @@ public class Exmonomial {
             return others;
     }
 
-    /**
-     * Stringa rappresentante un exmonomio
-     */
     @Override
     public String toString() {
 
@@ -627,16 +579,4 @@ public class Exmonomial {
 
         return b.toString();
     }
-
-    /**
-     * Multiplies by a constant
-     *
-     * @param c
-     *            constant
-     */
-    public void multiply(OmegaBigDecimal c) {
-
-        this.constantTerm = this.constantTerm.multiply(c);
-    }
-
 }

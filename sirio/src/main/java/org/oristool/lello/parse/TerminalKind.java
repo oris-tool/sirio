@@ -85,7 +85,7 @@ public enum TerminalKind {
     SUFFIX_OP_LOGIC,
 
     /**
-     * A relational binary operator such as == or <=.
+     * A relational binary operator such as {@code ==} or {@code<=}.
      */
     BIN_OP_RELS,
 

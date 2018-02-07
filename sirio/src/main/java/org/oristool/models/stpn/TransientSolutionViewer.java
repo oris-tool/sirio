@@ -40,6 +40,8 @@ public class TransientSolutionViewer extends JFrame {
     /**
      * Builds a Swing visualization of the given transient solution.
      *
+     * @param <R> regeneration type
+     * @param <S> state type
      * @param s transient solution
      * @return a Swing JPanel instance
      */
@@ -89,6 +91,8 @@ public class TransientSolutionViewer extends JFrame {
     /**
      * Displays a Swing visualization of the given transient solution.
      *
+     * @param <R> regeneration type
+     * @param <S> state type
      * @param transientSolution transient solution
      */
     public <R, S> TransientSolutionViewer(
@@ -164,6 +168,8 @@ public class TransientSolutionViewer extends JFrame {
     /**
      * Displays a Swing visualization of the given transient solutions.
      *
+     * @param <R> regeneration type
+     * @param <S> state type
      * @param transientSolutions transient solutions
      */
     @SafeVarargs
@@ -241,6 +247,8 @@ public class TransientSolutionViewer extends JFrame {
      * Displays a Swing visualization of the given transient solution, using a set
      * of labels.
      *
+     * @param <R> regeneration type
+     * @param <S> state type
      * @param stringList labels
      * @param transientSolutions transient solutions
      */

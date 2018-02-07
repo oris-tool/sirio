@@ -63,7 +63,9 @@ public final class StochasticComponentsFactory implements
      * @param tokensAdder the token adder function
      * @param checkNewlyEnabled whether to check newly-enabled sets in state
      *        comparisons
+     * @param policy policy for the selection of new nodes
      * @param tauAgeLimit time bound for the analysis
+     * @param stopCondition stop condition for the analysis
      * @param epsilon allowed error when comparing states
      * @param numSamples number of samples used to compare states
      * @param monitor analysis monitor

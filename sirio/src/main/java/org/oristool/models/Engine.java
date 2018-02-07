@@ -27,7 +27,7 @@ public interface Engine {
     /**
      * Checks if the analysis can be applied to the given Petri net.
      *
-     * <p>Problems are collected in a {@link validationMessageCollector}.
+     * <p>Problems are collected in a {@link ValidationMessageCollector}.
      *
      * @param pn Petri net
      * @param c collector for error messages

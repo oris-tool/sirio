@@ -20,7 +20,7 @@ package org.oristool.petrinet;
 import org.oristool.util.Feature;
 
 /**
- * Generic feature of a {@link PostCondition}.
+ * Generic feature of a {@link Postcondition}.
  */
 public interface PostconditionFeature extends Feature {
 

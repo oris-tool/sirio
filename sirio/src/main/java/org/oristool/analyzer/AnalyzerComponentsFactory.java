@@ -25,7 +25,7 @@ import org.oristool.petrinet.Transition;
 /**
  * Factory for all the components used by the analyzer.
  *
- * @param <M> type of the model (such as a {@link PetriNet}
+ * @param <M> type of the model (such as a {@link PetriNet})
  * @param <E> type of the event (such as the firing of a {@link Transition}
  */
 public interface AnalyzerComponentsFactory<M, E extends Event> {

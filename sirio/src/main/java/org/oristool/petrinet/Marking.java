@@ -60,6 +60,7 @@ public final class Marking {
     /**
      * Returns the number of tokens in a place.
      *
+     * @param place the input place
      * @return token count of the place
      */
     public int getTokens(Place place) {

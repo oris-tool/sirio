@@ -20,7 +20,7 @@ package org.oristool.math.expression;
 import org.oristool.math.OmegaBigDecimal;
 
 /**
- * A generic atomic term in a simple product.
+ * A generic atomic term (exponential or monomial).
  */
 public interface AtomicTerm {
 

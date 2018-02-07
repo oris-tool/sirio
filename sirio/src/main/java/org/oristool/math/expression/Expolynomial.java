@@ -32,10 +32,15 @@ import java.util.StringTokenizer;
 import org.oristool.math.OmegaBigDecimal;
 
 /**
- * A sum of exmonomial terms.
+ * A sum of {@link Exmonomial} terms.
  */
 public class Expolynomial {
 
+    /**
+     * Builds a new instance equal to the constant 1.
+     *
+     * @return a constant expolynomial equal to 1
+     */
     public static Expolynomial newOneInstance() {
         Expolynomial one = new Expolynomial();
         one.addExmonomial(new Exmonomial(OmegaBigDecimal.ONE));
@@ -43,6 +48,12 @@ public class Expolynomial {
         return one;
     }
 
+    /**
+     * Builds a new instance equal to a given constant.
+     *
+     * @param value input value
+     * @return a constant expolynomial equal to {@code value}
+     */
     public static Expolynomial newConstantInstance(OmegaBigDecimal value) {
         Expolynomial constant = new Expolynomial();
         constant.addExmonomial(new Exmonomial(value));
@@ -50,33 +61,20 @@ public class Expolynomial {
         return constant;
     }
 
-    /**
-     * Lista rappresentante la somma di prodotti, dove un prodotto è un
-     * exmonomio
-     */
     private List<Exmonomial> exmonomials;
-
-    /**
-     * Contesto matematico per indicare il numero di cifre significative da
-     * usare nel calcolo
-     */
     public static final MathContext mathContext = MathContext.DECIMAL128;
 
     /**
-     * Costruisce un expolinomio nullo
+     * Builds an empty expolynomial.
      */
     public Expolynomial() {
         exmonomials = new ArrayList<Exmonomial>();
     }
 
     /**
-     * Costruisce un expolinomio a partire da un altro expolinomio
+     * Builds the copy of an expolynomial.
      *
-     * @param expol
-     *            expolinomio da copiare
-     * @throws NegativeAlphaException
-     *             sollevata in caso di esponente negativo ritrovato all'interno
-     *             di un termine monomiale
+     * @param expol input expolynomial
      */
     public Expolynomial(Expolynomial expol) {
         exmonomials = new ArrayList<Exmonomial>();
@@ -84,29 +82,28 @@ public class Expolynomial {
             exmonomials.add(new Exmonomial(expol.getExmonomials().get(i)));
     }
 
-    /**
-     * Restituisce tutti gli exmonomi
-     *
-     * @return lista di exmonomi componenti l'expolinomio
-     */
     public List<Exmonomial> getExmonomials() {
         return exmonomials;
     }
 
     /**
-     * Aggiunge un exmonomio a quelli già presenti
+     * Adds an exmonomial to the sum.
      *
-     * @param exmon
-     *            exmonomio da aggiungere
+     * @param exmon input exmonomial
      */
     public void addExmonomial(Exmonomial exmon) {
         if (exmon != null)
             exmonomials.add(exmon);
     }
 
+    /**
+     * Returns all the variables used in this expolynomial.
+     *
+     * @return set of variables
+     */
     public Collection<Variable> getVariables() {
 
-        Set<Variable> variables = new LinkedHashSet<Variable>();
+        Set<Variable> variables = new LinkedHashSet<>();
         for (Exmonomial e : exmonomials)
             variables.addAll(e.getVariables());
 
@@ -114,6 +111,13 @@ public class Expolynomial {
 
     }
 
+    /**
+     * Returns the constant value of this expolynomial of throws an
+     * {@code IllegalStateException} exception if the expolynomial is not constant.
+     *
+     * @return constant value of the expolynomial
+     * @throws IllegalStateException if the expolynomial is not constant
+     */
     public OmegaBigDecimal getConstant() {
 
         this.normalize();
@@ -126,6 +130,9 @@ public class Expolynomial {
             return this.exmonomials.get(0).getConstantTerm();
     }
 
+    /**
+     * Normalizes the expolynomial, expanding all products and sums.
+     */
     public void normalize() {
         Expolynomial expol = new Expolynomial();
         for (int i = 0; i < exmonomials.size(); i++) {
@@ -158,6 +165,11 @@ public class Expolynomial {
         this.exmonomials = finalExpol.exmonomials;
     }
 
+    /**
+     * Adds another expolynomial.
+     *
+     * @param other input expolynomial
+     */
     public void add(Expolynomial other) {
 
         for (Exmonomial e : other.exmonomials)
@@ -166,6 +178,11 @@ public class Expolynomial {
         this.normalize();
     }
 
+    /**
+     * Subtracts another expolynomial.
+     *
+     * @param other input expolynomial
+     */
     public void sub(Expolynomial other) {
 
         for (Exmonomial exmon : other.getExmonomials()) {
@@ -177,6 +194,11 @@ public class Expolynomial {
         this.normalize();
     }
 
+    /**
+     * Multiplies by an expolynomial.
+     *
+     * @param other input expolynomial
+     */
     public void multiply(Expolynomial other) {
 
         List<Exmonomial> result = new ArrayList<Exmonomial>();
@@ -191,12 +213,22 @@ public class Expolynomial {
         this.normalize();
     }
 
+    /**
+     * Multiplies by a constant.
+     *
+     * @param k constant
+     */
     public void multiply(BigDecimal k) {
 
         for (Exmonomial exmon : this.exmonomials)
             exmon.multiply(new OmegaBigDecimal(k));
     }
 
+    /**
+     * Divides by a constant.
+     *
+     * @param k constant
+     */
     public void divide(BigDecimal k) {
 
         if (k.compareTo(BigDecimal.ZERO) == 0)
@@ -206,6 +238,12 @@ public class Expolynomial {
             exmon.divide(k);
     }
 
+    /**
+     * Replaces {@code oldVar} with {@code newVar}.
+     *
+     * @param oldVar variable to be replaced
+     * @param newVar new variable
+     */
     public void substitute(Variable oldVar, Variable newVar) {
 
         for (Exmonomial exmon : this.exmonomials)
@@ -214,6 +252,12 @@ public class Expolynomial {
         this.normalize();
     }
 
+    /**
+     * Evaluates the expolynomial.
+     *
+     * @param m map with values for all the variables
+     * @return expolynomial value
+     */
     public OmegaBigDecimal evaluate(Map<Variable, OmegaBigDecimal> m) {
 
         OmegaBigDecimal result = OmegaBigDecimal.ZERO;
@@ -224,6 +268,13 @@ public class Expolynomial {
         return result;
     }
 
+    /**
+     * Replaces a variable with its value.
+     *
+     * @param var variable to be replaced
+     * @param value value of the variable
+     * @return expolynomial after the substitution
+     */
     public Expolynomial evaluate(Variable var, OmegaBigDecimal value) {
 
         Expolynomial expol = new Expolynomial();
@@ -234,6 +285,16 @@ public class Expolynomial {
         return expol;
     }
 
+    /**
+     * Replaces <code>base</code> with +/- <code>offset</code> +
+     * <code>constant</code>.
+     *
+     * @param base variable to be replaced
+     * @param sign true if sign of the offset is positive
+     * @param offset offset to be added
+     * @param constant constant to be added
+     * @return resulting {@link Expolynomial}
+     */
     public Expolynomial evaluate(Variable base, boolean sign, Variable offset,
             BigDecimal constant) {
 
@@ -248,6 +309,18 @@ public class Expolynomial {
         return expol;
     }
 
+    /**
+     * Replaces <code>base</code> with +/- <code>offset1</code> +/-
+     * <code>offset2</code> + <code>constant</code>.
+     *
+     * @param base variable to be replaced
+     * @param sign1 true if sign of the first offset is positive
+     * @param offset1 first offset to be added
+     * @param sign2 true if sign of the second offset is positive
+     * @param offset2 second offset to be added
+     * @param constant constant to be added
+     * @return resulting {@link Expolynomial}
+     */
     public Expolynomial evaluate(Variable base, boolean sign1,
             Variable offset1, boolean sign2, Variable offset2,
             BigDecimal constant) {
@@ -263,6 +336,13 @@ public class Expolynomial {
         return expol;
     }
 
+
+    /**
+     * Replaces <code>base</code> with <code>base</code> + <code>offset</code>.
+     *
+     * @param base variable to be replaced
+     * @param offset offset to be applied
+     */
     public void shift(Variable base, Variable offset) {
 
         List<Exmonomial> result = new ArrayList<Exmonomial>();
@@ -273,6 +353,12 @@ public class Expolynomial {
         this.normalize();
     }
 
+    /**
+     * Computes the primitive function of this expolynomial.
+     *
+     * @param var integration variable
+     * @return primitive function
+     */
     public Expolynomial integrate(Variable var) {
 
         Expolynomial expol = new Expolynomial();
@@ -285,6 +371,14 @@ public class Expolynomial {
         return expol;
     }
 
+    /**
+     * Integrates this expolynomial over an interval.
+     *
+     * @param var integration variable
+     * @param lower lower bound
+     * @param upper upper bound
+     * @return resulting expolynomial
+     */
     public Expolynomial integrate(Variable var, OmegaBigDecimal lower,
             OmegaBigDecimal upper) {
 
@@ -299,7 +393,7 @@ public class Expolynomial {
         return expol;
     }
 
-    public void pow(Integer n) {
+    private void pow(Integer n) {
         if (n < 0)
             throw new IllegalArgumentException("Negative exponentiation");
         else if (n == 0) {
@@ -313,9 +407,6 @@ public class Expolynomial {
         }
     }
 
-    /**
-     * Stringa rappresentante l'expolinomio
-     */
     @Override
     public String toString() {
 
@@ -334,141 +425,49 @@ public class Expolynomial {
         return b.toString();
     }
 
-    public Expolynomial limit(Map<Variable, OmegaBigDecimal> toValues) {
-
-        // separates variables tending to positive or negative infinity
-        Set<Variable> pInfVars = new LinkedHashSet<Variable>();
-        Set<Variable> nInfVars = new LinkedHashSet<Variable>();
-        Map<Variable, OmegaBigDecimal> finiteVars = new HashMap<Variable, OmegaBigDecimal>();
-
-        for (Entry<Variable, OmegaBigDecimal> e : toValues.entrySet())
-            if (e.getValue().equals(OmegaBigDecimal.POSITIVE_INFINITY))
-                pInfVars.add(e.getKey());
-            else if (e.getValue().equals(OmegaBigDecimal.NEGATIVE_INFINITY))
-                nInfVars.add(e.getKey());
-            else
-                finiteVars.put(e.getKey(), e.getValue());
-
-        // the minimum total exponential rate among all the exmonomials for
-        // variables tending to +inf
-        // (if negative, the expolynomial diverges to +inf or -inf, depending on
-        // the sign of the sum of
-        // constant terms)
-        BigDecimal minPInfExponentialRate = null;
-
-        // the maximum monomial degree among all the exmonomials with minimum
-        // total exponential rate
-        int maxInfMonomialDegree = 0;
-
-        // builds the limiting expolynomial: this includes only non-null finite
-        // terms
-        Expolynomial result = new Expolynomial();
-
-        for (int i = 0; i < this.exmonomials.size(); ++i) {
-            // computes the limit of this exmonomial
-            Exmonomial limitingExmonomial = new Exmonomial(this.exmonomials
-                    .get(i).getConstantTerm());
-
-            // total rate of exponential terms tending to +inf in this
-            // exmonomial
-            // (terms tending to -inf are counted with a negated rate)
-            BigDecimal pInfExponentialRate = BigDecimal.ZERO;
-
-            // total degree of monomial terms tending to +inf in this exmonomial
-            // (terms tending to -inf with an odd degree change the sign)
-            int infMonomialDegree = 0;
-            BigDecimal infMonomialSign = BigDecimal.ONE;
-
-            // total exponent of exponential terms of a variable tending to a
-            // finite value
-            // (avoids multiple exponentiations within the same exmonomial)
-            BigDecimal totalExponent = BigDecimal.ZERO;
-
-            for (AtomicTerm a : this.getExmonomials().get(i).getAtomicTerms()) {
-                if (a instanceof ExponentialTerm) {
-                    ExponentialTerm e = (ExponentialTerm) a;
-
-                    if (pInfVars.contains(e.getVariable())) {
-                        pInfExponentialRate = pInfExponentialRate.add(e
-                                .getLambda());
-
-                    } else if (nInfVars.contains(e.getVariable())) {
-                        pInfExponentialRate = pInfExponentialRate.subtract(e
-                                .getLambda());
-
-                    } else if (finiteVars.containsKey(e.getVariable())) {
-                        totalExponent = totalExponent.subtract(e.getLambda()
-                                .multiply(
-                                        finiteVars.get(e.getVariable())
-                                                .bigDecimalValue()));
-
-                    } else {
-                        limitingExmonomial.addAtomicTerm(a);
-                    }
-
-                } else {
-                    MonomialTerm m = (MonomialTerm) a;
-
-                    if (pInfVars.contains(m.getVariable())) {
-                        infMonomialDegree += m.getAlpha();
-
-                    } else if (nInfVars.contains(m.getVariable())) {
-                        infMonomialDegree += m.getAlpha();
-                        if (m.getAlpha() % 2 == 1)
-                            infMonomialSign = infMonomialSign.negate();
-
-                    } else if (finiteVars.containsKey(m.getVariable())) {
-                        limitingExmonomial.multiply(finiteVars.get(
-                                m.getVariable()).pow(m.getAlpha()));
-
-                    } else {
-                        limitingExmonomial.addAtomicTerm(m);
-                    }
-                }
-            }
-
-            if (minPInfExponentialRate == null
-                    || pInfExponentialRate.compareTo(minPInfExponentialRate) < 0
-                    || (pInfExponentialRate.compareTo(minPInfExponentialRate) == 0 && infMonomialDegree < maxInfMonomialDegree)) {
-
-                // updates the minimum rate / maximum degree
-                minPInfExponentialRate = pInfExponentialRate;
-                maxInfMonomialDegree = infMonomialDegree;
-
-                // throws away the other terms (they diverge less)
-                result = new Expolynomial();
-            }
-
-            if (pInfExponentialRate.compareTo(minPInfExponentialRate) == 0
-                    && infMonomialDegree == maxInfMonomialDegree) {
-
-                // adds this term (it diverges as much as the most divergent
-                // ones)
-
-                result.addExmonomial(limitingExmonomial);
-            }
-        }
-
-        return result;
-
-    }
-
+    /**
+     * Checks if this expolynomial is constant.
+     *
+     * @return true if this expolynomial is constant.
+     */
     public boolean isConstant() {
         return exmonomials.size() == 1
                 && exmonomials.get(0).getAtomicTerms().size() == 0;
     }
 
+    /**
+     * Checks if this expolynomial contains a single exponential term.
+     *
+     * @return true if this expolynomial contains a single exponential term
+     */
     public boolean isExponential() {
         return exmonomials.size() == 1
                 && exmonomials.get(0).getAtomicTerms().size() == 1
                 && exmonomials.get(0).getAtomicTerms().get(0) instanceof ExponentialTerm;
     }
 
+    /**
+     * The exponential rate of the single exponential term contained in this
+     * expolynomial. If other terms are present, throws an
+     * {@code IllegalStateException}.
+     *
+     * @return true if this expolynomial contains a single exponential term
+     * @throws IllegalStateException if this is not a single exponential term
+     */
     public BigDecimal getExponentialRate() {
+        if (!isExponential())
+            throw new IllegalStateException();
+
         return ((ExponentialTerm) exmonomials.get(0).getAtomicTerms().get(0))
                 .getLambda();
     }
 
+    /**
+     * Builds an exponential from a string.
+     *
+     * @param string input string
+     * @return exponential instantance
+     */
     public static Expolynomial fromString(String string) {
         Expolynomial expol = new Expolynomial();
 
@@ -520,6 +519,12 @@ public class Expolynomial {
         return expol;
     }
 
+    /**
+     * Checks if the input string is a valid expolynomial expression.
+     *
+     * @param string input string
+     * @return true if the input string is a valid expolynomial expression.
+     */
     public static boolean isValid(String string) {
 
         try {

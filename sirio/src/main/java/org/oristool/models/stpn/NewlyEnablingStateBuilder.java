@@ -39,7 +39,7 @@ public class NewlyEnablingStateBuilder implements StateBuilder<Marking> {
 
     private PetriNet petriNet;
     private boolean transientAnalysis;
-    boolean distinctNewlyEnabledConditions;
+    boolean checkNewlyEnabled;
     private BigDecimal epsilon;
     private int numSamples;
 
@@ -54,16 +54,17 @@ public class NewlyEnablingStateBuilder implements StateBuilder<Marking> {
      * @param petriNet Petri net
      * @param transientAnalysis whether the state should include
      *        {@code Variable.AGE}
+     * @param checkNewlyEnabled whether to compare enabled sets
      * @param epsilon allowed error when comparing states
      * @param numSamples number of samples used when comparing states
      */
     public NewlyEnablingStateBuilder(PetriNet petriNet,
-            boolean transientAnalysis, boolean distinctNewlyEnabledConditions,
+            boolean transientAnalysis, boolean checkNewlyEnabled,
             BigDecimal epsilon, int numSamples) {
 
         this.petriNet = petriNet;
         this.transientAnalysis = transientAnalysis;
-        this.distinctNewlyEnabledConditions = distinctNewlyEnabledConditions;
+        this.checkNewlyEnabled = checkNewlyEnabled;
         this.epsilon = epsilon;
         this.numSamples = numSamples;
     }
@@ -73,7 +74,7 @@ public class NewlyEnablingStateBuilder implements StateBuilder<Marking> {
 
         // adds the petri state feature
         State state = InitialPetriStateBuilder.computeInitialState(petriNet,
-                marking, distinctNewlyEnabledConditions);
+                marking, checkNewlyEnabled);
         Set<Transition> enabledTransitions = state.getFeature(
                 PetriStateFeature.class).getNewlyEnabled();
 

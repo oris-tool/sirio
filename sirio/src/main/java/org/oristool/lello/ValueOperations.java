@@ -176,7 +176,7 @@ public class ValueOperations {
      *            Left hand side operand.
      * @param rhs
      *            Right hand side operand.
-     * @return Whether it is true that lhs < rhs or not.
+     * @return Whether it is true that {@code lhs < rhs} or not.
      */
     public static Value lt(Value lhs, Value rhs) {
         if (lhs.isNumeric() && rhs.isNumeric()) {
@@ -198,7 +198,7 @@ public class ValueOperations {
      *            Left hand side operand.
      * @param rhs
      *            Right hand side operand.
-     * @return Whether it is true that lhs <= rhs or not.
+     * @return Whether it is true that {@code lhs <= rhs} or not.
      */
     public static Value lte(Value lhs, Value rhs) {
         if (lhs.isNumeric() && rhs.isNumeric()) {
@@ -220,7 +220,7 @@ public class ValueOperations {
      *            Left hand side operand.
      * @param rhs
      *            Right hand side operand.
-     * @return Whether it is true that lhs > rhs or not.
+     * @return Whether it is true that {@code lhs > rhs} or not.
      */
     public static Value gt(Value lhs, Value rhs) {
         if (lhs.isNumeric() && rhs.isNumeric()) {
@@ -242,7 +242,7 @@ public class ValueOperations {
      *            Left hand side operand.
      * @param rhs
      *            Right hand side operand.
-     * @return Whether it is true that lhs >= rhs or not.
+     * @return Whether it is true that {@code lhs >= rhs} or not.
      */
     public static Value gte(Value lhs, Value rhs) {
         if (lhs.isNumeric() && rhs.isNumeric()) {

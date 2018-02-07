@@ -33,6 +33,9 @@ import org.oristool.math.expression.Expolynomial;
 import org.oristool.math.expression.ExponentialTerm;
 import org.oristool.math.expression.Variable;
 
+/**
+ * Multidimensional PDF on a support (non-piecewise).
+ */
 public class GEN implements Function {
 
     public static GEN getDETInstance(Variable v, BigDecimal value) {
@@ -83,18 +86,6 @@ public class GEN implements Function {
         return result;
     }
 
-    /**
-     * Normalizzazione della funzione. Corrisponde a normalizzare il dominio DBM
-     * e scalare la densità in modo tale che l'integrale sul dominio sia 1
-     *
-     * @return funzione <code>GEN</code> normalizzata
-     * @throws FunctionException
-     *             integrale sul dominio nullo
-     * @throws ExpressionException
-     *             eccezione sul calcolo della densità
-     * @throws DomainException
-     *             eccezione sul calcolo del dominio
-     */
     public void normalize() {
 
         BigDecimal integral = integrateOverDomain().bigDecimalValue();
@@ -105,29 +96,12 @@ public class GEN implements Function {
         density.divide(integral);
     }
 
-    /**
-     * Effettua il prodotto cartesiano con un'altra <code> Function </code>:
-     * corrisponde a eseguire il prodotto cartesiano fra i domini e il prodotto
-     * algebrico tra le densit?.
-     *
-     * @param f
-     *            funzione con la quale eseguire il prodotto cartesiano
-     * @return prodotto risultante
-     * @throws DomainDefinitionException
-     * @throws DomainException
-     * @throws ExpressionException
-     */
     public GEN cartesianProduct(Function f) {
         Expolynomial product = new Expolynomial(density);
         product.multiply(f.getDensity());
         return new GEN(domain.cartesianProduct(f.getDomain()), product);
     }
 
-    /**
-     * Integrates density over domain
-     *
-     * @return integration result
-     */
     public OmegaBigDecimal integrateOverDomain() {
 
         domain.normalize();
@@ -168,9 +142,6 @@ public class GEN implements Function {
         return result;
     }
 
-    /**
-     * Projects the specified variable v
-     */
     public PartitionedGEN project(Variable v) {
 
         domain.normalize();
@@ -191,9 +162,6 @@ public class GEN implements Function {
         return new PartitionedGEN(partition);
     }
 
-    /**
-     * Shifts wrt and projects the specified variable v
-     */
     public PartitionedGEN shiftAndProject(Variable k) {
 
         domain.normalize();
@@ -220,21 +188,6 @@ public class GEN implements Function {
         return new PartitionedGEN(partition);
     }
 
-    /**
-     * Calcola le zone derivanti dall'aggiunta dei vincoli del dominio di una
-     * nuova GEN con quella di partenza
-     *
-     * @param gen
-     *            la GEN da confrontare con quella di riferimento
-     * @param finalFunctions
-     *            lista da riempire con le GEN derivanti dal partizionamento
-     * @return GEN corrispondente all'intersezione dei domini delle due GEN di
-     *         partenza
-     * @throws AbsentVariableException
-     * @throws IllegalConstraintException
-     * @throws DomainDefinitionException
-     * @throws ExpressionException
-     */
     public GEN computeNonIntersectingZones(GEN gen, List<GEN> finalFunctions) {
         DBMZone otherDBM = gen.getDomain();
         DBMZone intersectionDBM = new DBMZone(domain);
@@ -262,17 +215,6 @@ public class GEN implements Function {
         return new GEN(intersectionDBM, newDensity);
     }
 
-    /**
-     * Calcola le GEN derivanti dalla sovrapposizione dei domini di due GEN
-     *
-     * @param gen
-     *            la seconda GEN da confrontare con quella di riferimento
-     * @return lista di GEN derivanti dal partizionamento
-     * @throws AbsentVariableException
-     * @throws IllegalConstraintException
-     * @throws DomainDefinitionException
-     * @throws ExpressionException
-     */
     public List<GEN> getSubZonesInducted(GEN gen) {
         List<GEN> finalFunctions = new ArrayList<GEN>();
         GEN intersection = this
@@ -283,18 +225,12 @@ public class GEN implements Function {
         return finalFunctions;
     }
 
-    /**
-     * oldVar -> newVar
-     */
     public void substitute(Variable oldVar, Variable newVar) {
 
         domain.substitute(oldVar, newVar);
         density.substitute(oldVar, newVar);
     }
 
-    /**
-     * oldVar -> newVar + coefficient
-     */
     public void substitute(Variable oldVar, Variable newVar,
             BigDecimal coefficient) {
 
@@ -302,9 +238,6 @@ public class GEN implements Function {
         density = density.evaluate(oldVar, true, newVar, coefficient);
     }
 
-    /**
-     * var -> var + coefficient
-     */
     public void constantShift(BigDecimal constant) {
 
         domain.constantShift(constant);
@@ -321,9 +254,6 @@ public class GEN implements Function {
 
     }
 
-    /**
-     * var -> var + constant for var in variables (in the domain and density)
-     */
     public void constantShift(BigDecimal constant,
             Collection<Variable> variables) {
 
@@ -344,12 +274,6 @@ public class GEN implements Function {
                     domainVars.get(i), constant);
     }
 
-    /**
-     * oldVar -> newVar (in the domain for oldVar) var -> var + constant (in the
-     * domain for all variables) oldVar -> - newVar + constant (in the density
-     * for oldVar) otherVar -> otherVar - newVar + constant (in the density for
-     * other variables)
-     */
     public void substituteAndShift(Variable oldVar, Variable newVar,
             BigDecimal constant) {
 
@@ -385,8 +309,9 @@ public class GEN implements Function {
         domain.imposeBound(v, Variable.TSTAR, max);
 
         BigDecimal integral = this.integrateOverDomain().bigDecimalValue();
-        //Integral is zero because its duration is end. To avoid a division by zero error, GEN is replaced by an IMM.
-        if(integral.compareTo(BigDecimal.ZERO) == 0){
+        // Integral is zero because its duration is end. To avoid a division by zero
+        // error, GEN is replaced by an IMM.
+        if (integral.compareTo(BigDecimal.ZERO) == 0){
             Variable x = Variable.X;
             OmegaBigDecimal omegaValue = OmegaBigDecimal.ZERO;
             DBMZone domain = new DBMZone();
@@ -404,9 +329,6 @@ public class GEN implements Function {
 
     @Override
     public String toString() {
-        // if(domain.getVariables().size().getConstraints().size()==0)
-        // return "<empty function>\n";
-
         StringBuilder b = new StringBuilder();
         b.append("Domain\n");
         b.append(domain);
@@ -417,11 +339,6 @@ public class GEN implements Function {
         return b.toString();
     }
 
-    /**
-     * Stampa la funzione secondo il formato di Mathematica
-     *
-     * @return stringa rappresentante la funzione nel formato di Mathematica
-     */
     @Override
     public String toMathematicaString() {
 
@@ -451,13 +368,6 @@ public class GEN implements Function {
         return density;
     }
 
-    /**
-     * Creates an EXP function over a truncated domain [eft, lft]. Note that the
-     * created function is not normalized, and thus integrateOverDomain yields
-     * the probability P{eft <= EXP <= lft}
-     *
-     * @return rate*exp(-rate*v) over [eft, lft]
-     */
     public static GEN newTruncatedExp(Variable v, BigDecimal rate,
             OmegaBigDecimal eft, OmegaBigDecimal lft) {
 

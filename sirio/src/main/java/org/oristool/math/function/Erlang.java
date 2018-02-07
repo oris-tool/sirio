@@ -36,23 +36,30 @@ import org.oristool.math.expression.ExponentialTerm;
 import org.oristool.math.expression.MonomialTerm;
 import org.oristool.math.expression.Variable;
 
+/**
+ * The Erlang PDF.
+ */
 public class Erlang implements Function {
 
     private DBMZone domain;
     private Expolynomial density;
 
-    private Variable x;
+    private Variable var;
     private BigDecimal lambda;
-    private int k;
+    private int shape;
 
     /**
-     * lambda^k x^(k-1) e^(-lambda x) / (k-1)! function on [0, +infty) domain
+     * Builds the function {@code lambda^k x^(k-1) e^(-lambda x) / (k-1)!} over {@code [0, +infty)}.
+     *
+     * @param x variable
+     * @param k shape
+     * @param lambda rate
      */
     public Erlang(Variable x, int k, BigDecimal lambda) {
 
-        this.x = x;
+        this.var = x;
         this.lambda = lambda;
-        this.k = k;
+        this.shape = k;
 
         OmegaBigDecimal eft;
         OmegaBigDecimal lft;
@@ -90,7 +97,7 @@ public class Erlang implements Function {
     }
 
     public int getShape() {
-        return k;
+        return shape;
     }
 
     public BigDecimal getLambda() {
@@ -99,7 +106,7 @@ public class Erlang implements Function {
 
     public Variable getVariable() {
 
-        return x;
+        return var;
     }
 
     @Override
@@ -130,9 +137,6 @@ public class Erlang implements Function {
 
     @Override
     public String toString() {
-        // if(domain.getVariables().size().getConstraints().size()==0)
-        // return "<empty function>\n";
-
         String result = "Domain\n";
         result = result + domain.toString();
         result = result + "Density\n";
@@ -169,7 +173,7 @@ public class Erlang implements Function {
         return domain;
     }
 
-    //XXX All methods under this line are duplicated
+    // FIXME methods under this line are duplicated
     public void conditionToMin(Variable v, OmegaBigDecimal min) {
         conditionToBound(v, min, OmegaBigDecimal.POSITIVE_INFINITY);
     }
@@ -271,12 +275,9 @@ public class Erlang implements Function {
 
         upper.sub(lower);
 
-        return new Erlang(new DBMZone(s.getDomain()), upper, x, k, lambda);
+        return new Erlang(new DBMZone(s.getDomain()), upper, var, shape, lambda);
     }
 
-    /**
-     * var -> var + coefficient
-     */
     public void constantShift(BigDecimal constant) {
 
         domain.constantShift(constant);
@@ -293,9 +294,6 @@ public class Erlang implements Function {
 
     }
 
-    /**
-     * var -> var + constant for var in variables (in the domain and density)
-     */
     public void constantShift(BigDecimal constant,
             Collection<Variable> variables) {
 
@@ -316,12 +314,11 @@ public class Erlang implements Function {
                     domainVars.get(i), constant);
     }
 
-
     private Erlang(DBMZone domain, Expolynomial density, Variable x, int k, BigDecimal lambda) {
         this.domain = domain;
         this.density = density;
-        this.x = x;
-        this.k = k;
+        this.var = x;
+        this.shape = k;
         this.lambda = lambda;
     }
 }

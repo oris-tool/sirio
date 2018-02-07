@@ -25,10 +25,18 @@ import org.oristool.math.domain.DBMZone;
 import org.oristool.math.expression.Expolynomial;
 import org.oristool.math.expression.Variable;
 
+/**
+ * Generic interface of partitioned functions.
+ */
 public interface PartitionedFunction {
 
     List<? extends Function> getFunctions();
 
+    /**
+     * Returns the minimum value across all subdomains.
+     *
+     * @return minimum value
+     */
     default OmegaBigDecimal getDomainsEFT() {
 
         if (getDomains().size() == 0)
@@ -37,22 +45,26 @@ public interface PartitionedFunction {
         return getDomains().get(0).getBound(Variable.TSTAR, Variable.X).negate();
     }
 
+    /**
+     * Returns the maximum value across all subdomains.
+     *
+     * @return maximum value
+     */
     default OmegaBigDecimal getDomainsLFT() {
 
         if (getDomains().size() == 0)
             throw new IllegalStateException("At least a partition must be present");
 
-        return getDomains().get(getDomains().size()-1).getBound(Variable.X, Variable.TSTAR);
+        return getDomains().get(getDomains().size() - 1).getBound(Variable.X, Variable.TSTAR);
     }
 
     default List<? extends DBMZone> getDomains() {
         return getFunctions().stream().map(f -> f.getDomain()).collect(Collectors.toList());
     }
 
-    default List <? extends Expolynomial> getDensities() {
+    default List<? extends Expolynomial> getDensities() {
         return getFunctions().stream().map(f -> f.getDensity()).collect(Collectors.toList());
     }
 
     String toMathematicaString();
-
 }

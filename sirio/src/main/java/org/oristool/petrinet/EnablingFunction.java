@@ -29,7 +29,7 @@ package org.oristool.petrinet;
  * <li>the enabling function evaluates to true.
  * </ul>
  *
- * <p>This class implements the interface {@link TranstionFeature} to be added
+ * <p>This class implements the interface {@link TransitionFeature} to be added
  * dynamically as feature to any {@link Transition}.
  */
 public final class EnablingFunction implements TransitionFeature {
@@ -58,6 +58,8 @@ public final class EnablingFunction implements TransitionFeature {
 
     /**
      * Returns the marking condition.
+     *
+     * @return the marking condition
      */
     public MarkingCondition getMarkingCondition() {
         return markingCondition;

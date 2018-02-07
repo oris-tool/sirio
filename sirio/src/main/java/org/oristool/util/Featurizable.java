@@ -60,6 +60,7 @@ public abstract class Featurizable<E extends Feature> {
     /**
      * Returns the feature associated with this object for a given type.
      *
+     * @param <F> type of the feature
      * @param typeToken type of feature to be returned
      * @return instance of the associated feature, or {@code null} if not present
      */
@@ -72,7 +73,9 @@ public abstract class Featurizable<E extends Feature> {
     /**
      * Returns true if this object has a feature with the given type.
      *
+     * @param <F> type of the feature
      * @param typeToken type of feature to be checked
+     * @return true if the feature is present
      */
     public <F extends E> boolean hasFeature(Class<F> typeToken) {
         return features.containsKey(typeToken);
@@ -81,6 +84,7 @@ public abstract class Featurizable<E extends Feature> {
     /**
      * Removes the feature with the given type from this object.
      *
+     * @param <F> type of the feature
      * @param typeToken type of the feature to be removed
      */
     public <F extends E> void removeFeature(Class<F> typeToken) {

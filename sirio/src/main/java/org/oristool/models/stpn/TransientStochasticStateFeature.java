@@ -101,6 +101,7 @@ public class TransientStochasticStateFeature implements StateFeature {
      * Returns the upper bound on the entering time for this transient state
      * class.
      *
+     * @param s stochastic state feature
      * @return OmegaBigDecimal upper time bound
      */
     public OmegaBigDecimal getEnteringTimeUpperBound(StochasticStateFeature s) {
@@ -112,6 +113,7 @@ public class TransientStochasticStateFeature implements StateFeature {
      * Returns the lower bound on the entering time for this transient state
      * class.
      *
+     * @param s stochastic state feature
      * @return OmegaBigDecimal upper time bound
      */
     public OmegaBigDecimal getEnteringTimeLowerBound(StochasticStateFeature s) {
@@ -123,6 +125,7 @@ public class TransientStochasticStateFeature implements StateFeature {
     /**
      * After timeUpperBound the probability of being in this class is zero.
      *
+     * @param s stochastic state feature
      * @return OmegaBigDecimal upper bound
      */
     public OmegaBigDecimal getTimeUpperBound(StochasticStateFeature s) {
@@ -136,6 +139,8 @@ public class TransientStochasticStateFeature implements StateFeature {
     /**
      * Computes the probability of being in this class at the specified time.
      *
+     * @param time time point
+     * @param s stochastic state feature
      * @return BigDecimal probability value
      */
     public BigDecimal computeTransientClassProbability(OmegaBigDecimal time,
@@ -170,17 +175,14 @@ public class TransientStochasticStateFeature implements StateFeature {
             firingVariablesWithExp.add(minEXP);
         }
 
-        // Selects t
-        OmegaBigDecimal t = new OmegaBigDecimal(time);
-
         // Adds constraints: tauAge in [-t, 0]
-        restrictedStateDensity.imposeBound(Variable.TSTAR, Variable.AGE, t);
+        restrictedStateDensity.imposeBound(Variable.TSTAR, Variable.AGE, time);
         restrictedStateDensity.imposeBound(Variable.AGE, Variable.TSTAR,
                 OmegaBigDecimal.ZERO);
 
         // Adds constraints: (-tauAge) + v > t i.e. tauAge - v < -t
         restrictedStateDensity.imposeBound(Variable.AGE,
-                firingVariablesWithExp, t.negate().toLeftNeighborhood());
+                firingVariablesWithExp, time.negate().toLeftNeighborhood());
 
         return restrictedStateDensity.measure().multiply(reachingProbability);
     }
@@ -189,6 +191,9 @@ public class TransientStochasticStateFeature implements StateFeature {
      * Computes the probability of reaching this class at a time within the
      * given interval [alpha,beta].
      *
+     * @param alpha lower bound
+     * @param beta upper bound
+     * @param s stochastic state feature
      * @return BigDecimal probability value
      */
     public BigDecimal computeVisitedProbability(OmegaBigDecimal alpha,

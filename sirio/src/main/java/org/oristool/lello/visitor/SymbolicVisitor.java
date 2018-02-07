@@ -36,6 +36,7 @@ public interface SymbolicVisitor {
     /**
      * Called by a binary expression.
      *
+     * @param bindings The bindings.
      * @param e The calling expression.
      * @return The manipulated expression.
      */
@@ -44,6 +45,7 @@ public interface SymbolicVisitor {
     /**
      * Called by a bracket expression.
      *
+     * @param bindings The bindings.
      * @param e The calling expression.
      * @return The manipulated expression.
      */
@@ -52,6 +54,7 @@ public interface SymbolicVisitor {
     /**
      * Called by a constant.
      *
+     * @param bindings The bindings.
      * @param e The calling expression.
      * @return The manipulated expression.
      */
@@ -60,6 +63,7 @@ public interface SymbolicVisitor {
     /**
      * Called by a function call expression.
      *
+     * @param bindings The bindings.
      * @param e The calling expression.
      * @return The manipulated expression.
      */
@@ -68,6 +72,7 @@ public interface SymbolicVisitor {
     /**
      * Called by an unary expression.
      *
+     * @param bindings The bindings.
      * @param e The calling expression.
      * @return The manipulated expression.
      */
@@ -76,6 +81,7 @@ public interface SymbolicVisitor {
     /**
      * Called by a variable reference.
      *
+     * @param bindings The bindings.
      * @param e The calling expression.
      * @return The manipulated expression.
      */
