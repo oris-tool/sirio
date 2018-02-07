@@ -21,11 +21,9 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -393,12 +391,20 @@ public class Expolynomial {
         return expol;
     }
 
-    private void pow(Integer n) {
-        if (n < 0)
+    /**
+     * Takes the n-th power of this expolynomial.
+     *
+     * @param n exponent
+     */
+    public void pow(int n) {
+
+        if (n < 0) {
             throw new IllegalArgumentException("Negative exponentiation");
-        else if (n == 0) {
+
+        } else if (n == 0) {
             this.exmonomials.clear();
             this.exmonomials.add(new Exmonomial(OmegaBigDecimal.ONE));
+
         } else {
             Expolynomial base = new Expolynomial(this);
             for (int i = 1; i < n; i++)
