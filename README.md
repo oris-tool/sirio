@@ -1,5 +1,7 @@
 # ORIS Tool: The Sirio Library
 
+[![Build Status](https://travis-ci.org/oris-tool/sirio.svg?branch=master)](https://travis-ci.org/oris-tool/sirio)
+
 ## Introduction
 
 Sirio is a library for the analysis of **stochastic time Petri nets**
