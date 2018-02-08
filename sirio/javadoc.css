@@ -1,9 +1,12 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+@import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono');
+
 /* Javadoc style sheet */
 /*
 Overall document style
 */
 
-@import url('resources/fonts/dejavu.css');
+/* @import url('resources/fonts/dejavu.css'); */
 
 body {
     background-color:#ffffff;
@@ -870,6 +873,8 @@ table.striped > tbody > tr > td, table.striped > tbody > tr > td {
 }
 
 
+
+
 body {
     background-color: #FFF;
     color:#333;
@@ -881,7 +886,7 @@ body {
 code, pre {
     color: #555;
     line-height: 1.286em;
-    font-family: Consolas, Menlo, "Roboto Mono";
+    font-family: Consolas, Menlo, 'Ubuntu Mono';
     font-size: 18px;
 }
 
@@ -893,7 +898,6 @@ h3, h4 {
 .contentContainer .description dl dd, .contentContainer .details dl dd, .serializedFormContainer dl dd {
     font-size: 18px;
     font-family: Roboto, Helvetica, sans-serif;
-    display: inline;
 }
 
 div.block {

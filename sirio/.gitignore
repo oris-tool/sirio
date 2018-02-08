@@ -4,3 +4,4 @@
 .settings/
 .checkstyle
 .eclipse-pmd
+.factorypath
