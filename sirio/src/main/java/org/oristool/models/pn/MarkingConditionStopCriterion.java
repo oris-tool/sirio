@@ -36,6 +36,10 @@ public final class MarkingConditionStopCriterion extends AnalyzerObserverAdapter
         this.markingCondition = mc;
     }
 
+    public MarkingConditionStopCriterion(String cond) {
+        this.markingCondition = MarkingCondition.fromString(cond);
+    }
+
     @Override
     public void notifySuccessionExtracted(Succession succession) {
         lastExtractedMarking = succession.getChild().getFeature(PetriStateFeature.class)

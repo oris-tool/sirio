@@ -54,7 +54,7 @@ import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
 
-public class RegenerativeSteadyStateAnalysis<R> implements Engine {
+public class RegenerativeSteadyStateAnalysis<R> {
     private Set<Marking> reachableMarkings;
     private Set<Marking> alwaysRegenerativeMarkings;
     private Set<Marking> neverRegenerativeMarkings;
@@ -137,7 +137,6 @@ public class RegenerativeSteadyStateAnalysis<R> implements Engine {
     private RegenerativeSteadyStateAnalysis() {
     }
 
-    @Override
     public boolean canAnalyze(PetriNet petriNet, ValidationMessageCollector c) {
 
         boolean canAnalyze = true;

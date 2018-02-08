@@ -28,7 +28,7 @@ public final class TimedTransitionFeature implements TransitionFeature {
     private OmegaBigDecimal lft;
 
     /**
-     * Builds a timed feature from minimum/maximum firing time.
+     * Builds a timed feature from minimum/maximum firing times.
      *
      * @param eft earliest firing time (minimum time to fire)
      * @param lft latest firing time (maximum time to fire)
@@ -46,6 +46,18 @@ public final class TimedTransitionFeature implements TransitionFeature {
 
         this.eft = eft;
         this.lft = lft;
+    }
+
+    /**
+     * Builds a timed feature from minimum/maximum firing times specified as
+     * strings. The strings must be valid inputs to the constructor of
+     * {@link OmegaBigDecimal}.
+     *
+     * @param eft earliest firing time (minimum time to fire)
+     * @param lft latest firing time (maximum time to fire)
+     */
+    public TimedTransitionFeature(String eft, String lft) {
+        this(new OmegaBigDecimal(eft), new OmegaBigDecimal(lft));
     }
 
     public boolean isDeterministic() {

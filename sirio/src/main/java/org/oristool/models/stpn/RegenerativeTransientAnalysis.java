@@ -63,7 +63,7 @@ import org.oristool.petrinet.Transition;
 /**
  * Regenerative analysis of stochastic time Petri nets.
  */
-public class RegenerativeTransientAnalysis<R> implements Engine {
+public class RegenerativeTransientAnalysis<R> {
 
     private double[][][] globalKernel;
     private double[][][] localKernel;
@@ -141,7 +141,6 @@ public class RegenerativeTransientAnalysis<R> implements Engine {
     private RegenerativeTransientAnalysis() {
     }
 
-    @Override
     public boolean canAnalyze(PetriNet petriNet, ValidationMessageCollector c) {
 
         boolean canAnalyze = true;

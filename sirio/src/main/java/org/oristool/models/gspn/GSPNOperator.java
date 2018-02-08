@@ -41,7 +41,7 @@ import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
 
-public final class GSPNOperator implements Engine {
+public final class GSPNOperator {
 
     private final BigDecimal timeLimit;
     private final BigDecimal step;
@@ -64,7 +64,6 @@ public final class GSPNOperator implements Engine {
         return new Marking(initialMarking);
     }
 
-    @Override
     public boolean canAnalyze(PetriNet petriNet, ValidationMessageCollector c) {
 
         boolean canAnalyze = true;

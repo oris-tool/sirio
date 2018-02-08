@@ -62,7 +62,7 @@ import org.oristool.petrinet.Transition;
  * of reachable markings, always regenerative markings, never regenerative
  * markings, both regenerative and not regenerative markings.
  */
-public class TransientAnalysis implements Engine {
+public class TransientAnalysis {
     private Set<Marking> reachableMarkings;
     private Set<Marking> alwaysRegenerativeMarkings;
     private Set<Marking> neverRegenerativeMarkings;
@@ -111,7 +111,6 @@ public class TransientAnalysis implements Engine {
     private TransientAnalysis() {
     }
 
-    @Override
     public boolean canAnalyze(PetriNet petriNet,
             ValidationMessageCollector c) {
 

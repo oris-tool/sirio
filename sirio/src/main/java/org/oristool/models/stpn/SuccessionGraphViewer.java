@@ -17,21 +17,9 @@
 
 package org.oristool.models.stpn;
 
-import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
-import com.mxgraph.model.mxCell;
-import com.mxgraph.swing.handler.mxRubberband;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.swing.mxGraphOutline;
-import com.mxgraph.swing.util.mxMorphing;
-import com.mxgraph.util.mxConstants;
-import com.mxgraph.util.mxEvent;
-import com.mxgraph.util.mxEventObject;
-import com.mxgraph.util.mxEventSource.mxIEventListener;
-import com.mxgraph.view.mxGraph;
-import com.mxgraph.view.mxStylesheet;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -48,6 +36,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -61,6 +50,19 @@ import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.state.State;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.petrinet.Marking;
+
+import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
+import com.mxgraph.model.mxCell;
+import com.mxgraph.swing.handler.mxRubberband;
+import com.mxgraph.swing.mxGraphComponent;
+import com.mxgraph.swing.mxGraphOutline;
+import com.mxgraph.swing.util.mxMorphing;
+import com.mxgraph.util.mxConstants;
+import com.mxgraph.util.mxEvent;
+import com.mxgraph.util.mxEventObject;
+import com.mxgraph.util.mxEventSource.mxIEventListener;
+import com.mxgraph.view.mxGraph;
+import com.mxgraph.view.mxStylesheet;
 
 
 @SuppressWarnings("serial")
@@ -358,12 +360,34 @@ public class SuccessionGraphViewer extends JPanel {
             public void mousePressed(MouseEvent e) {
                 mxCell cell = (mxCell) graphComponent.getCellAt(e.getX(),
                         e.getY());
-                System.out.println("Mouse click in graph component");
                 if (cell != null && cell.isVertex()) {
                     infoArea.setText(vertexState.get(cell).toString());
                 } else {
                     infoArea.setText("");
                 }
+            }
+        });
+    }
+
+    /**
+     * Displays the graph in a JFrame.
+     *
+     * @param graph input graph
+     */
+    public static void show(SuccessionGraph graph) {
+
+        JPanel viewer = new SuccessionGraphViewer(graph);
+        EventQueue.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+                JFrame frame = new JFrame("State graph");
+                frame.add(viewer);
+                frame.setDefaultCloseOperation(3);
+                frame.setExtendedState(6);
+                frame.pack();
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
             }
         });
     }
