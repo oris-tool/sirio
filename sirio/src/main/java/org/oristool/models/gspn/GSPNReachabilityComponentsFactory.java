@@ -37,7 +37,7 @@ import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.pn.PetriSuccessionEvaluator;
 import org.oristool.models.pn.PetriTokensAdder;
 import org.oristool.models.pn.PetriTokensRemover;
-import org.oristool.models.stpn.StochasticTransitionFeature;
+import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;

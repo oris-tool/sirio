@@ -15,13 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.stpn.steadystate;
+package org.oristool.models.stpn;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.oristool.models.stpn.RewardRate;
 import org.oristool.petrinet.Marking;
 
 public class SteadyStateSolution<T> {

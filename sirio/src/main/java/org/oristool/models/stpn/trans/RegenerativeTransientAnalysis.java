@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.stpn;
+package org.oristool.models.stpn.trans;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -52,9 +52,16 @@ import org.oristool.math.OmegaBigDecimal;
 import org.oristool.math.expression.Variable;
 import org.oristool.math.function.GEN;
 import org.oristool.math.function.StateDensityFunction;
-import org.oristool.models.Engine;
 import org.oristool.models.ValidationMessageCollector;
 import org.oristool.models.pn.PetriStateFeature;
+import org.oristool.models.stpn.TransientSolution;
+import org.oristool.models.stpn.trees.DeterministicEnablingState;
+import org.oristool.models.stpn.trees.Regeneration;
+import org.oristool.models.stpn.trees.RegenerativeComponentsFactory;
+import org.oristool.models.stpn.trees.StochasticStateFeature;
+import org.oristool.models.stpn.trees.StochasticTransitionFeature;
+import org.oristool.models.stpn.trees.TransientStochasticStateFeature;
+import org.oristool.models.stpn.trees.TruncationPolicy;
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;
@@ -63,7 +70,7 @@ import org.oristool.petrinet.Transition;
 /**
  * Regenerative analysis of stochastic time Petri nets.
  */
-public class RegenerativeTransientAnalysis<R> {
+class RegenerativeTransientAnalysis<R> {
 
     private double[][][] globalKernel;
     private double[][][] localKernel;
@@ -675,20 +682,20 @@ public class RegenerativeTransientAnalysis<R> {
         TransientSolution<R, Marking> p = new TransientSolution<R, Marking>(timeLimit, step,
                 regenerations, columnMarkings);
         if (logger != null)
-            logger.log(p.samplesNumber + " solution samples\n");
+            logger.log(p.getSamplesNumber() + " solution samples\n");
 
         // Global kernel representation
         OmegaBigDecimal globalConvergenceLimit = this.getGlobalConvergenceLimit();
         int globalSamplesNumber;
         if (globalConvergenceLimit.compareTo(OmegaBigDecimal.POSITIVE_INFINITY) < 0)
-            globalSamplesNumber = Math.min(p.samplesNumber,
+            globalSamplesNumber = Math.min(p.getSamplesNumber(),
                     globalConvergenceLimit.divide(step, MathContext.DECIMAL128).intValue() + 2);
         else
-            globalSamplesNumber = p.samplesNumber;
+            globalSamplesNumber = p.getSamplesNumber();
 
         if (logger != null)
             logger.log(globalSamplesNumber + " global kernel samples\n");
-        globalKernel = new double[globalSamplesNumber][p.regenerations.size()][p.regenerations
+        globalKernel = new double[globalSamplesNumber][p.getRegenerations().size()][p.getRegenerations()
                 .size()];
 
         // If the solution is computed for a subset of markings,
@@ -722,12 +729,12 @@ public class RegenerativeTransientAnalysis<R> {
         // Local kernel representation
         int localSamplesNumber;
         if (markingConditionLocalConvergenceLimit.compareTo(OmegaBigDecimal.POSITIVE_INFINITY) < 0)
-            localSamplesNumber = Math.min(p.samplesNumber, markingConditionLocalConvergenceLimit
+            localSamplesNumber = Math.min(p.getSamplesNumber(), markingConditionLocalConvergenceLimit
                     .divide(step, MathContext.DECIMAL128).intValue() + 2);
         else
-            localSamplesNumber = p.samplesNumber;
+            localSamplesNumber = p.getSamplesNumber();
 
-        localKernel = new double[localSamplesNumber][p.regenerations.size()][p.columnStates
+        localKernel = new double[localSamplesNumber][p.getRegenerations().size()][p.getColumnStates()
                 .size()];
 
         if (logger != null) {
@@ -952,17 +959,17 @@ public class RegenerativeTransientAnalysis<R> {
             monitor.notifyMessage("Solving the system of Markov renewal equations");
 
         timeValue = BigDecimal.ZERO;
-        for (int t = 0; t < p.samplesNumber; ++t) {
+        for (int t = 0; t < p.getSamplesNumber(); ++t) {
             for (int i = 0; i < regenerations.size(); ++i) {
                 for (int j = 0; j < columnMarkings.size(); ++j) {
                     // adds the local kernel value at time t or at convergence
-                    p.solution[t][i][j] = localKernel[t < localKernel.length ? t : localKernel.length - 1][i][j];
+                    p.getSolution()[t][i][j] = localKernel[t < localKernel.length ? t : localKernel.length - 1][i][j];
 
                     // convolution truncated after global kernel convergence
                     for (int u = 1; u <= (t < globalKernel.length ? t : globalKernel.length - 1); ++u)
                         for (int k = 0; k < regenerations.size(); ++k) {
-                            p.solution[t][i][j] += (globalKernel[u][i][k] - globalKernel[u - 1][i][k])
-                                    * p.solution[t - u][k][j];
+                            p.getSolution()[t][i][j] += (globalKernel[u][i][k] - globalKernel[u - 1][i][k])
+                                    * p.getSolution()[t - u][k][j];
                         }
                 }
             }
@@ -970,7 +977,7 @@ public class RegenerativeTransientAnalysis<R> {
             if (logger != null) {
                 logger.log(timeValue.toString());
                 for (int j = 0; j < columnMarkings.size(); ++j)
-                    logger.log(" " + p.solution[t][initialRegenerationIndex][j]);
+                    logger.log(" " + p.getSolution()[t][initialRegenerationIndex][j]);
                 logger.log("\n");
             }
 
@@ -1022,12 +1029,12 @@ public class RegenerativeTransientAnalysis<R> {
         TransientSolution<R, Marking> p = new TransientSolution<R, Marking>(timeLimit, step,
                 regenerations, columnMarkings);
         if (logger != null)
-            logger.log(p.samplesNumber + " solution samples\n");
+            logger.log(p.getSamplesNumber() + " solution samples\n");
 
         // Global kernel representation
         int globalSamplesNumber = globalConvergenceLimit.divide(step, MathContext.DECIMAL128)
                 .intValue() + 2;
-        double[][][] g = new double[globalSamplesNumber][p.regenerations.size()][p.regenerations
+        double[][][] g = new double[globalSamplesNumber][p.getRegenerations().size()][p.getRegenerations()
                 .size()];
         if (logger != null)
             logger.log(globalSamplesNumber + " global kernel samples\n");
@@ -1035,7 +1042,7 @@ public class RegenerativeTransientAnalysis<R> {
         // Local kernel representation (for SMPs local convergence is the same
         // as global one)
         int localSamplesNumber = globalSamplesNumber;
-        double[][][] l = new double[localSamplesNumber][p.regenerations.size()][p.columnStates
+        double[][][] l = new double[localSamplesNumber][p.getRegenerations().size()][p.getColumnStates()
                 .size()];
         if (logger != null)
             logger.log(localSamplesNumber + " local kernel samples\n");
@@ -1178,24 +1185,24 @@ public class RegenerativeTransientAnalysis<R> {
             monitor.notifyMessage("Solving the system of Markov renewal equations");
 
         timeValue = BigDecimal.ZERO;
-        for (int t = 0; t < p.samplesNumber; ++t) {
+        for (int t = 0; t < p.getSamplesNumber(); ++t) {
             for (int i = 0; i < regenerations.size(); ++i) {
                 for (int j = 0; j < columnMarkings.size(); ++j) {
                     // adds the local kernel value at time t or at convergence
-                    p.solution[t][i][j] = l[t < l.length ? t : l.length - 1][i][j];
+                    p.getSolution()[t][i][j] = l[t < l.length ? t : l.length - 1][i][j];
 
                     // convolution truncated after global kernel convergence
                     for (int u = 1; u <= (t < g.length ? t : g.length - 1); ++u)
                         for (int k = 0; k < regenerations.size(); ++k)
-                            p.solution[t][i][j] += (g[u][i][k] - g[u - 1][i][k])
-                                    * p.solution[t - u][k][j];
+                            p.getSolution()[t][i][j] += (g[u][i][k] - g[u - 1][i][k])
+                                    * p.getSolution()[t - u][k][j];
                 }
             }
 
             if (logger != null) {
                 logger.log(timeValue.toString());
                 for (int j = 0; j < columnMarkings.size(); ++j)
-                    logger.log(" " + p.solution[t][initialMarkingIndex][j]);
+                    logger.log(" " + p.getSolution()[t][initialMarkingIndex][j]);
                 logger.log("\n");
             }
 

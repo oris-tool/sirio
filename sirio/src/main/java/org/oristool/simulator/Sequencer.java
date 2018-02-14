@@ -34,7 +34,7 @@ import org.oristool.math.function.Function;
 import org.oristool.models.gspn.WeightExpressionFeature;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.pn.Priority;
-import org.oristool.models.stpn.StochasticTransitionFeature;
+import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.stpn;
+package org.oristool.models.stpn.trees;
 
 import org.oristool.analyzer.state.StateFeature;
 

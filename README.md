@@ -148,3 +148,97 @@ The available options when building `TimedAnalysis` are:
   select the next state (FIFO by default).
 - `stopOn(Supplier<StopCriterion>)`: to stop the analysis on some
   nodes (never by default).
+
+
+### Stochastic Time Petri Nets
+
+STPNs also define a probability density function (PDF) over the
+interval [a,b] of required values for the firing of each transition.
+
+Initially, each enabled transition **samples** a firing time according
+to its PDF. The firing time acts as a "timeout": the transition with
+firing time is selected. Its firing time is equal to the sojourn time
+in the current state.
+
+After the firing, the marking is updated according to the usual token
+moves (and `PostUpdater` function).
+- Newly-enabled or reset transitions sample a new firing time
+- Persistent transitions (enabled before the firing and during token
+  moves) have a firing time reduced by the sojourn time in the
+  previous state.
+
+A firing time PDF is added to a transition as a `StochasticTransitionFeature`:
+
+```java
+t3.addFeature(StochasticTransitionFeature.newUniformInstance("5", "15"));
+```
+
+Static factory methods are available
+in
+[`StochasticTransitionFeature`](http://www.oris-tool.org/apidoc/org/oristool/models/stpn/StochasticTransitionFeature.html) to
+to create firing times with many PDF, such as uniform, deterministic,
+exponential, expolynomial (among others).
+
+The library supports many analysis methods, for both transient and
+steady-state probabilities (and rewards).  The applicability of these
+methods depends on the properties of the underlying stochastic
+process.
+
+#### TreeTransient
+
+The most general (but also computationally expensive) analysis method
+is `TreeTransient`, which builds a tree of transient stochastic state
+classes. Each node encodes a marking and the joint PDF of enabled
+transitions. These are used to compute the probability that the STPN
+is any node of the tree (and thus has its marking) at a given time
+instant.
+
+The analysis can be configure through the builder of `TreeTransient` objects:
+
+``` java
+TreeTransient analysis = TreeTransient.builder()
+    .timeBound(new BigDecimal("5"))
+    .timeStep(new BigDecimal("0.1"))
+    .build();
+
+TransientSolution<Marking, Marking> result = analysis.compute(pn, marking);
+
+System.out.println("The transient probabilities at time 1.0:");
+for (int j = 0; j < result.getColumnStates().size(); j++) {
+    System.out.printf("%1.6f -- %s%n", result.getSolution()[10][0][j],
+            result.getColumnStates().get(j));
+}
+```
+
+The available options when building `TimedAnalysis` are:
+- `timeBound(BigDecimal)`: specifies the maximum time used to select
+  the time points where transient probabilities are computed
+  (required).
+- `timeStep(BigDecimal)`: specifies the time step used to select time
+  points in `[0, timeBound]` (required).
+- `policy(Supplier<EnumerationPolicy>)`: to use a custom policy to
+  select the next state to explore in the tree (FIFO by default).
+- `stopOn(Supplier<StopCriterion>)`: to stop the analysis on some
+  nodes (never by default).
+
+Note that FIFO and LIFO policies expand all transition firings in the
+tree until an absorbing state (where no transition is enabled) is
+reached. In most circumstances, it is useful to exclude nodes that can
+be reached only after `timeBound`, or to ensure that the probability
+of reaching unexplored nodes before `timeBound` is lower than some
+error.
+
+You can easily select this policy using the builder method
+`greedyPolicy(timeBound, error)`:
+
+``` java
+TreeTransient analysis = TreeTransient.builder()
+    .greedyPolicy(new BigDecimal("5"), BigDecimal.ZERO)
+    .timeStep(new BigDecimal("0.1"))
+    .build();
+```
+
+Nodes with higher **reaching probability** (the probability of the
+firing sequence from the root node) are explored first; the analysis
+ends when the total reaching probability of unexplored nodes is lower
+than the allowed error.

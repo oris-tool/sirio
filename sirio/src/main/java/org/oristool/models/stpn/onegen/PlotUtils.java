@@ -23,11 +23,11 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.oristool.analyzer.graph.SuccessionGraph;
-import org.oristool.models.stpn.DeterministicEnablingState;
 import org.oristool.models.stpn.RewardRate;
-import org.oristool.models.stpn.SuccessionGraphViewer;
 import org.oristool.models.stpn.TransientSolution;
 import org.oristool.models.stpn.TransientSolutionViewer;
+import org.oristool.models.stpn.trees.DeterministicEnablingState;
+import org.oristool.models.stpn.trees.SuccessionGraphViewer;
 
 class PlotUtils {
 

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.stpn;
+package org.oristool.models.stpn.trees;
 
 import java.math.BigDecimal;
 import java.util.Collections;

@@ -15,12 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.tpn;
+package org.oristool.models.stpn.trans;
 
+import java.math.BigDecimal;
 import java.util.function.Supplier;
 
-import org.oristool.analyzer.Analyzer;
-import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.log.AnalysisLogger;
 import org.oristool.analyzer.log.AnalysisMonitor;
 import org.oristool.analyzer.log.NoOpLogger;
@@ -29,71 +28,51 @@ import org.oristool.analyzer.policy.EnumerationPolicy;
 import org.oristool.analyzer.policy.FIFOPolicy;
 import org.oristool.analyzer.stop.AlwaysFalseStopCriterion;
 import org.oristool.analyzer.stop.StopCriterion;
+import org.oristool.math.OmegaBigDecimal;
 import org.oristool.models.Engine;
 import org.oristool.models.ValidationMessageCollector;
-import org.oristool.models.stpn.trees.Regeneration;
+import org.oristool.models.stpn.TransientSolution;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
+import org.oristool.models.stpn.trees.TruncationPolicy;
 import org.oristool.petrinet.Marking;
+import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
 
 import com.google.auto.value.AutoValue;
 
-
 /**
- * State-class graph builder for time Petri nets.
+ * Transient analysis of STPN using a single tree of stochastic state classes.
  */
 @AutoValue
-public abstract class TimedAnalysis implements Engine<PetriNet, Marking, SuccessionGraph> {
+public abstract class TreeTransient implements
+        Engine<PetriNet, Marking, TransientSolution<Marking, Marking>> {
 
     /**
      * Forbids subclassing outside of this package.
      */
-    TimedAnalysis() {
+    TreeTransient() {
 
     }
 
     /**
-     * Returns whether or not this analysis adds {@code Variable.AGE} to the set of
-     * enabled variables.
+     * Returns the maximum time bound for the analysis.
      *
-     * <p>The age variable causes all state classes to include the possible values
-     * for the time of the last firing, which are encoded by the opposite of
-     * {@code Variable.AGE}.
+     * <p>This parameter has no default value; it must be specified by the user.
      *
-     * <p>In most cases, this turns the state class graph in a tree.
-     *
-     * <p>This property is false by default.
-     *
-     * @return whether the analysis includes the age variable
+     * @return time bound of transient probabilities
      */
-    public abstract boolean includeAge();
+    public abstract BigDecimal timeBound();
 
     /**
-     * Returns whether or not this analysis adds the {@link Regeneration} property
-     * to states.
+     * Returns the step used to compute transient probabilities from 0 to
+     * {@code this.timeBound()}.
      *
-     * <p>All transitions must include a {@link StochasticTransitionFeature}.
+     * <p>This parameter has no default value; it must be specified by the user.
      *
-     * <p>This property is false by default.
-     *
-     * @return whether the analysis finds regenerations
+     * @return step of transient probabilities
      */
-    public abstract boolean markRegenerations();
-
-    /**
-     * Returns whether or not this analysis excludes transition firings with zero
-     * probability.
-     *
-     * <p>These are firings such that some transition has time-to-fire values
-     * {@code [a,b]} with {@code b > a} in the predecessor state class, and
-     * {@code b == a} in the successor state class.
-     *
-     * <p>This property is false by default.
-     *
-     * @return whether the analysis excludes transitions with zero probability
-     */
-    public abstract boolean excludeZeroProb();
+    public abstract BigDecimal timeStep();
 
     /**
      * Returns the supplier of enumeration policies used by this analysis.
@@ -101,6 +80,9 @@ public abstract class TimedAnalysis implements Engine<PetriNet, Marking, Success
      * <p>A new policy instance is generated for each run.
      *
      * <p>By default, a FIFO policy is used.
+     *
+     * <p>The builder method {@code greedyPolicy(timeBound, error)} can be used to
+     * set a {@link TruncationPolicy}, a given timeBound, and the allowed error.
      *
      * @return the supplier of state class expansion policies
      */
@@ -145,10 +127,7 @@ public abstract class TimedAnalysis implements Engine<PetriNet, Marking, Success
      * @return a builder of {@code TimedAnalysis} instances.
      */
     public static Builder builder() {
-        return new AutoValue_TimedAnalysis.Builder()
-                .includeAge(false)
-                .markRegenerations(false)
-                .excludeZeroProb(false)
+        return new AutoValue_TreeTransient.Builder()
                 .policy(FIFOPolicy::new)
                 .stopOn(AlwaysFalseStopCriterion::new)
                 .monitor(NoOpMonitor.INSTANCE)
@@ -166,38 +145,25 @@ public abstract class TimedAnalysis implements Engine<PetriNet, Marking, Success
         }
 
         /**
-         * Sets whether or not this analysis should add {@code Variable.AGE} to the set
-         * of enabled variables.
+         * Sets the maximum time bound for the analysis.
          *
-         * <p>This property is false by default.
+         * <p>This parameter has no default value; it must be specified by the user.
          *
-         * @param value whether the analysis should include the age variable
+         * @param value bound of transient probabilities
          * @return this builder instance
          */
-        public abstract Builder includeAge(boolean value);
+        public abstract Builder timeBound(BigDecimal value);
 
         /**
-         * Sets whether or not this analysis should add the {@link Regeneration}
-         * property to states.
+         * Sets the step used to compute transient probabilities from 0 to
+         * {@code this.timeBound()}.
          *
-         * <p>This property is false by default.
+         * <p>This parameter has no default value; it must be specified by the user.
          *
-         * @param value whether the analysis should find regenerations
+         * @param value of transient probabilities
          * @return this builder instance
          */
-        public abstract Builder markRegenerations(boolean value);
-
-        /**
-         * Sets whether or not this analysis should exclude transition firings with zero
-         * probability.
-         *
-         * <p>This property is false by default.
-         *
-         * @param value whether the analysis should exclude transitions with zero
-         *        probability
-         * @return this builder instance
-         */
-        public abstract Builder excludeZeroProb(boolean value);
+        public abstract Builder timeStep(BigDecimal value);
 
         /**
          * Sets the supplier of enumeration policies used by this analysis.
@@ -206,10 +172,36 @@ public abstract class TimedAnalysis implements Engine<PetriNet, Marking, Success
          *
          * <p>By default, a FIFO policy is used.
          *
+         * <p>The builder method {@code greedyPolicy(timeBound, error)} can be used to
+         * set a {@link TruncationPolicy}, a given timeBound, and the allowed error.
+         *
+         *
          * @param value the supplier of state class expansion policies
          * @return this builder instance
          */
         public abstract Builder policy(Supplier<EnumerationPolicy> value);
+
+        /**
+         * Sets the time bound for the analysis (similarly to
+         * {@link #timeBound(BigDecimal)}) and a greedy policy controlling the
+         * enumeration of nodes.
+         *
+         * <p>The node with largest reaching probability is expanded first. The
+         * enumeration is halted if the probability of finding the STPN in a state of
+         * the frontier set at the time bound (and thus at any time before that) is
+         * lower than {@code error}.
+         *
+         * <p>A new policy instance is generated for each run.
+         *
+         * @param timeBound bound of transient probabilities
+         * @param error the allowed error at each time before the time bound
+         * @return this builder instance
+         */
+        public Builder greedyPolicy(BigDecimal timeBound, BigDecimal error) {
+            timeBound(timeBound);
+            policy(() -> new TruncationPolicy(error, new OmegaBigDecimal(timeBound)));
+            return this;
+        }
 
         /**
          * Sets the supplier of local stop criterion instances used by this analysis. It
@@ -252,8 +244,7 @@ public abstract class TimedAnalysis implements Engine<PetriNet, Marking, Success
          *
          * @return a new {@code TimedAnalysis} instance
          */
-        public abstract TimedAnalysis build();
-
+        public abstract TreeTransient build();
     }
 
     /**
@@ -267,19 +258,20 @@ public abstract class TimedAnalysis implements Engine<PetriNet, Marking, Success
      *         input Petri net
      */
     @Override
-    public SuccessionGraph compute(PetriNet pn, Marking m) {
+    public TransientSolution<Marking, Marking> compute(PetriNet pn, Marking m) {
 
         if (!canAnalyze(pn))
             throw new IllegalArgumentException("Cannot analyze the input Petri net");
 
-        TimedComponentsFactory components = new TimedComponentsFactory(includeAge(), true,
-                excludeZeroProb(), markRegenerations(), true, policy().get(), stopOn().get(),
-                monitor(), null, null);
+        ForwardTransientAnalysis trees = ForwardTransientAnalysis.compute(pn, m,
+                timeBound(), policy().get(), stopOn().get(), logger(), monitor(), false);
 
-        Analyzer<PetriNet, Transition> analyzer = new Analyzer<>(components, pn,
-                components.buildInitialState(pn, m));
+        // note: probabilities will not sum to 1 when using stop conditions
+        TransientSolution<Marking,Marking> solution = trees
+                .solveDiscretizedBeingProbabilities(timeBound(), timeStep(),
+                        MarkingCondition.ANY, MarkingCondition.NONE, logger(), monitor());
 
-        return analyzer.analyze();
+        return solution;
     }
 
     @Override
@@ -287,24 +279,14 @@ public abstract class TimedAnalysis implements Engine<PetriNet, Marking, Success
 
         boolean canAnalyze = true;
 
-        if (markRegenerations()) {
-            for (Transition t : pn.getTransitions()) {
-                if (!t.hasFeature(StochasticTransitionFeature.class)) {
-                    canAnalyze = false;
-                    c.addError("Transition '" + t + "' is not stochastic");
-                }
-            }
-        }
-
         for (Transition t : pn.getTransitions()) {
-            if (!t.hasFeature(TimedTransitionFeature.class)
-                    && !t.hasFeature(StochasticTransitionFeature.class)) {
+            if (!t.hasFeature(StochasticTransitionFeature.class)) {
                 canAnalyze = false;
-                c.addError("Transition '" + t
-                        + "' is neither timed nor stochastic");
+                c.addError("Transition '" + t + "' is not stochastic");
             }
         }
 
         return canAnalyze;
     }
 }
+

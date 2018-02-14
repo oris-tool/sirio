@@ -15,35 +15,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.stpn;
+package org.oristool.models.stpn.trees;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.state.StateBuilder;
 import org.oristool.math.expression.Variable;
+import org.oristool.math.function.EXP;
+import org.oristool.math.function.PartitionedFunction;
 import org.oristool.math.function.StateDensityFunction;
 import org.oristool.models.gspn.RateExpressionFeature;
 import org.oristool.models.pn.InitialPetriStateBuilder;
 import org.oristool.models.pn.PetriStateFeature;
-import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
 
 /**
- * State builder for stochastic time Petri nets, using standard regenerations.
+ * State builder for stochastic time Petri nets.
  */
-public class NewlyEnablingStateBuilder implements StateBuilder<Marking> {
+public final class DeterministicEnablingStateBuilder implements
+        StateBuilder<DeterministicEnablingState> {
 
-    private PetriNet petriNet;
-    private boolean transientAnalysis;
-    boolean checkNewlyEnabled;
-    private BigDecimal epsilon;
-    private int numSamples;
+    private final PetriNet petriNet;
+    private final boolean transientAnalysis;
+    private final boolean checkNewlyEnabled;
+    private final BigDecimal epsilon;
+    private final int numSamples;
 
-    public NewlyEnablingStateBuilder(PetriNet petriNet,
+    public DeterministicEnablingStateBuilder(PetriNet petriNet,
             boolean transientAnalysis) {
         this(petriNet, transientAnalysis, false, BigDecimal.ZERO, 0);
     }
@@ -54,11 +57,12 @@ public class NewlyEnablingStateBuilder implements StateBuilder<Marking> {
      * @param petriNet Petri net
      * @param transientAnalysis whether the state should include
      *        {@code Variable.AGE}
-     * @param checkNewlyEnabled whether to compare enabled sets
+     * @param checkNewlyEnabled whether to compare the sets of newly enabled
+     *        transitions of states
      * @param epsilon allowed error when comparing states
      * @param numSamples number of samples used when comparing states
      */
-    public NewlyEnablingStateBuilder(PetriNet petriNet,
+    public DeterministicEnablingStateBuilder(PetriNet petriNet,
             boolean transientAnalysis, boolean checkNewlyEnabled,
             BigDecimal epsilon, int numSamples) {
 
@@ -69,12 +73,22 @@ public class NewlyEnablingStateBuilder implements StateBuilder<Marking> {
         this.numSamples = numSamples;
     }
 
+    /**
+     * Builds an initial {@link State} instance from a
+     * {@link DeterministicEnablingState}.
+     *
+     * <p>The state includes a {@code PetriStateFeature} and
+     * {@code StochasticStateFeature}.
+     *
+     * @param s a deterministic enabling state
+     * @return a state instance
+     */
     @Override
-    public State build(Marking marking) {
+    public State build(DeterministicEnablingState s) {
 
         // adds the petri state feature
         State state = InitialPetriStateBuilder.computeInitialState(petriNet,
-                marking, checkNewlyEnabled);
+                s.getMarking(), checkNewlyEnabled);
         Set<Transition> enabledTransitions = state.getFeature(
                 PetriStateFeature.class).getNewlyEnabled();
 
@@ -84,12 +98,21 @@ public class NewlyEnablingStateBuilder implements StateBuilder<Marking> {
         StateDensityFunction f = new StateDensityFunction();
         ssf.setStateDensity(f);
 
-        // builds the initial state density function through cartesian products
-        // and adds deterministic functions manually
+        // builds the initial state density function through Cartesian products
+        Map<Variable, BigDecimal> enablingTimes = s.getEnablingTimes();
         for (Transition t : enabledTransitions) {
-            ssf.addVariable(new Variable(t.getName()),
-                    t.getFeature(StochasticTransitionFeature.class)
-                            .getFiringTimeDensity());
+            Variable v = new Variable(t.getName());
+
+            PartitionedFunction density = t.getFeature(StochasticTransitionFeature.class)
+                    .getFiringTimeDensity();
+
+            if (enablingTimes.containsKey(v))
+                ssf.addVariableReduced(v, density, enablingTimes.get(v));
+            else if (density instanceof EXP)
+                ssf.addVariable(v, density);
+            else
+                throw new IllegalArgumentException("The GEN transition " + v
+                        + " does not have a deterministic enabling time");
         }
 
         // updates rates of all EXPs with a RateExpressionFeature
@@ -98,9 +121,12 @@ public class NewlyEnablingStateBuilder implements StateBuilder<Marking> {
                 ssf.setEXPRate(new Variable(t.getName()),
                         new BigDecimal(t
                                 .getFeature(RateExpressionFeature.class)
-                                .getRate(petriNet, marking)));
+                                .getRate(petriNet, s.getMarking())));
             }
         }
+
+        // adds the regeneration object
+        state.addFeature(new Regeneration<DeterministicEnablingState>(s));
 
         // flags update
         boolean hasEnabledImm = false;
@@ -133,5 +159,4 @@ public class NewlyEnablingStateBuilder implements StateBuilder<Marking> {
 
         return state;
     }
-
 }

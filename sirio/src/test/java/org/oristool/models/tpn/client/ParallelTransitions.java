@@ -34,7 +34,7 @@ import org.oristool.analyzer.stop.AlwaysFalseStopCriterion;
 import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.math.expression.Variable;
 import org.oristool.models.pn.MarkingConditionStopCriterion;
-import org.oristool.models.stpn.EnablingSyncsFeature;
+import org.oristool.models.stpn.trees.EnablingSyncsFeature;
 import org.oristool.models.tpn.TimedAnalysis;
 import org.oristool.models.tpn.TimedStateFeature;
 import org.oristool.models.tpn.TimedTransitionFeature;

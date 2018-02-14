@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.stpn.steadystate;
+package org.oristool.models.stpn.steady;
 
 import java.math.BigDecimal;
 

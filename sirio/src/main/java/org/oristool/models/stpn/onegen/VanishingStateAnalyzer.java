@@ -33,8 +33,8 @@ import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.state.State;
 import org.oristool.models.gspn.WeightExpressionFeature;
 import org.oristool.models.pn.PetriStateFeature;
-import org.oristool.models.stpn.Regeneration;
-import org.oristool.models.stpn.StochasticTransitionFeature;
+import org.oristool.models.stpn.trees.Regeneration;
+import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Transition;
 
 // refactored from GSPNGraphAnalyzer.java

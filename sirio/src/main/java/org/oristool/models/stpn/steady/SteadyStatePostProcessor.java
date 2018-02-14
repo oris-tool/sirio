@@ -15,13 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.stpn.steadystate;
+package org.oristool.models.stpn.steady;
 
 import java.math.BigDecimal;
 
 import org.oristool.analyzer.Succession;
 import org.oristool.analyzer.SuccessionProcessor;
-import org.oristool.models.stpn.StochasticSuccessionFeature;
+import org.oristool.models.stpn.trees.StochasticSuccessionFeature;
 
 /**
  * Post-processor updating {@code ReachingProbabilityFeature}.

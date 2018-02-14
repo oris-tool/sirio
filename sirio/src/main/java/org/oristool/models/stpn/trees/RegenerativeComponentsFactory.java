@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.stpn;
+package org.oristool.models.stpn.trees;
 
 import java.math.BigDecimal;
 import java.util.Set;
@@ -26,11 +26,13 @@ import org.oristool.analyzer.EnabledEventsBuilder;
 import org.oristool.analyzer.NoOpProcessor;
 import org.oristool.analyzer.SuccessionEvaluator;
 import org.oristool.analyzer.SuccessionProcessor;
+import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.log.AnalysisMonitor;
 import org.oristool.analyzer.policy.EnumerationPolicy;
 import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.stop.AlwaysFalseStopCriterion;
 import org.oristool.analyzer.stop.MonitorStopCriterion;
+import org.oristool.analyzer.stop.OrStopCriterion;
 import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.math.OmegaBigDecimal;
 import org.oristool.models.pn.MarkingConditionStopCriterion;
@@ -45,12 +47,17 @@ import org.oristool.petrinet.Transition;
 /**
  * Factory of objects to build the state space and PDFs of a stochastic time
  * Petri net using {@link Analyzer}.
+ *
+ * <p>The analysis will not expand nodes resulting from a regeneration. The
+ * resulting {@link SuccessionGraph} where the root and the leaves are
+ * regenerations (while inner nodes are not).
  */
-public final class StochasticComponentsFactory implements
+public final class RegenerativeComponentsFactory implements
         AnalyzerComponentsFactory<PetriNet, Transition> {
 
     private final EnumerationPolicy policy;
     private final StochasticSuccessionEvaluator stochasticSuccessionEvaluator;
+
     private final StopCriterion localStopCriterion;
     private final StopCriterion globalStopCriterion;
     private final SuccessionProcessor postProcessor;
@@ -63,16 +70,19 @@ public final class StochasticComponentsFactory implements
      * @param tokensAdder the token adder function
      * @param checkNewlyEnabled whether to check newly-enabled sets in state
      *        comparisons
-     * @param policy policy for the selection of new nodes
+     * @param postProcessor postprocessor to apply on each state
+     * @param policy policy used to select the next node
      * @param tauAgeLimit time bound for the analysis
-     * @param stopCondition stop condition for the analysis
+     * @param stopCondition additional stop condition (the analysis always stops on
+     *        regenerative nodes)
      * @param epsilon allowed error when comparing states
      * @param numSamples number of samples used to compare states
      * @param monitor analysis monitor
      */
-    public StochasticComponentsFactory(boolean transientAnalysis,
+    public RegenerativeComponentsFactory(boolean transientAnalysis,
             MarkingUpdater tokensRemover, MarkingUpdater tokensAdder,
-            boolean checkNewlyEnabled, EnumerationPolicy policy,
+            boolean checkNewlyEnabled,
+            SuccessionProcessor postProcessor, EnumerationPolicy policy,
             OmegaBigDecimal tauAgeLimit, MarkingCondition stopCondition,
             BigDecimal epsilon, int numSamples, AnalysisMonitor monitor) {
 
@@ -84,14 +94,16 @@ public final class StochasticComponentsFactory implements
                 checkNewlyEnabled, tauAgeLimit);
 
         if (stopCondition == null)
-            localStopCriterion = new AlwaysFalseStopCriterion();
+            localStopCriterion = new RegenerativeStopCriterion();
         else
-            localStopCriterion = new MarkingConditionStopCriterion(
-                    stopCondition);
+            localStopCriterion = new OrStopCriterion(
+                    new RegenerativeStopCriterion(),
+                    new MarkingConditionStopCriterion(stopCondition));
 
         globalStopCriterion = monitor != null ? new MonitorStopCriterion(
                 monitor) : new AlwaysFalseStopCriterion();
-        postProcessor = new NewlyEnablingEvaluator();
+
+        this.postProcessor = postProcessor;
     }
 
     @Override

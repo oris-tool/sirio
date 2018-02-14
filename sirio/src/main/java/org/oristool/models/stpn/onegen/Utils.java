@@ -28,8 +28,8 @@ import org.oristool.math.OmegaBigDecimal;
 import org.oristool.models.gspn.RateExpressionFeature;
 import org.oristool.models.gspn.WeightExpressionFeature;
 import org.oristool.models.pn.PetriStateFeature;
-import org.oristool.models.stpn.Regeneration;
-import org.oristool.models.stpn.StochasticTransitionFeature;
+import org.oristool.models.stpn.trees.Regeneration;
+import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Transition;
 
 class Utils {

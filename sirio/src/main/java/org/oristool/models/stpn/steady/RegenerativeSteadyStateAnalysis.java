@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.stpn.steadystate;
+package org.oristool.models.stpn.steady;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -45,10 +45,11 @@ import org.oristool.math.expression.Variable;
 import org.oristool.models.Engine;
 import org.oristool.models.ValidationMessageCollector;
 import org.oristool.models.pn.PetriStateFeature;
-import org.oristool.models.stpn.Regeneration;
-import org.oristool.models.stpn.RegenerativeComponentsFactory;
-import org.oristool.models.stpn.StochasticStateFeature;
-import org.oristool.models.stpn.StochasticTransitionFeature;
+import org.oristool.models.stpn.SteadyStateSolution;
+import org.oristool.models.stpn.trees.Regeneration;
+import org.oristool.models.stpn.trees.RegenerativeComponentsFactory;
+import org.oristool.models.stpn.trees.StochasticStateFeature;
+import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;

@@ -26,7 +26,7 @@ import org.oristool.analyzer.state.StateFeature;
 import org.oristool.math.function.PartitionedFunction;
 import org.oristool.models.gspn.RateExpressionFeature;
 import org.oristool.models.pn.PetriStateFeature;
-import org.oristool.models.stpn.StochasticTransitionFeature;
+import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;

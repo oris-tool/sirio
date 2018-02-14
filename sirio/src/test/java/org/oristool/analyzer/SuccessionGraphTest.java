@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.state.State;
-import org.oristool.models.stpn.StochasticStateFeature;
+import org.oristool.models.stpn.trees.StochasticStateFeature;
 
 /**
  * Simple tests of succession graph model.

@@ -18,7 +18,7 @@
  *
  */
 
-package org.oristool.models.stpn;
+package org.oristool.models.stpn.trans;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -45,13 +45,22 @@ import org.oristool.analyzer.log.PrintStreamLogger;
 import org.oristool.analyzer.policy.EnumerationPolicy;
 import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.stop.MonitorStopCriterion;
+import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.math.OmegaBigDecimal;
 import org.oristool.math.expression.Variable;
 import org.oristool.math.function.GEN;
 import org.oristool.math.function.StateDensityFunction;
-import org.oristool.models.Engine;
 import org.oristool.models.ValidationMessageCollector;
+import org.oristool.models.pn.MarkingConditionStopCriterion;
 import org.oristool.models.pn.PetriStateFeature;
+import org.oristool.models.stpn.TransientSolution;
+import org.oristool.models.stpn.trees.NewlyEnablingStateBuilder;
+import org.oristool.models.stpn.trees.Regeneration;
+import org.oristool.models.stpn.trees.StochasticComponentsFactory;
+import org.oristool.models.stpn.trees.StochasticStateFeature;
+import org.oristool.models.stpn.trees.StochasticTransitionFeature;
+import org.oristool.models.stpn.trees.TransientStochasticStateFeature;
+import org.oristool.models.stpn.trees.TruncationPolicy;
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;
@@ -62,7 +71,7 @@ import org.oristool.petrinet.Transition;
  * of reachable markings, always regenerative markings, never regenerative
  * markings, both regenerative and not regenerative markings.
  */
-public class TransientAnalysis {
+class ForwardTransientAnalysis {
     private Set<Marking> reachableMarkings;
     private Set<Marking> alwaysRegenerativeMarkings;
     private Set<Marking> neverRegenerativeMarkings;
@@ -87,7 +96,7 @@ public class TransientAnalysis {
 
     private Marking initialMarking;
     private PetriNet petriNet;
-    private EnumerationPolicy truncationPolicy;
+    private EnumerationPolicy policy;
 
     public Marking getInitialMarking() {
         return new Marking(initialMarking);
@@ -97,8 +106,8 @@ public class TransientAnalysis {
         return petriNet;
     }
 
-    public EnumerationPolicy getTruncationPolicy() {
-        return truncationPolicy;
+    public EnumerationPolicy getPolicy() {
+        return policy;
     }
 
     private Map<Marking, Set<State>> stateClasses;
@@ -108,7 +117,7 @@ public class TransientAnalysis {
     }
 
 
-    private TransientAnalysis() {
+    private ForwardTransientAnalysis() {
     }
 
     public boolean canAnalyze(PetriNet petriNet,
@@ -134,10 +143,10 @@ public class TransientAnalysis {
      * @param truncationPolicy encapsulates analysis options and pruning behavior
      * @return Result of the analysis
      */
-    public static TransientAnalysis compute(PetriNet petriNet,
+    public static ForwardTransientAnalysis compute(PetriNet petriNet,
             Marking initialMarking, TruncationPolicy truncationPolicy) {
 
-        return TransientAnalysis.compute(petriNet, initialMarking,
+        return ForwardTransientAnalysis.compute(petriNet, initialMarking,
                 truncationPolicy, MarkingCondition.NONE, new PrintStreamLogger(
                         System.out), null, true);
     }
@@ -152,11 +161,11 @@ public class TransientAnalysis {
      * @param l analysis logger
      * @return Result of the analysis
      */
-    public static TransientAnalysis compute(PetriNet petriNet,
+    public static ForwardTransientAnalysis compute(PetriNet petriNet,
             Marking initialMarking, TruncationPolicy truncationPolicy,
             AnalysisLogger l) {
 
-        return TransientAnalysis.compute(petriNet, initialMarking,
+        return ForwardTransientAnalysis.compute(petriNet, initialMarking,
                 truncationPolicy, MarkingCondition.NONE, l, null, true);
     }
 
@@ -173,23 +182,50 @@ public class TransientAnalysis {
      *            encapsulates analysis options and pruning behavior
      * @param stopCondition
      *            the analysis is stopped on nodes satisfying this condition
-     *            complete transient analysis)
      * @param l analysis logger
      * @param monitor monitor to interrupt the analysis
      * @param verbose true to enable verbose logging
      * @return Result of the analysis
      */
-    public static TransientAnalysis compute(PetriNet petriNet,
+    public static ForwardTransientAnalysis compute(PetriNet petriNet,
             Marking initialMarking, TruncationPolicy truncationPolicy,
             MarkingCondition stopCondition, AnalysisLogger l,
             AnalysisMonitor monitor, boolean verbose) {
 
-        TransientAnalysis a = new TransientAnalysis();
+        return ForwardTransientAnalysis.compute(petriNet, initialMarking,
+                truncationPolicy.getTauAgeLimit().bigDecimalValue(),
+                truncationPolicy, new MarkingConditionStopCriterion(stopCondition),
+                l, monitor, verbose);
+    }
+
+    /**
+     * Performs a straight analysis of the net from an initial marking with
+     * respect to the process of being in any reachable marking, stopping the
+     * transient tree construction on nodes satisfying stopCondition.
+     *
+     * @param petriNet
+     *            Stochastic Petri Net to be analyzed
+     * @param initialMarking
+     *            initial marking of the net
+     * @param policy
+     *            encapsulates analysis options and pruning behavior
+     * @param stopCriterion
+     *            the analysis is stopped on nodes satisfying this condition
+     * @param l analysis logger
+     * @param monitor monitor to interrupt the analysis
+     * @param verbose true to enable verbose logging
+     * @return Result of the analysis
+     */
+    public static ForwardTransientAnalysis compute(PetriNet petriNet,
+            Marking initialMarking, BigDecimal timeBound, EnumerationPolicy policy,
+            StopCriterion stopCondition, AnalysisLogger l,
+            AnalysisMonitor monitor, boolean verbose) {
+
+        ForwardTransientAnalysis a = new ForwardTransientAnalysis();
 
         if (l != null) {
             l.log(">> Standard analysis starting from " + initialMarking
-                    + " (pruning threshold " + truncationPolicy.getEpsilon()
-                    + ", tauAgeLimit " + truncationPolicy.getTauAgeLimit());
+                    + " (policy: " + policy + ")");
             if (stopCondition != MarkingCondition.NONE)
                 l.log(", stopCondition");
             l.log(")\n");
@@ -199,7 +235,7 @@ public class TransientAnalysis {
 
         a.petriNet = petriNet;
         a.initialMarking = initialMarking;
-        a.truncationPolicy = truncationPolicy;
+        a.policy = policy;
 
         a.stateClasses = new HashMap<Marking, Set<State>>();
 
@@ -210,8 +246,8 @@ public class TransientAnalysis {
 
         // Performs the analysis starting from the initial marking
         StochasticComponentsFactory f = new StochasticComponentsFactory(true,
-                null, null, false, truncationPolicy,
-                truncationPolicy.getTauAgeLimit(), stopCondition, null, 0,
+                null, null, false, policy,
+                new OmegaBigDecimal(timeBound), stopCondition, null, 0,
                 monitor);
 
         Analyzer<PetriNet, Transition> analyzer = new Analyzer<PetriNet, Transition>(
@@ -297,7 +333,7 @@ public class TransientAnalysis {
                             + formatProbability(transientFeature
                                     .computeVisitedProbability(
                                             OmegaBigDecimal.ZERO,
-                                            truncationPolicy.getTauAgeLimit(),
+                                            new OmegaBigDecimal(timeBound),
                                             stochasticFeature)));
                     l.log(" (" + petriFeature.getMarking() + ")");
                     l.log(" ["
@@ -561,16 +597,12 @@ public class TransientAnalysis {
      * @param visitedProbabilies
      *            selects visited probabilities instead of being ones
      * @return A representation of the solution
-     * @throws Exception
      */
     private TransientSolution<Marking, Marking> solveDiscretized(
             BigDecimal timeLimit, BigDecimal step,
             MarkingCondition markingCondition, MarkingCondition stopCondition,
             boolean visitedProbabilies, AnalysisLogger l,
             AnalysisMonitor monitor) {
-
-        // FIXME Ha senso qui convertire a double per mantenere
-        // un output compatibile con l'analisi rigenerativa?
 
         if (l != null) {
             l.log(">> Solving in [0, " + timeLimit + "] with step " + step
@@ -605,7 +637,7 @@ public class TransientAnalysis {
         // Computes the solution for each time instant and each marking
         OmegaBigDecimal timeValue = OmegaBigDecimal.ZERO;
         OmegaBigDecimal timeStep = new OmegaBigDecimal(step);
-        for (int t = 0; t < p.samplesNumber; ++t) {
+        for (int t = 0; t < p.getSamplesNumber(); ++t) {
 
             if (l != null)
                 l.log(timeValue.toString());
@@ -623,7 +655,7 @@ public class TransientAnalysis {
                                 .getFeature(TransientStochasticStateFeature.class);
                         StochasticStateFeature stochasticFeature = s
                                 .getFeature(StochasticStateFeature.class);
-                        p.solution[t][0][j] += (!visitedProbabilies
+                        p.getSolution()[t][0][j] += (!visitedProbabilies
                                 && !stopCondition.evaluate(columnMarkings
                                         .get(j)) ? transientFeature
                                 .computeTransientClassProbability(timeValue,
@@ -639,7 +671,7 @@ public class TransientAnalysis {
                     }
 
                 if (l != null)
-                    l.log(" " + p.solution[t][0][j]);
+                    l.log(" " + p.getSolution()[t][0][j]);
             }
 
             if (l != null)

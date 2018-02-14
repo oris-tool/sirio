@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.stpn;
+package org.oristool.models.stpn.trees;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -79,6 +79,23 @@ public class StochasticTransitionFeature implements TransitionFeature {
         result = 31 * result + weight.hashCode();
 
         return result;
+    }
+
+    /**
+     * Builds the stochastic feature of a transition with uniformly distributed
+     * timer.
+     *
+     * @param eft minimum firing time (as a string)
+     * @param lft maximum firing time (as a string)
+     * @return a stochastic feature with uniform distribution
+     */
+    public static StochasticTransitionFeature newUniformInstance(
+            String eft, String lft) {
+
+        return StochasticTransitionFeature.newUniformInstance(
+                new OmegaBigDecimal(eft),
+                new OmegaBigDecimal(lft),
+                BigDecimal.ONE);
     }
 
     public static StochasticTransitionFeature newUniformInstance(

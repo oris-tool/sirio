@@ -15,28 +15,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.stpn.steadystate;
+package org.oristool.models.stpn.trees;
 
-import java.math.BigDecimal;
-
-import org.oristool.analyzer.state.State;
-import org.oristool.analyzer.state.StateBuilder;
+import org.oristool.analyzer.AnalyzerObserverAdapter;
+import org.oristool.analyzer.Succession;
+import org.oristool.analyzer.stop.StopCriterion;
 
 /**
- * State builder for steady-state analysis of STPNs.
+ * Stop criterion halting the analysis after regenerations.
  */
-public class SteadyStateInitialStateBuilder<T> implements StateBuilder<T> {
+public class RegenerativeStopCriterion extends AnalyzerObserverAdapter
+        implements StopCriterion {
 
-    private StateBuilder<T> sb;
+    boolean lastStateClassExtractedIsRegenerative;
+    int addedNodes;
 
-    public SteadyStateInitialStateBuilder(StateBuilder<T> sb) {
-        this.sb = sb;
+    @Override
+    public boolean stop() {
+        return lastStateClassExtractedIsRegenerative && addedNodes > 1;
     }
 
     @Override
-    public State build(T discreteState) {
-        State s = sb.build(discreteState);
-        s.addFeature(new ReachingProbabilityFeature(BigDecimal.ONE));
-        return s;
+    public void notifySuccessionExtracted(Succession succession) {
+        lastStateClassExtractedIsRegenerative = succession.getChild()
+                .hasFeature(Regeneration.class);
+        addedNodes++;
     }
+
 }
