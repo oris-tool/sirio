@@ -31,7 +31,6 @@ import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.log.AnalysisLogger;
 import org.oristool.analyzer.log.AnalysisMonitor;
 import org.oristool.analyzer.state.State;
-import org.oristool.models.Engine;
 import org.oristool.models.ValidationMessageCollector;
 import org.oristool.models.gspn.CTMCTransientSolution.EvaluationMode;
 import org.oristool.models.pn.PetriStateFeature;
@@ -64,6 +63,13 @@ public final class GSPNOperator {
         return new Marking(initialMarking);
     }
 
+    /**
+     * Checks whether this method can analyze the given Petri net.
+     *
+     * @param petriNet input Petri net
+     * @param c collector of validation messages
+     * @return true if the Petri net can be analyzed
+     */
     public boolean canAnalyze(PetriNet petriNet, ValidationMessageCollector c) {
 
         boolean canAnalyze = true;

@@ -86,6 +86,35 @@ public final class RegenerativeComponentsFactory implements
             OmegaBigDecimal tauAgeLimit, MarkingCondition stopCondition,
             BigDecimal epsilon, int numSamples, AnalysisMonitor monitor) {
 
+        this(transientAnalysis, tokensRemover, tokensAdder, checkNewlyEnabled,
+            postProcessor, policy, tauAgeLimit, new MarkingConditionStopCriterion(stopCondition),
+            epsilon, numSamples, monitor);
+    }
+
+    /**
+     * Builds a factory for STPN analysis.
+     *
+     * @param transientAnalysis whether to include {@code Variable.AGE}
+     * @param tokensRemover the token remover function
+     * @param tokensAdder the token adder function
+     * @param checkNewlyEnabled whether to check newly-enabled sets in state
+     *        comparisons
+     * @param postProcessor postprocessor to apply on each state
+     * @param policy policy used to select the next node
+     * @param tauAgeLimit time bound for the analysis
+     * @param stopCriterion additional stop condition (the analysis always stops on
+     *        regenerative nodes)
+     * @param epsilon allowed error when comparing states
+     * @param numSamples number of samples used to compare states
+     * @param monitor analysis monitor
+     */
+    public RegenerativeComponentsFactory(boolean transientAnalysis,
+            MarkingUpdater tokensRemover, MarkingUpdater tokensAdder,
+            boolean checkNewlyEnabled,
+            SuccessionProcessor postProcessor, EnumerationPolicy policy,
+            OmegaBigDecimal tauAgeLimit, StopCriterion stopCriterion,
+            BigDecimal epsilon, int numSamples, AnalysisMonitor monitor) {
+
         this.policy = policy;
         this.stochasticSuccessionEvaluator = new StochasticSuccessionEvaluator(
                 transientAnalysis, tokensRemover != null ? tokensRemover
@@ -93,12 +122,11 @@ public final class RegenerativeComponentsFactory implements
                 tokensAdder != null ? tokensAdder : new PetriTokensAdder(),
                 checkNewlyEnabled, tauAgeLimit);
 
-        if (stopCondition == null)
+        if (stopCriterion == null)
             localStopCriterion = new RegenerativeStopCriterion();
         else
             localStopCriterion = new OrStopCriterion(
-                    new RegenerativeStopCriterion(),
-                    new MarkingConditionStopCriterion(stopCondition));
+                    new RegenerativeStopCriterion(), stopCriterion);
 
         globalStopCriterion = monitor != null ? new MonitorStopCriterion(
                 monitor) : new AlwaysFalseStopCriterion();

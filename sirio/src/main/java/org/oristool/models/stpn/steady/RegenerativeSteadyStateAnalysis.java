@@ -42,7 +42,6 @@ import org.oristool.analyzer.state.StateBuilder;
 import org.oristool.analyzer.stop.MonitorStopCriterion;
 import org.oristool.math.OmegaBigDecimal;
 import org.oristool.math.expression.Variable;
-import org.oristool.models.Engine;
 import org.oristool.models.ValidationMessageCollector;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.stpn.SteadyStateSolution;
@@ -138,6 +137,13 @@ public class RegenerativeSteadyStateAnalysis<R> {
     private RegenerativeSteadyStateAnalysis() {
     }
 
+    /**
+     * Checks whether this method can analyze the given Petri net.
+     *
+     * @param petriNet input Petri net
+     * @param c collector of validation messages
+     * @return true if the Petri net can be analyzed
+     */
     public boolean canAnalyze(PetriNet petriNet, ValidationMessageCollector c) {
 
         boolean canAnalyze = true;

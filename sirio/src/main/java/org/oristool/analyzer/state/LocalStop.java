@@ -15,18 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.simulator.rewards;
-
-import java.math.BigDecimal;
-
-import org.oristool.analyzer.Succession;
+package org.oristool.analyzer.state;
 
 /**
- * Common interface of discrete and continuous reward times.
+ * State feature tagging states where a local stop criterion was applied.
  */
-public interface RewardTime {
-
-    BigDecimal getTimeStep();
-
-    BigDecimal getSojournTime(Succession succession);
+public enum LocalStop implements StateFeature {
+    INSTANCE
 }

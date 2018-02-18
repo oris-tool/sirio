@@ -47,7 +47,7 @@ import org.oristool.petrinet.Transition;
  * A simple TPN test analyzing models with multiple timed transitions in
  * parallel.
  */
-class ParallelTransitions {
+class ParallelTransitionsTest {
 
     private PetriNet pn;
     private Marking marking;

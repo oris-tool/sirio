@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.stpn.trans;
+package org.oristool.models.stpn.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,6 +36,9 @@ import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.math.OmegaBigDecimal;
 import org.oristool.models.pn.MarkingConditionStopCriterion;
 import org.oristool.models.stpn.TransientSolution;
+import org.oristool.models.stpn.trans.RegTransient;
+import org.oristool.models.stpn.trans.TreeTransient;
+import org.oristool.models.stpn.trees.DeterministicEnablingState;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.models.stpn.trees.TruncationPolicy;
 import org.oristool.petrinet.Marking;
@@ -47,7 +50,7 @@ import org.oristool.petrinet.Transition;
  * A simple STPN test analyzing models with multiple uniform transitions in
  * parallel.
  */
-class ParallelTransitions {
+class ParallelTransitionsTest {
 
     private PetriNet pn;
     private Marking marking;
@@ -98,13 +101,15 @@ class ParallelTransitions {
         BigDecimal greedyBound = new BigDecimal("2.8");
         Supplier<EnumerationPolicy> greedy = () -> new TruncationPolicy(greedyError,
                 new OmegaBigDecimal(greedyBound));
+        List<Supplier<EnumerationPolicy>> policies = Arrays.asList(null, fifo, lifo, greedy);
 
         Supplier<StopCriterion> cond = () -> new MarkingConditionStopCriterion("p3 > 1");
+        List<Supplier<StopCriterion>> conditions = Arrays.asList(null, cond);
 
-        for (BigDecimal timeBound : timeBounds) {
-            for (BigDecimal timeStep : timeSteps) {
-                for (Supplier<EnumerationPolicy> policy : Arrays.asList(null, fifo, lifo, greedy)) {
-                    for (Supplier<StopCriterion> stopOn : Arrays.asList(null, cond)) {
+        for (final BigDecimal timeBound : timeBounds) {
+            for (final BigDecimal timeStep : timeSteps) {
+                for (final Supplier<EnumerationPolicy> policy : policies) {
+                    for (Supplier<StopCriterion> stopOn : conditions) {
 
                         TreeTransient.Builder builder = TreeTransient.builder();
 
@@ -159,8 +164,7 @@ class ParallelTransitions {
                         TransientSolution<Marking, Marking> result =
                                 analysis.compute(pn, marking);
 
-                        timeBound = policy != greedy ? timeBound : greedyBound;
-                        assertEquals(timeBound.divide(timeStep).intValue() + 1,
+                        assertEquals(analysis.timeBound().divide(timeStep).intValue() + 1,
                                 result.getSamplesNumber());
 
                         assertEquals(1, result.getRegenerations().size());
@@ -174,19 +178,131 @@ class ParallelTransitions {
 
                         assertEquals(states, result.getColumnStates().size());
 
-                        if (stopOn == null) {
-                            double maxError = policy != greedy
-                                    ? 0.000001 : greedyError.doubleValue();
+                        double maxError = policy != greedy
+                                ? 0.000001 : greedyError.doubleValue();
+                        for (int t = 0; t < result.getSamplesNumber(); t++) {
+                            double sum = 0.0;
 
-                            for (int t = 0; t < result.getSamplesNumber(); t++) {
-                                double sum = 0.0;
-
-                                for (int j = 0; j < result.getSolution()[t][0].length; j++) {
-                                    sum += result.getSolution()[t][0][j];
-                                }
-
-                                assertTrue(Math.abs(sum - 1) < maxError);
+                            for (int j = 0; j < result.getSolution()[t][0].length; j++) {
+                                sum += result.getSolution()[t][0][j];
                             }
+
+                            assertTrue(Math.abs(sum - 1) < maxError);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void regenerativeAnalysisVariants() {
+
+        List<BigDecimal> timeBounds = Arrays.asList(null, BigDecimal.ONE,
+                BigDecimal.TEN, new BigDecimal("10.5"));
+
+        List<BigDecimal> timeSteps = Arrays.asList(null, new BigDecimal("0.1"),
+                BigDecimal.ONE, new BigDecimal("2"));
+
+        Supplier<EnumerationPolicy> fifo = FIFOPolicy::new;
+        Supplier<EnumerationPolicy> lifo = LIFOPolicy::new;
+
+        BigDecimal greedyError = new BigDecimal("0.1");
+        BigDecimal greedyBound = new BigDecimal("2.8");
+        Supplier<EnumerationPolicy> greedy = () -> new TruncationPolicy(greedyError,
+                new OmegaBigDecimal(greedyBound));
+        List<Supplier<EnumerationPolicy>> policies = Arrays.asList(null, fifo, lifo, greedy);
+
+        Supplier<StopCriterion> cond = () -> new MarkingConditionStopCriterion("p3 > 1");
+        List<Supplier<StopCriterion>> conditions = Arrays.asList(null, cond);
+
+        for (final BigDecimal timeBound : timeBounds) {
+            for (final BigDecimal timeStep : timeSteps) {
+                for (final Supplier<EnumerationPolicy> policy : policies) {
+                    for (final Supplier<StopCriterion> stopOn : conditions) {
+
+                        RegTransient.Builder builder = RegTransient.builder();
+
+                        if (timeBound != null)
+                            builder.timeBound(timeBound);
+
+                        if (timeStep != null)
+                            builder.timeStep(timeStep);
+
+                        if (policy != null) {
+                            if (policy == greedy)
+                                builder.greedyPolicy(greedyBound, greedyError);
+                            else
+                                builder.policy(policy);
+
+                        }
+
+                        if (stopOn != null)
+                            builder.stopOn(stopOn);
+
+                        if ((timeBound == null && policy != greedy) || timeStep == null) {
+                            assertThrows(IllegalStateException.class, () -> builder.build());
+                            continue;
+                        }
+
+                        RegTransient analysis = builder.build();
+
+                        // check that parameters are set correctly
+                        assertEquals(policy != greedy ? timeBound : greedyBound,
+                                analysis.timeBound());
+                        assertEquals(timeStep, analysis.timeStep());
+
+                        if (policy == null) {
+                            assertEquals(FIFOPolicy.class, analysis.policy().get().getClass());
+                        } else if (policy.equals(fifo)) {
+                            assertEquals(fifo, analysis.policy());
+                        } else if (policy.equals(lifo)) {
+                            assertEquals(lifo, analysis.policy());
+                        } else {
+                            TruncationPolicy p = (TruncationPolicy) analysis.policy().get();
+                            assertEquals(p.getEpsilon(), greedyError);
+                            assertEquals(p.getTauAgeLimit(), new OmegaBigDecimal(greedyBound));
+                        }
+
+                        if (stopOn == null)
+                            assertEquals(AlwaysFalseStopCriterion.class,
+                                    analysis.stopOn().get().getClass());
+                        else
+                            assertEquals(stopOn, analysis.stopOn());
+
+
+                        TransientSolution<DeterministicEnablingState, Marking> result =
+                                analysis.compute(pn, marking);
+
+                        assertEquals(analysis.timeBound().divide(timeStep).intValue() + 1,
+                                result.getSamplesNumber());
+
+                        assertEquals(stopOn == null ? 2 : 1,
+                                result.getRegenerations().size());
+
+                        DeterministicEnablingState initialReg =
+                                new DeterministicEnablingState(marking, pn);
+                        assertEquals(initialReg, result.getRegenerations().get(0));
+
+                        int states = 6;
+                        if (stopOn != null)
+                            states--;
+                        if (policy == greedy)
+                            states--;
+
+                        assertEquals(states, result.getColumnStates().size());
+
+                        double maxError = policy != greedy
+                                ? 0.000001 : greedyError.doubleValue();
+
+                        for (int t = 0; t < result.getSamplesNumber(); t++) {
+                            double sum = 0.0;
+
+                            for (int j = 0; j < result.getSolution()[t][0].length; j++) {
+                                sum += result.getSolution()[t][0][j];
+                            }
+
+                            assertTrue(Math.abs(sum - 1) < maxError);
                         }
                     }
                 }

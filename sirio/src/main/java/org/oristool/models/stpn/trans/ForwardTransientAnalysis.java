@@ -43,6 +43,7 @@ import org.oristool.analyzer.log.AnalysisLogger;
 import org.oristool.analyzer.log.AnalysisMonitor;
 import org.oristool.analyzer.log.PrintStreamLogger;
 import org.oristool.analyzer.policy.EnumerationPolicy;
+import org.oristool.analyzer.state.LocalStop;
 import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.stop.MonitorStopCriterion;
 import org.oristool.analyzer.stop.StopCriterion;
@@ -503,16 +504,14 @@ class ForwardTransientAnalysis {
             BigDecimal timeLimit, BigDecimal step,
             MarkingCondition markingCondition, AnalysisLogger l) {
 
-        return solveDiscretized(timeLimit, step, markingCondition,
-                MarkingCondition.NONE, false, l, null);
+        return solveDiscretized(timeLimit, step, markingCondition, false, l, null);
     }
 
     public TransientSolution<Marking, Marking> solveDiscretizedBeingProbabilities(
             BigDecimal timeLimit, BigDecimal step,
             MarkingCondition markingCondition) {
 
-        return solveDiscretized(timeLimit, step, markingCondition,
-                MarkingCondition.NONE, false,
+        return solveDiscretized(timeLimit, step, markingCondition, false,
                 new PrintStreamLogger(System.out), null);
     }
 
@@ -521,17 +520,7 @@ class ForwardTransientAnalysis {
             MarkingCondition markingCondition, AnalysisLogger l,
             AnalysisMonitor m) {
 
-        return solveDiscretized(timeLimit, step, markingCondition,
-                MarkingCondition.NONE, false, l, m);
-    }
-
-    public TransientSolution<Marking, Marking> solveDiscretizedBeingProbabilities(
-            BigDecimal timeLimit, BigDecimal step,
-            MarkingCondition markingCondition, MarkingCondition stopCondition,
-            AnalysisLogger l, AnalysisMonitor m) {
-
-        return solveDiscretized(timeLimit, step, markingCondition,
-                stopCondition, false, l, m);
+        return solveDiscretized(timeLimit, step, markingCondition, false, l, m);
     }
 
     /**
@@ -552,17 +541,15 @@ class ForwardTransientAnalysis {
             BigDecimal timeLimit, BigDecimal step,
             MarkingCondition markingCondition, AnalysisLogger l) {
 
-        return solveDiscretized(timeLimit, step, markingCondition,
-                MarkingCondition.NONE, true, l, null);
+        return solveDiscretized(timeLimit, step, markingCondition, true, l, null);
     }
 
     public TransientSolution<Marking, Marking> solveDiscretizedVisitedProbabilities(
             BigDecimal timeLimit, BigDecimal step,
             MarkingCondition markingCondition) {
 
-        return solveDiscretized(timeLimit, step, markingCondition,
-                MarkingCondition.NONE, true, new PrintStreamLogger(System.out),
-                null);
+        return solveDiscretized(timeLimit, step, markingCondition, true,
+                new PrintStreamLogger(System.out), null);
     }
 
     public TransientSolution<Marking, Marking> solveDiscretizedVisitedProbabilities(
@@ -570,8 +557,7 @@ class ForwardTransientAnalysis {
             MarkingCondition markingCondition, AnalysisLogger l,
             AnalysisMonitor m) {
 
-        return solveDiscretized(timeLimit, step, markingCondition,
-                MarkingCondition.NONE, true, l, m);
+        return solveDiscretized(timeLimit, step, markingCondition, true, l, m);
     }
 
     public TransientSolution<Marking, Marking> solveDiscretizedVisitedProbabilities(
@@ -579,8 +565,7 @@ class ForwardTransientAnalysis {
             MarkingCondition markingCondition, MarkingCondition stopCondition,
             AnalysisLogger l, AnalysisMonitor m) {
 
-        return solveDiscretized(timeLimit, step, markingCondition,
-                stopCondition, true, l, m);
+        return solveDiscretized(timeLimit, step, markingCondition, true, l, m);
     }
 
     /**
@@ -600,7 +585,7 @@ class ForwardTransientAnalysis {
      */
     private TransientSolution<Marking, Marking> solveDiscretized(
             BigDecimal timeLimit, BigDecimal step,
-            MarkingCondition markingCondition, MarkingCondition stopCondition,
+            MarkingCondition markingCondition,
             boolean visitedProbabilies, AnalysisLogger l,
             AnalysisMonitor monitor) {
 
@@ -656,8 +641,7 @@ class ForwardTransientAnalysis {
                         StochasticStateFeature stochasticFeature = s
                                 .getFeature(StochasticStateFeature.class);
                         p.getSolution()[t][0][j] += (!visitedProbabilies
-                                && !stopCondition.evaluate(columnMarkings
-                                        .get(j)) ? transientFeature
+                                && !s.hasFeature(LocalStop.class) ? transientFeature
                                 .computeTransientClassProbability(timeValue,
                                         stochasticFeature).doubleValue()
                                 : transientFeature.computeVisitedProbability(

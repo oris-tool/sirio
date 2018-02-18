@@ -26,12 +26,16 @@ import org.oristool.analyzer.log.NoOpLogger;
 import org.oristool.analyzer.log.NoOpMonitor;
 import org.oristool.analyzer.policy.EnumerationPolicy;
 import org.oristool.analyzer.policy.FIFOPolicy;
+import org.oristool.analyzer.state.StateBuilder;
 import org.oristool.analyzer.stop.AlwaysFalseStopCriterion;
 import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.math.OmegaBigDecimal;
 import org.oristool.models.Engine;
 import org.oristool.models.ValidationMessageCollector;
 import org.oristool.models.stpn.TransientSolution;
+import org.oristool.models.stpn.trees.DeterministicEnablingState;
+import org.oristool.models.stpn.trees.DeterministicEnablingStateBuilder;
+import org.oristool.models.stpn.trees.EnablingSyncsEvaluator;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.models.stpn.trees.TruncationPolicy;
 import org.oristool.petrinet.Marking;
@@ -42,16 +46,18 @@ import org.oristool.petrinet.Transition;
 import com.google.auto.value.AutoValue;
 
 /**
- * Transient analysis of STPNs using a single tree of stochastic state classes.
+ * Transient analysis of STPNs using trees of stochastic state classes between
+ * regenerations.
  */
 @AutoValue
-public abstract class TreeTransient implements
-        Engine<PetriNet, Marking, TransientSolution<Marking, Marking>> {
+public abstract class RegTransient
+        implements Engine<PetriNet, Marking,
+            TransientSolution<DeterministicEnablingState, Marking>> {
 
     /**
      * Forbids subclassing outside of this package.
      */
-    TreeTransient() {
+    RegTransient() {
 
     }
 
@@ -87,6 +93,23 @@ public abstract class TreeTransient implements
      * @return the supplier of state class expansion policies
      */
     public abstract Supplier<EnumerationPolicy> policy();
+
+    /**
+     * Checks whether normalization of rows in local and global kernels is enabled.
+     *
+     * <p>Without normalization, defective kernel rows produce probabilities that
+     * sum to less than 1, but they are guaranteed to be lower bounds of the exact
+     * values.
+     *
+     * <p>With normalization, the output probabilities always sum to 1, but they can
+     * include an error increasing over time, and overestimate or underestimate the
+     * exact values.
+     *
+     * <p>By default, kernel normalization is not enabled.
+     *
+     * @return true if kernel normalization is enabled
+     */
+    public abstract boolean normalizeKernels();
 
     /**
      * Returns the supplier of local stop criterion instances used by this analysis.
@@ -127,8 +150,9 @@ public abstract class TreeTransient implements
      * @return a builder of {@code TimedAnalysis} instances.
      */
     public static Builder builder() {
-        return new AutoValue_TreeTransient.Builder()
+        return new AutoValue_RegTransient.Builder()
                 .policy(FIFOPolicy::new)
+                .normalizeKernels(false)
                 .stopOn(AlwaysFalseStopCriterion::new)
                 .monitor(NoOpMonitor.INSTANCE)
                 .logger(NoOpLogger.INSTANCE);
@@ -168,12 +192,13 @@ public abstract class TreeTransient implements
         /**
          * Sets the supplier of enumeration policies used by this analysis.
          *
-         * <p>A new policy instance is generated for each run.
+         * <p>A new policy instance is generated for for each tree (and for each run of
+         * the analysis).
          *
          * <p>By default, a FIFO policy is used.
          *
          * <p>The builder method {@code greedyPolicy(timeBound, error)} can be used to
-         * set a {@link TruncationPolicy}, a given timeBound, and the allowed error.
+         * use a {@link TruncationPolicy} with given timeBound and allowed error.
          *
          *
          * @param value the supplier of state class expansion policies
@@ -191,7 +216,13 @@ public abstract class TreeTransient implements
          * the frontier set at the time bound (and thus at any time before that) is
          * lower than {@code error}.
          *
-         * <p>A new policy instance is generated for each run.
+         * <p>A new policy instance is generated for each tree and for each run.
+         *
+         * <p>Note that partial enumeration of transient trees between regenerations can
+         * produce <i>defective kernels</i> for the MRP. The output probabilities will
+         * be a lower bound of their correct values (with total error increasing over
+         * time). For a better approximation (but with no lower-bound guarantee) set
+         * {@code normalizeKernels(true)}.
          *
          * @param timeBound bound of transient probabilities
          * @param error the allowed error at each time before the time bound
@@ -202,6 +233,24 @@ public abstract class TreeTransient implements
             policy(() -> new TruncationPolicy(error, new OmegaBigDecimal(timeBound)));
             return this;
         }
+
+        /**
+         * Enables the normalization of rows in local and global kernels.
+         *
+         * <p>Without normalization, defective kernel rows produce probabilities that
+         * sum less than 1, but they are guaranteed to be lower bounds of the exact
+         * values.
+         *
+         * <p>With normalization, the output probabilities always sum to 1, but they can
+         * include an error increasing over time, and overestimate or underestimate the
+         * exact values.
+         *
+         * <p>By default, kernel normalization is not enabled.
+         *
+         * @param value true to enable kernel normalization
+         * @return this builder instance
+         */
+        public abstract Builder normalizeKernels(boolean value);
 
         /**
          * Sets the supplier of local stop criterion instances used by this analysis. It
@@ -244,7 +293,7 @@ public abstract class TreeTransient implements
          *
          * @return a new {@code TimedAnalysis} instance
          */
-        public abstract TreeTransient build();
+        public abstract RegTransient build();
     }
 
     /**
@@ -258,17 +307,23 @@ public abstract class TreeTransient implements
      *         input Petri net
      */
     @Override
-    public TransientSolution<Marking, Marking> compute(PetriNet pn, Marking m) {
+    public TransientSolution<DeterministicEnablingState, Marking> compute(PetriNet pn, Marking m) {
 
         if (!canAnalyze(pn))
             throw new IllegalArgumentException("Cannot analyze the input Petri net");
 
-        ForwardTransientAnalysis trees = ForwardTransientAnalysis.compute(pn, m,
-                timeBound(), policy().get(), stopOn().get(), logger(), monitor(), false);
+        DeterministicEnablingState r = new DeterministicEnablingState(m, pn);
+        StateBuilder<DeterministicEnablingState> stateBuilder =
+                new DeterministicEnablingStateBuilder(pn, true);
 
-        TransientSolution<Marking,Marking> solution = trees
-                .solveDiscretizedBeingProbabilities(timeBound(), timeStep(),
-                        MarkingCondition.ANY, logger(), monitor());
+        RegenerativeTransientAnalysis<DeterministicEnablingState> trees =
+                RegenerativeTransientAnalysis.compute(pn, r, timeBound(),
+                    stateBuilder, new EnablingSyncsEvaluator(),
+                    policy().get(), stopOn().get(), false, false, logger(), monitor(), false);
+
+        TransientSolution<DeterministicEnablingState, Marking> solution =
+                trees.solveDiscretizedMarkovRenewal(timeBound(), timeStep(),
+                        MarkingCondition.ANY, normalizeKernels(), logger(), monitor());
 
         return solution;
     }
@@ -288,4 +343,3 @@ public abstract class TreeTransient implements
         return canAnalyze;
     }
 }
-

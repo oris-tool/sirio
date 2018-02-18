@@ -45,9 +45,12 @@ import org.oristool.analyzer.log.AnalysisLogger;
 import org.oristool.analyzer.log.AnalysisMonitor;
 import org.oristool.analyzer.log.PrintStreamLogger;
 import org.oristool.analyzer.policy.EnumerationPolicy;
+import org.oristool.analyzer.state.LocalStop;
 import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.state.StateBuilder;
+import org.oristool.analyzer.stop.AlwaysFalseStopCriterion;
 import org.oristool.analyzer.stop.MonitorStopCriterion;
+import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.math.OmegaBigDecimal;
 import org.oristool.math.expression.Variable;
 import org.oristool.math.function.GEN;
@@ -98,8 +101,8 @@ class RegenerativeTransientAnalysis<R> {
 
     private R initialRegeneration;
     private PetriNet petriNet;
-    private EnumerationPolicy truncationPolicy;
-    private MarkingCondition absorbingCondition;
+    private EnumerationPolicy policy;
+    private StopCriterion absorbingCondition;
     private Set<Marking> absorbingMarkings;
 
     public R getInitialRegeneration() {
@@ -111,10 +114,10 @@ class RegenerativeTransientAnalysis<R> {
     }
 
     public EnumerationPolicy getTruncationPolicy() {
-        return truncationPolicy;
+        return policy;
     }
 
-    public MarkingCondition getAbsorbingCondition() {
+    public StopCriterion getAbsorbingCondition() {
         return absorbingCondition;
     }
 
@@ -167,7 +170,7 @@ class RegenerativeTransientAnalysis<R> {
             boolean markTruncationLeavesAsRegenerative, AnalysisLogger l, AnalysisMonitor monitor) {
 
         return RegenerativeTransientAnalysis.compute(petriNet, initialRegeneration, stateBuilder,
-                postProcessor, truncationPolicy, MarkingCondition.NONE,
+                postProcessor, truncationPolicy, new AlwaysFalseStopCriterion(),
                 truncationLeavesInGlobalKernel, markTruncationLeavesAsRegenerative, l, monitor);
     }
 
@@ -176,48 +179,38 @@ class RegenerativeTransientAnalysis<R> {
             TruncationPolicy truncationPolicy, boolean truncationLeavesInGlobalKernel,
             boolean markTruncationLeavesAsRegenerative) {
 
-        return RegenerativeTransientAnalysis.compute(petriNet, initialRegeneration, stateBuilder,
-                postProcessor, truncationPolicy, MarkingCondition.NONE,
+        return RegenerativeTransientAnalysis.compute(petriNet, initialRegeneration,
+                truncationPolicy.getTauAgeLimit().bigDecimalValue(), stateBuilder,
+                postProcessor, truncationPolicy, new AlwaysFalseStopCriterion(),
                 truncationLeavesInGlobalKernel, markTruncationLeavesAsRegenerative,
-                new PrintStreamLogger(System.out), null, false); // Laura
+                new PrintStreamLogger(System.out), null, false);
     }
 
     public static <R> RegenerativeTransientAnalysis<R> compute(PetriNet petriNet,
             R initialRegeneration, StateBuilder<R> stateBuilder, SuccessionProcessor postProcessor,
-            TruncationPolicy truncationPolicy, MarkingCondition absorbingCondition,
+            TruncationPolicy truncationPolicy, StopCriterion absorbingCondition,
             boolean truncationLeavesInGlobalKernel, boolean markTruncationLeavesAsRegenerative,
             AnalysisLogger l, AnalysisMonitor monitor) {
 
-        return RegenerativeTransientAnalysis.compute(petriNet, initialRegeneration, stateBuilder,
+        return RegenerativeTransientAnalysis.compute(petriNet, initialRegeneration,
+                truncationPolicy.getTauAgeLimit().bigDecimalValue(), stateBuilder,
                 postProcessor, truncationPolicy, absorbingCondition, truncationLeavesInGlobalKernel,
                 markTruncationLeavesAsRegenerative, l, monitor, true);
     }
 
     public static <R> RegenerativeTransientAnalysis<R> compute(PetriNet petriNet,
-            R initialRegeneration, StateBuilder<R> stateBuilder, SuccessionProcessor postProcessor,
-            TruncationPolicy truncationPolicy, MarkingCondition absorbingCondition,
+            R initialRegeneration, BigDecimal timeBound, StateBuilder<R> stateBuilder,
+            SuccessionProcessor postProcessor,
+            EnumerationPolicy policy, StopCriterion absorbingCondition,
             boolean truncationLeavesInGlobalKernel, boolean markTruncationLeavesAsRegenerative,
             AnalysisLogger l, AnalysisMonitor monitor, boolean verbose) {
-
-        // FIXME: truncationLeavesInGlobalKernel e
-        // markTruncationLeavesAsRegenerative
-        // considerano come foglia di troncamento la radice in un albero fatto
-        // da un
-        // solo nodo. In realta`, potrei piu` semplicemente non avere successori
-        // e in
-        // tal caso la radice non sarebbe una foglia di troncamento (ed andrebbe
-        // inserita nel kernel locale). Le due condizioni non sono pero`
-        // distinguibili,
-        // visto che nel grafo niente indica dove e` stato effettuato il
-        // troncamento.
 
         Locale.setDefault(Locale.US);
         RegenerativeTransientAnalysis<R> a = new RegenerativeTransientAnalysis<R>();
 
         if (l != null) {
             l.log(">> Regenerative analysis starting from " + initialRegeneration
-                    + " (pruning threshold " + truncationPolicy.getEpsilon() + ", tauAgeLimit "
-                    + truncationPolicy.getTauAgeLimit());
+                    + " (policy: " + policy);
             if (absorbingCondition != MarkingCondition.NONE)
                 l.log(", absorbingCondition");
             l.log(")\n");
@@ -238,7 +231,7 @@ class RegenerativeTransientAnalysis<R> {
 
         a.petriNet = petriNet;
         a.initialRegeneration = initialRegeneration;
-        a.truncationPolicy = truncationPolicy;
+        a.policy = policy;
         a.absorbingCondition = absorbingCondition;
 
         a.localClasses = new HashMap<R, Map<Marking, Set<State>>>();
@@ -270,7 +263,7 @@ class RegenerativeTransientAnalysis<R> {
             long currentStartTime = System.currentTimeMillis();
 
             RegenerativeComponentsFactory f = new RegenerativeComponentsFactory(true, null, null,
-                    true, postProcessor, truncationPolicy, truncationPolicy.getTauAgeLimit(),
+                    true, postProcessor, policy, new OmegaBigDecimal(timeBound),
                     absorbingCondition, null, 0, monitor);
 
             Analyzer<PetriNet, Transition> analyzer = new Analyzer<PetriNet, Transition>(f,
@@ -309,11 +302,12 @@ class RegenerativeTransientAnalysis<R> {
                 Node n = stack.pop();
                 if (n != null) {
                     State s = graph.getState(n);
-                    PetriStateFeature petriFeature = s.getFeature(PetriStateFeature.class);
-                    StochasticStateFeature stochasticFeature = s
+                    final PetriStateFeature petriFeature = s.getFeature(PetriStateFeature.class);
+                    final StochasticStateFeature stochasticFeature = s
                             .getFeature(StochasticStateFeature.class);
-                    StateDensityFunction densityFunction = stochasticFeature.getStateDensity();
-                    TransientStochasticStateFeature transientFeature = s
+                    final StateDensityFunction densityFunction =
+                            stochasticFeature.getStateDensity();
+                    final TransientStochasticStateFeature transientFeature = s
                             .getFeature(TransientStochasticStateFeature.class);
 
                     // Update tree counts
@@ -323,14 +317,12 @@ class RegenerativeTransientAnalysis<R> {
                         treeTerms += g.getDensity().getExmonomials().size();
                     treeDepth = Math.max(treeDepth, offset.length() / 2);
 
-                    // Adds this marking to the initial ones to start the
-                    // analysis from
-                    // if it is in a regenerative class for the first time and
-                    // it's not absorbing
-                    if (absorbingCondition.evaluate(petriFeature.getMarking()))
+                    if (s.hasFeature(LocalStop.class))
                         a.absorbingMarkings.add(petriFeature.getMarking());
 
-                    else if (s.hasFeature(Regeneration.class)) {
+                    // Adds this marking to the initial ones to start the
+                    // analysis from if it is in a regenerative class
+                    if (s.hasFeature(Regeneration.class)) {
                         // (markTruncationLeavesAsRegenerative &&
                         // graph.getSuccessors(n).size()==0)))
                         // TODO fix markTruncationLeavesAsRegenerative by
@@ -345,9 +337,10 @@ class RegenerativeTransientAnalysis<R> {
                         if (!reachedRegenerations.contains(regeneration)) {
 
                             if (regReachedAfterTimeBound(regeneration, initialRegeneration,
-                                    truncationPolicy.getTauAgeLimit())) {
-                                if(l != null)
-                                    l.log(">> Skipping regeneration after time bound: " + regeneration);
+                                    new OmegaBigDecimal(timeBound))) {
+                                if (l != null)
+                                    l.log(">> Skipping regeneration after time bound: "
+                                            + regeneration);
                             } else {
                                 reachedRegenerations.add(regeneration);
                                 initialRegenerations.add(regeneration);
@@ -368,7 +361,6 @@ class RegenerativeTransientAnalysis<R> {
                     String addedTo = "";
                     if (s.hasFeature(Regeneration.class) && graph.getSuccessors(n).size() == 0
                             && !n.equals(graph.getRoot())
-                            && !absorbingCondition.evaluate(petriFeature.getMarking())
                             || (truncationLeavesInGlobalKernel
                                     && graph.getSuccessors(n).size() == 0)) {
 
@@ -425,7 +417,7 @@ class RegenerativeTransientAnalysis<R> {
                         l.log(" " + formatProbability(transientFeature.getReachingProbability()));
                         l.log(" " + formatProbability(
                                 transientFeature.computeVisitedProbability(OmegaBigDecimal.ZERO,
-                                        truncationPolicy.getTauAgeLimit(), stochasticFeature)));
+                                        new OmegaBigDecimal(timeBound), stochasticFeature)));
                         l.log(" (" + petriFeature.getMarking().toString().trim() + ")");
                         l.log(" [" + transientFeature.getEnteringTimeLowerBound(stochasticFeature)
                                 + ","
@@ -472,7 +464,7 @@ class RegenerativeTransientAnalysis<R> {
                                     notFiredEnabledTransitions.remove(succ.getEvent());
 
                         for (Transition t : notFiredEnabledTransitions) {
-                            Variable tau = new Variable(t.getName());
+                            final Variable tau = new Variable(t.getName());
                             l.log(" ");
                             if (petriFeature.getNewlyEnabled().contains(t))
                                 l.log("~");
@@ -695,8 +687,8 @@ class RegenerativeTransientAnalysis<R> {
 
         if (logger != null)
             logger.log(globalSamplesNumber + " global kernel samples\n");
-        globalKernel = new double[globalSamplesNumber][p.getRegenerations().size()][p.getRegenerations()
-                .size()];
+        globalKernel = new double[globalSamplesNumber][p.getRegenerations().size()][p
+                .getRegenerations().size()];
 
         // If the solution is computed for a subset of markings,
         // local convergence might be faster
@@ -721,21 +713,22 @@ class RegenerativeTransientAnalysis<R> {
 
             markingConditionLocalConvergenceLimit = maxTimeUpperBound;
             if (logger != null)
-                logger.log(
-                        "For markings satisfying the marking condition, local kernel converges after t="
-                                + markingConditionLocalConvergenceLimit + "\n");
+                logger.log("For markings satisfying the marking condition, "
+                        + "local kernel converges after t="
+                        + markingConditionLocalConvergenceLimit + "\n");
         }
 
         // Local kernel representation
         int localSamplesNumber;
         if (markingConditionLocalConvergenceLimit.compareTo(OmegaBigDecimal.POSITIVE_INFINITY) < 0)
-            localSamplesNumber = Math.min(p.getSamplesNumber(), markingConditionLocalConvergenceLimit
-                    .divide(step, MathContext.DECIMAL128).intValue() + 2);
+            localSamplesNumber = Math.min(p.getSamplesNumber(),
+                    markingConditionLocalConvergenceLimit.divide(step, MathContext.DECIMAL128)
+                            .intValue() + 2);
         else
             localSamplesNumber = p.getSamplesNumber();
 
-        localKernel = new double[localSamplesNumber][p.getRegenerations().size()][p.getColumnStates()
-                .size()];
+        localKernel = new double[localSamplesNumber][p.getRegenerations().size()][p
+                .getColumnStates().size()];
 
         if (logger != null) {
             logger.log(localSamplesNumber + " local kernel samples\n");
@@ -766,7 +759,8 @@ class RegenerativeTransientAnalysis<R> {
         // time instant before
         // convergence
         BigDecimal timeValue = BigDecimal.ZERO;
-        for (int t = 0; t < (globalKernel.length > localKernel.length ? globalKernel.length : localKernel.length); ++t) {
+        for (int t = 0; t < (globalKernel.length > localKernel.length
+                ? globalKernel.length : localKernel.length); ++t) {
             if (monitor != null)
                 monitor.notifyMessage("Evaluating kernels at time t=" + timeValue);
 
@@ -778,23 +772,35 @@ class RegenerativeTransientAnalysis<R> {
                         // Local kernel is regenerations.size() x
                         // columnMarkings.size()
                         for (int j = 0; j < columnMarkings.size(); ++j)
-                        if (localClasses.get(regenerations.get(i)).get(columnMarkings.get(j)) != null) {
-                        // sums over probabilities of being at time t in
-                        // a class with marking j
-                        // starting the analysis from marking i and not
-                        // having reached a regeneration
-                        for (State s : localClasses.get(regenerations.get(i)).get(columnMarkings.get(j))) {
-                        if (absorbingCondition.evaluate(columnMarkings.get(j)))
-                        localKernel[t][i][j] += s.getFeature(TransientStochasticStateFeature.class).computeVisitedProbability(OmegaBigDecimal.ZERO, new OmegaBigDecimal(timeValue), s.getFeature(StochasticStateFeature.class)).doubleValue();
-                        else
-                        localKernel[t][i][j] += s.getFeature(TransientStochasticStateFeature.class).computeTransientClassProbability(new OmegaBigDecimal(timeValue), s.getFeature(StochasticStateFeature.class)).doubleValue();
+                            if (localClasses.get(regenerations.get(i))
+                                    .get(columnMarkings.get(j)) != null) {
+                                // sums over probabilities of being at time t in
+                                // a class with marking j
+                                // starting the analysis from marking i and not
+                                // having reached a regeneration
+                                for (State s : localClasses.get(regenerations.get(i))
+                                        .get(columnMarkings.get(j))) {
+                                    if (s.hasFeature(LocalStop.class))
+                                        localKernel[t][i][j] += s
+                                                .getFeature(TransientStochasticStateFeature.class)
+                                                .computeVisitedProbability(OmegaBigDecimal.ZERO,
+                                                        new OmegaBigDecimal(timeValue),
+                                                        s.getFeature(StochasticStateFeature.class))
+                                                .doubleValue();
+                                    else
+                                        localKernel[t][i][j] += s
+                                                .getFeature(TransientStochasticStateFeature.class)
+                                                .computeTransientClassProbability(
+                                                        new OmegaBigDecimal(timeValue),
+                                                        s.getFeature(StochasticStateFeature.class))
+                                                .doubleValue();
 
-                        if (monitor != null && monitor.interruptRequested()) {
-                        monitor.notifyMessage("Aborted");
-                        return null;
-                        }
-                        }
-                        }
+                                    if (monitor != null && monitor.interruptRequested()) {
+                                        monitor.notifyMessage("Aborted");
+                                        return null;
+                                    }
+                                }
+                            }
                 }
 
                 // Computes the i-th global kernel row at time t (if convergence
@@ -804,20 +810,26 @@ class RegenerativeTransientAnalysis<R> {
                         // Global kernel is regenerations.size() x
                         // regenerations.size()
                         for (int j = 0; j < regenerations.size(); ++j)
-                        if (regenerationClasses.get(regenerations.get(i)).get(regenerations.get(j)) != null)
-                            // sums over probabilities of having visited at
-                            // time t a regeneration class
-                            // with marking j starting the analysis from
-                            // initial marking i
-                            for (State s : regenerationClasses.get(regenerations.get(i))
-                                    .get(regenerations.get(j))) {
-                            globalKernel[t][i][j] += s.getFeature(TransientStochasticStateFeature.class).computeVisitedProbability(OmegaBigDecimal.ZERO, new OmegaBigDecimal(timeValue), s.getFeature(StochasticStateFeature.class)).doubleValue();
+                            if (regenerationClasses.get(regenerations.get(i))
+                                    .get(regenerations.get(j)) != null)
+                                // sums over probabilities of having visited at
+                                // time t a regeneration class
+                                // with marking j starting the analysis from
+                                // initial marking i
+                                for (State s : regenerationClasses.get(regenerations.get(i))
+                                        .get(regenerations.get(j))) {
+                                    globalKernel[t][i][j] += s
+                                            .getFeature(TransientStochasticStateFeature.class)
+                                            .computeVisitedProbability(OmegaBigDecimal.ZERO,
+                                                    new OmegaBigDecimal(timeValue),
+                                                    s.getFeature(StochasticStateFeature.class))
+                                            .doubleValue();
 
-                            if (monitor != null && monitor.interruptRequested()) {
-                            monitor.notifyMessage("Aborted");
-                            return null;
-                            }
-                            }
+                                    if (monitor != null && monitor.interruptRequested()) {
+                                        monitor.notifyMessage("Aborted");
+                                        return null;
+                                    }
+                                }
 
                     if (normalizeGlobalKernel) {
                         // normalizes as G[i,j] = G[i,j]*(1-sum_k L[i,k])/(sum_k
@@ -829,11 +841,13 @@ class RegenerativeTransientAnalysis<R> {
 
                         double localRowSum = 0;
                         for (int j = 0; j < columnMarkings.size(); ++j)
-                            localRowSum += localKernel[t < localKernel.length ? t : localKernel.length - 1][i][j];
+                            localRowSum += localKernel[t < localKernel.length ? t
+                                    : localKernel.length - 1][i][j];
 
                         if (globalRowSum > 0.000000001)
                             for (int j = 0; j < regenerations.size(); ++j)
-                                globalKernel[t][i][j] = globalKernel[t][i][j] * (1 - localRowSum) / globalRowSum;
+                                globalKernel[t][i][j] = globalKernel[t][i][j] * (1 - localRowSum)
+                                        / globalRowSum;
 
                     }
                 }
@@ -842,112 +856,7 @@ class RegenerativeTransientAnalysis<R> {
             timeValue = timeValue.add(step);
         }
 
-        // if (localSamplesNumber > 0) {
-        // System.out.println("L(0)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < columnMarkings.size(); ++j)
-        // System.out.print(l[0][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (globalSamplesNumber > 0) {
-        // System.out.println("G(0)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < regenerations.size(); ++j)
-        // System.out.print(g[0][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (localSamplesNumber > 1) {
-        // System.out.println("L(1)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < columnMarkings.size(); ++j)
-        // System.out.print(l[1][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (globalSamplesNumber > 1) {
-        // System.out.println("G(1)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < regenerations.size(); ++j)
-        // System.out.print(g[1][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-
-        // Prints out the kernels at 2.5, 12, 14 (or convergence limit)
-        // if (localSamplesNumber > 250) {
-        // System.out.println("L(2.5)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < columnMarkings.size(); ++j)
-        // System.out.print(l[250][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (globalSamplesNumber > 250) {
-        // System.out.println("G(2.5)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < regenerations.size(); ++j)
-        // System.out.print(g[250][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (localSamplesNumber > 1200) {
-        // System.out.println("L(12)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < columnMarkings.size(); ++j)
-        // System.out.print(l[1200][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (globalSamplesNumber > 1200) {
-        // System.out.println("G(12)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < regenerations.size(); ++j)
-        // System.out.print(g[1200][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (localSamplesNumber > 1400) {
-        // System.out.println("L(14)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < columnMarkings.size(); ++j)
-        // System.out.print(l[1400][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (globalSamplesNumber > 1400) {
-        // System.out.println("G(14)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < regenerations.size(); ++j)
-        // System.out.print(g[1400][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
         if (logger != null) {
-            // logger.log("L("+markingConditionLocalConvergenceLimit+")\n");
-            // for (int i=0; i < regenerations.size(); ++i) {
-            // for (int j=0; j < columnMarkings.size(); ++j)
-            // logger.log(l[l.length-1][i][j]+" ");
-            // logger.log("\n");
-            // }
-            //
-            // logger.log("G("+this.getGlobalConvergenceLimit()+")\n");
-            // for (int i=0; i < regenerations.size(); ++i) {
-            // for (int j=0; j < regenerations.size(); ++j)
-            // logger.log(g[g.length-1][i][j]+" ");
-            // logger.log("\n");
-            // }
-            //
             logger.log(">> Discretization took " + (System.currentTimeMillis() - startTime) / 1000
                     + "s\n");
         }
@@ -963,13 +872,15 @@ class RegenerativeTransientAnalysis<R> {
             for (int i = 0; i < regenerations.size(); ++i) {
                 for (int j = 0; j < columnMarkings.size(); ++j) {
                     // adds the local kernel value at time t or at convergence
-                    p.getSolution()[t][i][j] = localKernel[t < localKernel.length ? t : localKernel.length - 1][i][j];
+                    p.getSolution()[t][i][j] = localKernel[t < localKernel.length ? t
+                            : localKernel.length - 1][i][j];
 
                     // convolution truncated after global kernel convergence
-                    for (int u = 1; u <= (t < globalKernel.length ? t : globalKernel.length - 1); ++u)
+                    for (int u = 1; u <= (t < globalKernel.length ? t
+                            : globalKernel.length - 1); ++u)
                         for (int k = 0; k < regenerations.size(); ++k) {
-                            p.getSolution()[t][i][j] += (globalKernel[u][i][k] - globalKernel[u - 1][i][k])
-                                    * p.getSolution()[t - u][k][j];
+                            p.getSolution()[t][i][j] += (globalKernel[u][i][k]
+                                    - globalKernel[u - 1][i][k]) * p.getSolution()[t - u][k][j];
                         }
                 }
             }
@@ -1034,16 +945,16 @@ class RegenerativeTransientAnalysis<R> {
         // Global kernel representation
         int globalSamplesNumber = globalConvergenceLimit.divide(step, MathContext.DECIMAL128)
                 .intValue() + 2;
-        double[][][] g = new double[globalSamplesNumber][p.getRegenerations().size()][p.getRegenerations()
-                .size()];
+        int regs = p.getRegenerations().size();
+        final double[][][] g = new double[globalSamplesNumber][regs][regs];
         if (logger != null)
             logger.log(globalSamplesNumber + " global kernel samples\n");
 
         // Local kernel representation (for SMPs local convergence is the same
         // as global one)
         int localSamplesNumber = globalSamplesNumber;
-        double[][][] l = new double[localSamplesNumber][p.getRegenerations().size()][p.getColumnStates()
-                .size()];
+        double[][][] l = new double[localSamplesNumber][p.getRegenerations().size()][p
+                .getColumnStates().size()];
         if (logger != null)
             logger.log(localSamplesNumber + " local kernel samples\n");
 
@@ -1074,20 +985,25 @@ class RegenerativeTransientAnalysis<R> {
                     // Global kernel is regenerations.size() x
                     // regenerations.size()
                     for (int j = 0; j < regenerations.size(); ++j)
-                    if (regenerationClasses.get(regenerations.get(i)).get(regenerations.get(j)) != null)
-                        // sums over probabilities of having visited at time
-                        // t a regeneration class
-                        // with marking j starting the analysis from initial
-                        // marking i
-                        for (State s : regenerationClasses.get(regenerations.get(i))
-                                .get(regenerations.get(j))) {
-                        g[t][i][j] += s.getFeature(TransientStochasticStateFeature.class).computeVisitedProbability(OmegaBigDecimal.ZERO, new OmegaBigDecimal(timeValue), s.getFeature(StochasticStateFeature.class)).doubleValue();
+                        if (regenerationClasses.get(regenerations.get(i))
+                                .get(regenerations.get(j)) != null)
+                            // sums over probabilities of having visited at time
+                            // t a regeneration class
+                            // with marking j starting the analysis from initial
+                            // marking i
+                            for (State s : regenerationClasses.get(regenerations.get(i))
+                                    .get(regenerations.get(j))) {
+                                g[t][i][j] += s.getFeature(TransientStochasticStateFeature.class)
+                                        .computeVisitedProbability(OmegaBigDecimal.ZERO,
+                                                new OmegaBigDecimal(timeValue),
+                                                s.getFeature(StochasticStateFeature.class))
+                                        .doubleValue();
 
-                        if (monitor != null && monitor.interruptRequested()) {
-                        monitor.notifyMessage("Aborted");
-                        return null;
-                        }
-                        }
+                                if (monitor != null && monitor.interruptRequested()) {
+                                    monitor.notifyMessage("Aborted");
+                                    return null;
+                                }
+                            }
 
                 // Local kernel is regenerations.size() x columnMarkings.size()
                 // and columnMarkins corresponds to the first regenerations that
@@ -1104,61 +1020,6 @@ class RegenerativeTransientAnalysis<R> {
 
             timeValue = timeValue.add(step);
         }
-
-        // Prints out the kernels at 2.5, 12, 14 (or convergence limit)
-        // if (localSamplesNumber > 250) {
-        // System.out.println("L(2.5)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < columnMarkings.size(); ++j)
-        // System.out.print(l[250][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (globalSamplesNumber > 250) {
-        // System.out.println("G(2.5)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < regenerations.size(); ++j)
-        // System.out.print(g[250][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (localSamplesNumber > 1200) {
-        // System.out.println("L(12)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < columnMarkings.size(); ++j)
-        // System.out.print(l[1200][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (globalSamplesNumber > 1200) {
-        // System.out.println("G(12)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < regenerations.size(); ++j)
-        // System.out.print(g[1200][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (localSamplesNumber > 1400) {
-        // System.out.println("L(14)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < columnMarkings.size(); ++j)
-        // System.out.print(l[1400][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
-        //
-        // if (globalSamplesNumber > 1400) {
-        // System.out.println("G(14)");
-        // for (int i=0; i < regenerations.size(); ++i) {
-        // for (int j=0; j < regenerations.size(); ++j)
-        // System.out.print(g[1400][i][j]+" ");
-        // System.out.println("");
-        // }
-        // }
 
         if (logger != null) {
             logger.log("L(" + this.getGlobalConvergenceLimit() + ")\n");

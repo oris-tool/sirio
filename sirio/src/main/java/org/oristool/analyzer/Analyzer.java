@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.policy.EnumerationPolicy;
+import org.oristool.analyzer.state.LocalStop;
 import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.stop.StopCriterion;
 
@@ -138,7 +139,10 @@ public final class Analyzer<M, E extends Event> {
             this.notifyNodeAdded(currentSuccession);
 
             // If new, expands the child of this succession
-            if (newChild && !localStopCriterion.stop()) {
+            if (localStopCriterion.stop()) {
+                currentSuccession.getChild().addFeature(LocalStop.INSTANCE);
+
+            } else if (newChild) {
                 // Computes successions starting from the child of the current
                 // one
                 for (E e : enabledEventsBuilder.getEnabledEvents(model,
