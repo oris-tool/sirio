@@ -190,10 +190,11 @@ The most general (but also computationally expensive) analysis method
 is `TreeTransient`, which builds a tree of transient stochastic state
 classes. Each node encodes a marking and the joint PDF of enabled
 transitions. These are used to compute the probability that the STPN
-is any node of the tree (and thus has its marking) at a given time
-instant.
+is in any node of the tree (and thus it has its marking) at a given
+time instant.
 
-The analysis can be configure through the builder of `TreeTransient` objects:
+The analysis can be configure through the builder of `TreeTransient`
+objects:
 
 ``` java
 TreeTransient analysis = TreeTransient.builder()
@@ -210,7 +211,7 @@ for (int j = 0; j < result.getColumnStates().size(); j++) {
 }
 ```
 
-The available options when building `TimedAnalysis` are:
+The available options when building `TreeTransient` are:
 - `timeBound(BigDecimal)`: specifies the maximum time used to select
   the time points where transient probabilities are computed
   (required).
@@ -230,6 +231,75 @@ error.
 
 You can easily select this policy using the builder method
 `greedyPolicy(timeBound, error)`:
+
+``` java
+TreeTransient analysis = TreeTransient.builder()
+    .greedyPolicy(new BigDecimal("5"), BigDecimal.ZERO)
+    .timeStep(new BigDecimal("0.1"))
+    .build();
+```
+
+Nodes with higher **reaching probability** (the probability of the
+firing sequence from the root node) are explored first; the analysis
+ends when the total reaching probability of unexplored nodes is lower
+than the allowed error.
+
+#### RegTransient
+
+The analysis method `RegTransient` can be applied when the underlying
+stochastic process finds regenerations (i.e., states where all general
+timers are newly-enabled or with deterministic enabling time).
+
+This method builds a tree of transient stochastic state classes from
+each regeneration until the next reachable regeneration. Each node of
+the tree encodes a marking and the joint PDF of enabled
+transitions. These are used to compute the global and local kernels of
+the underlying Markov regenerative process.
+
+In turn, the kernels are used to solve (numerically) Markov renewal
+equations that provide the transient probability of all markings.
+
+The analysis can be configured through the builder of `RegTransient`
+objects:
+
+``` java
+RegTransient analysis = RegTransient.builder()
+    .timeBound(new BigDecimal("5"))
+    .timeStep(new BigDecimal("0.1"))
+    .build();
+
+TransientSolution<DeterministicEnablingState, Marking> result =
+    analysis.compute(pn, marking);
+
+System.out.println("The transient probabilities at time 1.0:");
+for (int j = 0; j < result.getColumnStates().size(); j++) {
+    System.out.printf("%1.6f -- %s%n", result.getSolution()[10][0][j],
+            result.getColumnStates().get(j));
+}
+```
+
+The available options when building `RegTransient` are:
+- `timeBound(BigDecimal)`: specifies the maximum time used to select
+  the time points where transient probabilities are computed
+  (required).
+- `timeStep(BigDecimal)`: specifies the time step used to select time
+  points in `[0, timeBound]` (required).
+- `policy(Supplier<EnumerationPolicy>)`: to use a custom policy to
+  select the next state to explore in the tree (FIFO by default).
+- `stopOn(Supplier<StopCriterion>)`: to stop the analysis on some
+  nodes (never by default).
+- `normalizeKernels(boolean)`: whether to normalize of global kernel
+  (false by default). Without normalization, defective kernel rows
+  produce probabilities that sum to less than 1, but they are
+  guaranteed to be lower bounds of the exact values. With
+  normalization, the output probabilities always sum to 1, but they
+  can include an error (increasing over time) that overestimate or
+  underestimate the exact values.
+
+To exclude nodes that can be reached only after `timeBound` in each
+tree, or to ensure that the probability of reaching unexplored nodes
+before `timeBound` is lower than some error, you can select a
+greedy policy using the builder method `greedyPolicy(timeBound, error)`:
 
 ``` java
 TreeTransient analysis = TreeTransient.builder()
