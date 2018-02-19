@@ -16,12 +16,6 @@ then
     exit 1
 fi
 
-if [ -z "$GH_JAVADOC" ]
-then
-    echo -e "$ERROR The environment variable GH_JAVADOC is not set."
-    exit 1
-fi
-
 if [ -z "$SONATYPE_USERNAME" ]
 then
     echo -e "$ERROR The environment variable SONATYPE_USERNAME is not set."
@@ -94,7 +88,6 @@ echo -e "$INFO Publishing new Javadoc to: www.oris-tool.org/apidoc."
 
 echo -e "$INFO Setting up SSH keys..."
 mkdir -p -m 700 ~/.ssh
-echo $GH_JAVADOC | base64 --decode > ~/.ssh/gh_javadoc
 echo $GH_WEBSITE | base64 --decode > ~/.ssh/gh_website
 echo $GH_GITHUB  | base64 --decode > ~/.ssh/known_hosts
 chmod 600 ~/.ssh/*
@@ -108,24 +101,15 @@ ls target/site
 
 cd target/site
 
-echo -e "$INFO Updating oris-tool/sirio-javadoc..."
-GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_javadoc" git clone git@github.com:oris-tool/sirio-javadoc.git
-cd sirio-javadoc
-rm -rf ../sirio-javadoc/*
-git checkout LICENSE
-cp -a ../apidocs/* .
-git add .
-git commit -m "Update Javadoc"
-GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_javadoc" git push
-cd ..
-
 echo -e "$INFO Updating oris-tool/oris-tool.github.io..."
-GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git clone --recurse-submodules https://github.com/oris-tool/oris-tool.github.io.git
+GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git clone git@github.com:oris-tool/oris-tool.github.io.git
 cd oris-tool.github.io
-GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git submodule update --recursive --remote
+rm -rf ./apidoc/*
+git checkout ./apidoc/LICENSE
+cp -a ../apidocs/* apidoc
 git add apidoc
 git commit -m "Update Javadoc"
-GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git push git@github.com:oris-tool/oris-tool.github.io.git
+GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git push
 cd ..
 
 echo -e "$SUCCESS Deployment completed."
