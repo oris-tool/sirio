@@ -84,8 +84,8 @@ fi
 set -e
 
 echo -e "$INFO Setting up GPG keys..."
-echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
-echo $GPG_OWNERTRUST  | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --quiet --import
+echo $GPG_OWNERTRUST  | base64 --decode | $GPG_EXECUTABLE --quiet --import-ownertrust
 
 echo -e "$INFO Deploying to the Central Repository..."
 # mvn clean deploy --settings ../.travis/settings.xml -DskipTests=true -B -U -P release
@@ -93,7 +93,7 @@ echo -e "$INFO Deploying to the Central Repository..."
 echo -e "$INFO Publishing new Javadoc to: www.oris-tool.org/apidoc."
 
 echo -e "$INFO Setting up SSH keys..."
-mkdir -m 700 ~/.ssh
+mkdir -p -m 700 ~/.ssh
 echo $GH_JAVADOC | base64 --decode > ~/.ssh/gh_javadoc
 echo $GH_WEBSITE | base64 --decode > ~/.ssh/gh_website
 echo $GH_GITHUB  | base64 --decode > ~/.ssh/known_hosts
