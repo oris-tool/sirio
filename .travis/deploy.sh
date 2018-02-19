@@ -120,12 +120,12 @@ GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_javadoc" git push
 cd ..
 
 echo -e "$INFO Updating oris-tool/oris-tool.github.io..."
-GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git clone --recurse-submodules git@github.com:oris-tool/oris-tool.github.io.git
+GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git clone --recurse-submodules https://github.com/oris-tool/oris-tool.github.io.git
 cd oris-tool.github.io
 GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git submodule update --recursive --remote
 git add apidoc
 git commit -m "Update Javadoc"
-GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git push
+GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git push git@github.com:oris-tool/oris-tool.github.io.git
 cd ..
 
 echo -e "$SUCCESS Deployment completed."
