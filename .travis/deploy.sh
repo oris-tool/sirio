@@ -77,7 +77,7 @@ then
     echo -e "$INFO Updating the project version..."
     mvn versions:set -DnewVersion=$VERSION 1>/dev/null 2>/dev/null
 else
-    VERSION=`mvn help:evaluate -Dexpression=project.version 2>/dev/null| grep -v "^\["`
+    VERSION=`mvn help:evaluate -Dexpression=project.version -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn  2>/dev/null| grep -v "^\["`
     echo -e "$INFO Deploying a new snapshot: $VERSION"
 fi
 
@@ -100,6 +100,11 @@ echo $GH_GITHUB  | base64 --decode > ~/.ssh/known_hosts
 chmod 600 ~/.ssh/*
 git config --global user.name "Marco Paolieri"
 git config --global user.email "paolieri@users.noreply.github.com"
+
+
+ls target/site
+mvn -B javadoc:javadoc
+ls target/site
 
 cd target/site
 
