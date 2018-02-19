@@ -1,6 +1,28 @@
 language: java
 jdk:
   - oraclejdk9
-before_install: cd sirio
+before_install:
+  - cd sirio
+install:
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+script:
+  - mvn test -B
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+deploy:
+  -
+    provider: script
+    script: .travis/deploy.sh
+    skip_cleanup: true
+    on:
+      repo: oris-tool/sirio
+      branch: master
+      jdk: oraclejdk9
+  -
+    provider: script
+    script: .travis/deploy.sh
+    skip_cleanup: true
+    on:
+      repo: oris-tool/sirio
+      tags: true
+      jdk: oraclejdk9

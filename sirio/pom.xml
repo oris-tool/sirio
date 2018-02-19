@@ -5,6 +5,7 @@
   <groupId>org.oris-tool</groupId>
   <artifactId>sirio</artifactId>
   <version>2.0.0-SNAPSHOT</version>
+  <packaging>jar</packaging>
 
   <name>Sirio</name>
   <description>Library for the analysis of stochastic Petri nets</description>
@@ -13,7 +14,7 @@
   <scm>
     <url>https://github.com/oris-tool/sirio</url>
     <connection>scm:git:git://github.com/oris-tool/sirio.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com:/oris-tool/sirio.git</developerConnection>
+    <developerConnection>scm:git:ssh://git@github.com/oris-tool/sirio.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
 
@@ -27,12 +28,28 @@
     <url>http://stlab.dinfo.unifi.it</url>
   </organization>
 
+  <developers>
+      <developer>
+          <id>paolieri</id>
+          <name>Marco Paolieri</name>
+          <email>paolieri@oris-tool.org</email>
+      </developer>
+  </developers>
+
   <licenses>
     <license>
       <name>GNU Affero General Public License 3.0</name>
       <url>https://www.gnu.org/licenses/agpl-3.0.txt</url>
+      <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
 
   <properties>
     <maven.compiler.source>9</maven.compiler.source>
@@ -116,6 +133,20 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.7.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <stylesheetfile>${basedir}/javadoc.css</stylesheetfile>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.19.1</version>
         <configuration>
@@ -135,14 +166,6 @@
               <version>${junit.jupiter.version}</version>
             </dependency>
         </dependencies>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.0</version>
-        <configuration>
-          <stylesheetfile>${basedir}/javadoc.css</stylesheetfile>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -216,6 +239,74 @@
           </execution>
         </executions>
       </plugin>
+      <plugin><!-- for versions:display-{plugin,dependency}-updates -->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <rulesUri>file://${basedir}/versions_maven_rules.xml</rulesUri>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+  <profiles>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.6.8</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverid>ossrh</serverid>
+              <nexusurl>https://oss.sonatype.org/</nexusurl>
+              <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.0.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.0.0</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>1.6</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
