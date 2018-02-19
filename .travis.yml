@@ -12,7 +12,7 @@ after_success:
 deploy:
   -
     provider: script
-    script: .travis/deploy.sh
+    script: bash ../.travis/deploy.sh
     skip_cleanup: true
     on:
       repo: oris-tool/sirio
@@ -20,7 +20,7 @@ deploy:
       jdk: oraclejdk9
   -
     provider: script
-    script: .travis/deploy.sh
+    script: bash ../.travis/deploy.sh
     skip_cleanup: true
     on:
       repo: oris-tool/sirio
