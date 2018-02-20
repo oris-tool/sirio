@@ -31,6 +31,11 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.oristool.analyzer.state.State;
 
+/**
+ * Embedded DTMC solver and representation.
+ *
+ * @param <R> type of DTMC states
+ */
 class EmbeddedDTMC<R> {
 
     private Map<R, Map<R, BigDecimal>> reachingProbabilities;
@@ -48,11 +53,12 @@ class EmbeddedDTMC<R> {
                 regenerationClasses);
         RealVector tmpSteadyState = computeSteadyState(states, tmpReachingProbabilities);
 
-        a.steadyState = new HashMap<R, BigDecimal>();
+        a.steadyState = new HashMap<>();
         for (R state : states.keySet()) {
             a.steadyState.put(state, new BigDecimal(tmpSteadyState.getEntry(states.get(state))));
         }
-        a.reachingProbabilities = new HashMap<R, Map<R, BigDecimal>>();
+
+        a.reachingProbabilities = new HashMap<>();
         for (R from : states.keySet()) {
             a.reachingProbabilities.put(from, new HashMap<R, BigDecimal>());
             for (R to : states.keySet()) {
@@ -67,7 +73,7 @@ class EmbeddedDTMC<R> {
     }
 
     private static <R> Map<R, Integer> mapRegenerativeStates(Set<R> regenerations) {
-        Map<R, Integer> states = new HashMap<R, Integer>();
+        Map<R, Integer> states = new HashMap<>();
         int i = 0;
         for (R state : regenerations) {
             states.put(state, i);

@@ -79,31 +79,15 @@ class RegenerativeTransientAnalysis<R> {
     private double[][][] localKernel;
 
     private Set<Marking> reachableMarkings;
-    private Set<Marking> alwaysRegenerativeMarkings;
-    private Set<Marking> neverRegenerativeMarkings;
-    private Set<Marking> regenerativeAndNotRegenerativeMarkings;
 
     public Set<Marking> getReachableMarkings() {
         return Collections.unmodifiableSet(reachableMarkings);
-    }
-
-    public Set<Marking> getAlwaysRegenerativeMarkings() {
-        return Collections.unmodifiableSet(alwaysRegenerativeMarkings);
-    }
-
-    public Set<Marking> getNeverRegenerativeMarkings() {
-        return Collections.unmodifiableSet(neverRegenerativeMarkings);
-    }
-
-    public Set<Marking> getRegenerativeAndNotRegenerativeMarkings() {
-        return Collections.unmodifiableSet(regenerativeAndNotRegenerativeMarkings);
     }
 
     private R initialRegeneration;
     private PetriNet petriNet;
     private EnumerationPolicy policy;
     private StopCriterion absorbingCondition;
-    private Set<Marking> absorbingMarkings;
 
     public R getInitialRegeneration() {
         return initialRegeneration;
@@ -119,10 +103,6 @@ class RegenerativeTransientAnalysis<R> {
 
     public StopCriterion getAbsorbingCondition() {
         return absorbingCondition;
-    }
-
-    public Set<Marking> getAbsorbingMarkings() {
-        return Collections.unmodifiableSet(absorbingMarkings);
     }
 
     private Map<R, Map<Marking, Set<State>>> localClasses;
@@ -236,15 +216,12 @@ class RegenerativeTransientAnalysis<R> {
 
         a.localClasses = new HashMap<R, Map<Marking, Set<State>>>();
         a.regenerationClasses = new HashMap<R, Map<R, Set<State>>>();
-        a.absorbingMarkings = new LinkedHashSet<Marking>();
-
-        Set<Marking> sometimesRegenerativeMarkings = new LinkedHashSet<Marking>();
-        Set<Marking> sometimesNotRegenerativeMarkings = new LinkedHashSet<Marking>();
+        a.reachableMarkings = new LinkedHashSet<>();
 
         // Adds the initialRegeneration to the list of regenerations to start
         // the analysis from
-        Set<R> reachedRegenerations = new LinkedHashSet<R>();
-        reachedRegenerations.add(initialRegeneration);
+        a.regenerations = new LinkedHashSet<R>();
+        a.regenerations.add(initialRegeneration);
 
         Queue<R> initialRegenerations = new LinkedList<R>();
         initialRegenerations.add(initialRegeneration);
@@ -317,9 +294,6 @@ class RegenerativeTransientAnalysis<R> {
                         treeTerms += g.getDensity().getExmonomials().size();
                     treeDepth = Math.max(treeDepth, offset.length() / 2);
 
-                    if (s.hasFeature(LocalStop.class))
-                        a.absorbingMarkings.add(petriFeature.getMarking());
-
                     // Adds this marking to the initial ones to start the
                     // analysis from if it is in a regenerative class
                     if (s.hasFeature(Regeneration.class)) {
@@ -334,7 +308,7 @@ class RegenerativeTransientAnalysis<R> {
                         // regenerations should be of type R (!)
                         R regeneration = (R) s.getFeature(Regeneration.class).getValue();
 
-                        if (!reachedRegenerations.contains(regeneration)) {
+                        if (!a.regenerations.contains(regeneration)) {
 
                             if (regReachedAfterTimeBound(regeneration, initialRegeneration,
                                     new OmegaBigDecimal(timeBound))) {
@@ -342,21 +316,13 @@ class RegenerativeTransientAnalysis<R> {
                                     l.log(">> Skipping regeneration after time bound: "
                                             + regeneration);
                             } else {
-                                reachedRegenerations.add(regeneration);
+                                a.regenerations.add(regeneration);
                                 initialRegenerations.add(regeneration);
                             }
                         }
                     }
 
-                    // Logs this marking as seen in a regenerative or not
-                    // regenerative class
-                    if (s.hasFeature(Regeneration.class)) // ||
-                        // (markTruncationLeavesAsRegenerative
-                        // &&
-                        // graph.getSuccessors(n).size()==0))
-                        sometimesRegenerativeMarkings.add(petriFeature.getMarking());
-                    else
-                        sometimesNotRegenerativeMarkings.add(petriFeature.getMarking());
+                    a.reachableMarkings.add(petriFeature.getMarking());
 
                     String addedTo = "";
                     if (s.hasFeature(Regeneration.class) && graph.getSuccessors(n).size() == 0
@@ -537,28 +503,6 @@ class RegenerativeTransientAnalysis<R> {
                     treeTimeStats.getVariance()));
         }
 
-        a.alwaysRegenerativeMarkings = new LinkedHashSet<Marking>(sometimesRegenerativeMarkings);
-        a.alwaysRegenerativeMarkings.removeAll(sometimesNotRegenerativeMarkings);
-
-        a.neverRegenerativeMarkings = new LinkedHashSet<Marking>(sometimesNotRegenerativeMarkings);
-        a.neverRegenerativeMarkings.removeAll(sometimesRegenerativeMarkings);
-
-        a.regenerativeAndNotRegenerativeMarkings = new LinkedHashSet<Marking>(
-                sometimesRegenerativeMarkings);
-        a.regenerativeAndNotRegenerativeMarkings.retainAll(sometimesNotRegenerativeMarkings);
-
-        a.reachableMarkings = new LinkedHashSet<Marking>(sometimesRegenerativeMarkings);
-        a.reachableMarkings.addAll(sometimesNotRegenerativeMarkings);
-
-        a.regenerations = reachedRegenerations;
-
-        if (l != null) {
-            l.log("Always regenerative markings: " + a.alwaysRegenerativeMarkings + "\n");
-            l.log("Never regenerative markings: " + a.neverRegenerativeMarkings + "\n");
-            l.log("Markings both regenerative and not regenerative: "
-                    + a.regenerativeAndNotRegenerativeMarkings + "\n");
-            l.log("Absorbing markings: " + a.absorbingMarkings + "\n");
-        }
 
         // The maximum entering time upper bound among any regeneration class
         // is a convergence point for the global kernel
@@ -889,181 +833,6 @@ class RegenerativeTransientAnalysis<R> {
                 logger.log(timeValue.toString());
                 for (int j = 0; j < columnMarkings.size(); ++j)
                     logger.log(" " + p.getSolution()[t][initialRegenerationIndex][j]);
-                logger.log("\n");
-            }
-
-            if (monitor != null && monitor.interruptRequested()) {
-                monitor.notifyMessage("Aborted");
-                return null;
-            }
-
-            timeValue = timeValue.add(step);
-        }
-
-        if (logger != null)
-            logger.log(">> Markov renewal equation solved in "
-                    + (System.currentTimeMillis() - startTime) / 1000 + "s\n");
-
-        if (monitor != null)
-            monitor.notifyMessage("Computation completed");
-
-        return p;
-    }
-
-    public TransientSolution<R, Marking> solveDiscretizedSemiMarkovRenewal(BigDecimal timeLimit,
-            BigDecimal step) {
-        return solveDiscretizedSemiMarkovRenewal(timeLimit, step, new PrintStreamLogger(System.out),
-                null);
-    }
-
-    public TransientSolution<R, Marking> solveDiscretizedSemiMarkovRenewal(BigDecimal timeLimit,
-            BigDecimal step, AnalysisLogger logger, AnalysisMonitor monitor) {
-
-        if (logger != null)
-            logger.log(">> Solving SMP in [0, " + timeLimit + "] with step " + step + " \n");
-
-        long startTime = System.currentTimeMillis();
-
-        // One row for each absorbing or possibly regenerative marking
-        List<R> regenerations = new ArrayList<R>(this.regenerations);
-
-        // Adds a column for any absorbing marking
-        List<Marking> columnMarkings = new ArrayList<Marking>(this.getAbsorbingMarkings());
-
-        if (logger != null) {
-            logger.log("Regenerations: " + regenerations + "\n");
-            logger.log("Column markings: " + columnMarkings + "\n");
-        }
-        int initialMarkingIndex = regenerations.indexOf(this.getInitialRegeneration());
-
-        // Builds a representation of the transient solution
-        TransientSolution<R, Marking> p = new TransientSolution<R, Marking>(timeLimit, step,
-                regenerations, columnMarkings);
-        if (logger != null)
-            logger.log(p.getSamplesNumber() + " solution samples\n");
-
-        // Global kernel representation
-        int globalSamplesNumber = globalConvergenceLimit.divide(step, MathContext.DECIMAL128)
-                .intValue() + 2;
-        int regs = p.getRegenerations().size();
-        final double[][][] g = new double[globalSamplesNumber][regs][regs];
-        if (logger != null)
-            logger.log(globalSamplesNumber + " global kernel samples\n");
-
-        // Local kernel representation (for SMPs local convergence is the same
-        // as global one)
-        int localSamplesNumber = globalSamplesNumber;
-        double[][][] l = new double[localSamplesNumber][p.getRegenerations().size()][p
-                .getColumnStates().size()];
-        if (logger != null)
-            logger.log(localSamplesNumber + " local kernel samples\n");
-
-        if (logger != null) {
-            for (int i = 0; i < regenerations.size(); ++i) {
-                for (int j = 0; j < regenerations.size(); ++j)
-                    if (regenerationClasses.get(regenerations.get(i)) != null && regenerationClasses
-                            .get(regenerations.get(i)).get(regenerations.get(j)) != null)
-                        logger.log(regenerationClasses.get(regenerations.get(i))
-                                .get(regenerations.get(j)).size() + " ");
-                    else
-                        logger.log("0 ");
-                logger.log("\n");
-            }
-        }
-
-        // Discretizes the global and local kernel (one row at a time) for each
-        // time instant before
-        // convergence
-        BigDecimal timeValue = BigDecimal.ZERO;
-        for (int t = 0; t < g.length; ++t) {
-            if (monitor != null)
-                monitor.notifyMessage("Evaluating the global kernel at time t=" + timeValue);
-
-            for (int i = 0; i < regenerations.size(); ++i) {
-                // Computes the i-th global kernel row at time t
-                if (regenerationClasses.get(regenerations.get(i)) != null)
-                    // Global kernel is regenerations.size() x
-                    // regenerations.size()
-                    for (int j = 0; j < regenerations.size(); ++j)
-                        if (regenerationClasses.get(regenerations.get(i))
-                                .get(regenerations.get(j)) != null)
-                            // sums over probabilities of having visited at time
-                            // t a regeneration class
-                            // with marking j starting the analysis from initial
-                            // marking i
-                            for (State s : regenerationClasses.get(regenerations.get(i))
-                                    .get(regenerations.get(j))) {
-                                g[t][i][j] += s.getFeature(TransientStochasticStateFeature.class)
-                                        .computeVisitedProbability(OmegaBigDecimal.ZERO,
-                                                new OmegaBigDecimal(timeValue),
-                                                s.getFeature(StochasticStateFeature.class))
-                                        .doubleValue();
-
-                                if (monitor != null && monitor.interruptRequested()) {
-                                    monitor.notifyMessage("Aborted");
-                                    return null;
-                                }
-                            }
-
-                // Local kernel is regenerations.size() x columnMarkings.size()
-                // and columnMarkins corresponds to the first regenerations that
-                // are absorbing
-                if (i < columnMarkings.size()) {
-                    // Computes the i-th global kernel row at time t
-                    double globalRowSum = 0;
-                    for (int j = 0; j < regenerations.size(); ++j)
-                        globalRowSum += g[t][i][j];
-
-                    l[t][i][i] = 1 - globalRowSum;
-                }
-            }
-
-            timeValue = timeValue.add(step);
-        }
-
-        if (logger != null) {
-            logger.log("L(" + this.getGlobalConvergenceLimit() + ")\n");
-            for (int i = 0; i < regenerations.size(); ++i) {
-                for (int j = 0; j < columnMarkings.size(); ++j)
-                    logger.log(l[l.length - 1][i][j] + " ");
-                logger.log("\n");
-            }
-
-            logger.log("G(" + this.getGlobalConvergenceLimit() + ")\n");
-            for (int i = 0; i < regenerations.size(); ++i) {
-                for (int j = 0; j < regenerations.size(); ++j)
-                    logger.log(g[g.length - 1][i][j] + " ");
-                logger.log("\n");
-            }
-
-            logger.log(">> Discretization took " + (System.currentTimeMillis() - startTime) / 1000
-                    + "s\n");
-        }
-        startTime = System.currentTimeMillis();
-
-        // Solves the Markov Renewal Equation employing the trapezoidal rule
-        if (monitor != null)
-            monitor.notifyMessage("Solving the system of Markov renewal equations");
-
-        timeValue = BigDecimal.ZERO;
-        for (int t = 0; t < p.getSamplesNumber(); ++t) {
-            for (int i = 0; i < regenerations.size(); ++i) {
-                for (int j = 0; j < columnMarkings.size(); ++j) {
-                    // adds the local kernel value at time t or at convergence
-                    p.getSolution()[t][i][j] = l[t < l.length ? t : l.length - 1][i][j];
-
-                    // convolution truncated after global kernel convergence
-                    for (int u = 1; u <= (t < g.length ? t : g.length - 1); ++u)
-                        for (int k = 0; k < regenerations.size(); ++k)
-                            p.getSolution()[t][i][j] += (g[u][i][k] - g[u - 1][i][k])
-                                    * p.getSolution()[t - u][k][j];
-                }
-            }
-
-            if (logger != null) {
-                logger.log(timeValue.toString());
-                for (int j = 0; j < columnMarkings.size(); ++j)
-                    logger.log(" " + p.getSolution()[t][initialMarkingIndex][j]);
                 logger.log("\n");
             }
 

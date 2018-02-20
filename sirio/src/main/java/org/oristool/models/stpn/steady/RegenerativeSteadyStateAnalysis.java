@@ -40,25 +40,22 @@ import org.oristool.analyzer.policy.EnumerationPolicy;
 import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.state.StateBuilder;
 import org.oristool.analyzer.stop.MonitorStopCriterion;
+import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.math.OmegaBigDecimal;
 import org.oristool.math.expression.Variable;
-import org.oristool.models.ValidationMessageCollector;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.stpn.SteadyStateSolution;
 import org.oristool.models.stpn.trees.Regeneration;
 import org.oristool.models.stpn.trees.RegenerativeComponentsFactory;
 import org.oristool.models.stpn.trees.StochasticStateFeature;
-import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
 
 public class RegenerativeSteadyStateAnalysis<R> {
+
     private Set<Marking> reachableMarkings;
-    private Set<Marking> alwaysRegenerativeMarkings;
-    private Set<Marking> neverRegenerativeMarkings;
-    private Set<Marking> regenerativeAndNotRegenerativeMarkings;
     private Map<R, Map<Marking, BigDecimal>> sojournMap;
     private SteadyStateSolution<Marking> steadyState;
     private EmbeddedDTMC<R> embeddedDTMC;
@@ -79,23 +76,10 @@ public class RegenerativeSteadyStateAnalysis<R> {
         return Collections.unmodifiableSet(reachableMarkings);
     }
 
-    public Set<Marking> getAlwaysRegenerativeMarkings() {
-        return Collections.unmodifiableSet(alwaysRegenerativeMarkings);
-    }
-
-    public Set<Marking> getNeverRegenerativeMarkings() {
-        return Collections.unmodifiableSet(neverRegenerativeMarkings);
-    }
-
-    public Set<Marking> getRegenerativeAndNotRegenerativeMarkings() {
-        return Collections.unmodifiableSet(regenerativeAndNotRegenerativeMarkings);
-    }
-
     private R initialRegeneration;
     private PetriNet petriNet;
-    private EnumerationPolicy truncationPolicy;
-    private MarkingCondition absorbingCondition;
-    private Set<Marking> absorbingMarkings;
+    private EnumerationPolicy enumerationPolicy;
+    private StopCriterion absorbingCondition;
 
     public R getInitialRegeneration() {
         return initialRegeneration;
@@ -109,16 +93,12 @@ public class RegenerativeSteadyStateAnalysis<R> {
         return petriNet;
     }
 
-    public EnumerationPolicy getTruncationPolicy() {
-        return truncationPolicy;
+    public EnumerationPolicy getEnumerationPolicy() {
+        return enumerationPolicy;
     }
 
-    public MarkingCondition getAbsorbingCondition() {
+    public StopCriterion getAbsorbingCondition() {
         return absorbingCondition;
-    }
-
-    public Set<Marking> getAbsorbingMarkings() {
-        return Collections.unmodifiableSet(absorbingMarkings);
     }
 
     private Map<R, Map<Marking, Set<State>>> localClasses;
@@ -138,48 +118,36 @@ public class RegenerativeSteadyStateAnalysis<R> {
     }
 
     /**
-     * Checks whether this method can analyze the given Petri net.
+     * Computes marking steady-state probabilities from sojourn times in each
+     * regeneration epoch and steady-state probabilities of initial regenerations.
      *
-     * @param petriNet input Petri net
-     * @param c collector of validation messages
-     * @return true if the Petri net can be analyzed
+     * @param a result with reachable markings and sojourn map
+     * @return steady-state distribution
      */
-    public boolean canAnalyze(PetriNet petriNet, ValidationMessageCollector c) {
-
-        boolean canAnalyze = true;
-        for (Transition t : petriNet.getTransitions()) {
-            if (!t.hasFeature(StochasticTransitionFeature.class)) {
-                canAnalyze = false;
-                c.addError("Transition '" + t + "' is not stochastic");
-            }
-        }
-
-        return canAnalyze;
-    }
-
     private static <R> Map<Marking, BigDecimal> calculateSteadyState(
             RegenerativeSteadyStateAnalysis<R> a) {
 
         a.embeddedDTMC = EmbeddedDTMC.compute(a.getRegenerations(), a.getRegenerationClasses());
         Map<R, BigDecimal> eDTMCSteadyState = a.embeddedDTMC.getSteadyState();
 
-        Map<Marking, BigDecimal> steadyState = new HashMap<Marking, BigDecimal>();
+        Map<Marking, BigDecimal> steadyState = new HashMap<>();
         BigDecimal normalizationFactor = BigDecimal.ZERO;
-        for (Marking mrk : a.reachableMarkings) {
+        for (Marking m : a.reachableMarkings) {
             BigDecimal aij = BigDecimal.ZERO;
             for (R reg : a.getRegenerations()) {
-                if (a.sojournMap.get(reg).containsKey(mrk)) {
+                if (a.sojournMap.get(reg).containsKey(m)) {
                     BigDecimal prob = eDTMCSteadyState.get(reg).multiply(
-                            a.sojournMap.get(reg).get(mrk));
+                            a.sojournMap.get(reg).get(m));
                     aij = aij.add(prob);
                     normalizationFactor = normalizationFactor.add(prob);
                 }
             }
-            steadyState.put(mrk, aij);
+            steadyState.put(m, aij);
         }
-        for (Marking mrk : a.reachableMarkings) {
-            steadyState.replace(mrk,
-                    steadyState.get(mrk).divide(normalizationFactor, MathContext.DECIMAL128));
+
+        for (Marking m : a.reachableMarkings) {
+            steadyState.replace(m,
+                    steadyState.get(m).divide(normalizationFactor, MathContext.DECIMAL128));
         }
 
         return steadyState;
@@ -195,8 +163,6 @@ public class RegenerativeSteadyStateAnalysis<R> {
      * @param postProcessor postprocessor to apply to each state
      * @param enumerationPolicy policy for state selection
      * @param absorbingCondition absorbing condition
-     * @param truncationLeavesInGlobalKernel whether to leave truncated leaves in kernel
-     * @param markTruncationLeavesAsRegenerative whether to mark them as regenerations
      * @param l logger
      * @param monitor monitor
      * @param verbose whether to output additional information
@@ -204,8 +170,7 @@ public class RegenerativeSteadyStateAnalysis<R> {
      */
     public static <R> RegenerativeSteadyStateAnalysis<R> compute(PetriNet petriNet,
             R initialRegeneration, StateBuilder<R> stateBuilder, SuccessionProcessor postProcessor,
-            EnumerationPolicy enumerationPolicy, MarkingCondition absorbingCondition,
-            boolean truncationLeavesInGlobalKernel, boolean markTruncationLeavesAsRegenerative,
+            EnumerationPolicy enumerationPolicy, StopCriterion absorbingCondition,
             AnalysisLogger l, AnalysisMonitor monitor, boolean verbose) {
 
         Locale.setDefault(Locale.US);
@@ -220,24 +185,19 @@ public class RegenerativeSteadyStateAnalysis<R> {
 
         a.petriNet = petriNet;
         a.initialRegeneration = initialRegeneration;
-        a.truncationPolicy = enumerationPolicy;
+        a.enumerationPolicy = enumerationPolicy;
         a.absorbingCondition = absorbingCondition;
 
-        a.localClasses = new HashMap<R, Map<Marking, Set<State>>>();
-        a.regenerationClasses = new HashMap<R, Map<R, Set<State>>>();
-        a.absorbingMarkings = new LinkedHashSet<Marking>();
+        a.localClasses = new HashMap<>();
+        a.regenerationClasses = new HashMap<>();
+        a.reachableMarkings = new LinkedHashSet<>();
+        a.sojournMap = new HashMap<>();
 
-        a.sojournMap = new HashMap<R, Map<Marking, BigDecimal>>();
-
-        Set<Marking> sometimesRegenerativeMarkings = new LinkedHashSet<Marking>();
-        Set<Marking> sometimesNotRegenerativeMarkings = new LinkedHashSet<Marking>();
-
-        // Adds the initialRegeneration to the list of regenerations to start
-        // the analysis from
-        Set<R> reachedRegenerations = new LinkedHashSet<R>();
+        // Adds the initialRegeneration to the list of regenerations
+        Set<R> reachedRegenerations = new LinkedHashSet<>();
         reachedRegenerations.add(initialRegeneration);
 
-        Queue<R> initialRegenerations = new LinkedList<R>();
+        Queue<R> initialRegenerations = new LinkedList<>();
         initialRegenerations.add(initialRegeneration);
 
         // Performs the analysis from the initial marking and then from any
@@ -260,7 +220,7 @@ public class RegenerativeSteadyStateAnalysis<R> {
 
             SuccessionGraph graph = analyzer.analyze();
 
-            a.sojournMap.put(currentInitialRegeneration, new HashMap<Marking, BigDecimal>());
+            a.sojournMap.put(currentInitialRegeneration, new HashMap<>());
 
             if (l != null)
                 l.log(">> " + graph.getNodes().size() + " state classes found\n");
@@ -277,9 +237,8 @@ public class RegenerativeSteadyStateAnalysis<R> {
                             + graph.getNodes().size() + " state classes)");
             }
 
-            // calcola la massa delle foglie
             // Analyzes the state class tree in a depth first fashion
-            Deque<Node> stack = new LinkedList<Node>();
+            Deque<Node> stack = new LinkedList<>();
             stack.push(graph.getRoot());
             String offset = "";
             while (!stack.isEmpty()) {
@@ -291,14 +250,7 @@ public class RegenerativeSteadyStateAnalysis<R> {
                     StochasticStateFeature stochasticFeature = s
                             .getFeature(StochasticStateFeature.class);
 
-                    // Adds this marking to the initial ones to start the
-                    // analysis from
-                    // if it is in a regenerative class for the first time and
-                    // it's not absorbing
-                    if (absorbingCondition.evaluate(petriFeature.getMarking()))
-                        a.absorbingMarkings.add(petriFeature.getMarking());
-
-                    else if (s.hasFeature(Regeneration.class)) {
+                    if (s.hasFeature(Regeneration.class)) {
 
                         @SuppressWarnings("unchecked")
                         // regenerations should be of type R (!)
@@ -310,22 +262,11 @@ public class RegenerativeSteadyStateAnalysis<R> {
                         }
                     }
 
-                    // Logs this marking as seen in a regenerative or not
-                    // regenerative class
-                    if (s.hasFeature(Regeneration.class)) // ||
-                        // (markTruncationLeavesAsRegenerative
-                        // &&
-                        // graph.getSuccessors(n).size()==0))
-                        sometimesRegenerativeMarkings.add(petriFeature.getMarking());
-                    else
-                        sometimesNotRegenerativeMarkings.add(petriFeature.getMarking());
+                    a.reachableMarkings.add(petriFeature.getMarking());
 
                     if (s.hasFeature(Regeneration.class)
                             && graph.getSuccessors(n).size() == 0
-                            && !n.equals(graph.getRoot())
-                            && !absorbingCondition.evaluate(petriFeature.getMarking())
-                            || (truncationLeavesInGlobalKernel
-                                    && graph.getSuccessors(n).size() == 0)) {
+                            && !n.equals(graph.getRoot())) {
 
                         @SuppressWarnings("unchecked")
                         // regenerations should be of type R (!)
@@ -337,12 +278,12 @@ public class RegenerativeSteadyStateAnalysis<R> {
                         // initial and class marking
                         if (!a.regenerationClasses.containsKey(currentInitialRegeneration))
                             a.regenerationClasses.put(currentInitialRegeneration,
-                                    new HashMap<R, Set<State>>());
+                                    new HashMap<>());
 
                         if (!a.regenerationClasses.get(currentInitialRegeneration).containsKey(
                                 regeneration))
                             a.regenerationClasses.get(currentInitialRegeneration).put(regeneration,
-                                    new LinkedHashSet<State>());
+                                    new LinkedHashSet<>());
 
                         a.regenerationClasses.get(currentInitialRegeneration).get(regeneration)
                                 .add(s);
@@ -405,29 +346,7 @@ public class RegenerativeSteadyStateAnalysis<R> {
 
         }
 
-        a.alwaysRegenerativeMarkings = new LinkedHashSet<Marking>(sometimesRegenerativeMarkings);
-        a.alwaysRegenerativeMarkings.removeAll(sometimesNotRegenerativeMarkings);
-
-        a.neverRegenerativeMarkings = new LinkedHashSet<Marking>(sometimesNotRegenerativeMarkings);
-        a.neverRegenerativeMarkings.removeAll(sometimesRegenerativeMarkings);
-
-        a.regenerativeAndNotRegenerativeMarkings = new LinkedHashSet<Marking>(
-                sometimesRegenerativeMarkings);
-        a.regenerativeAndNotRegenerativeMarkings.retainAll(sometimesNotRegenerativeMarkings);
-
-        a.reachableMarkings = new LinkedHashSet<Marking>(sometimesRegenerativeMarkings);
-        a.reachableMarkings.addAll(sometimesNotRegenerativeMarkings);
-
         a.regenerations = reachedRegenerations;
-
-        if (l != null) {
-            l.log("Always regenerative markings: " + a.alwaysRegenerativeMarkings + "\n");
-            l.log("Never regenerative markings: " + a.neverRegenerativeMarkings + "\n");
-            l.log("Markings both regenerative and not regenerative: "
-                    + a.regenerativeAndNotRegenerativeMarkings + "\n");
-            l.log("Absorbing markings: " + a.absorbingMarkings + "\n");
-        }
-
         a.steadyState = new SteadyStateSolution<Marking>(calculateSteadyState(a));
 
         if (monitor != null)

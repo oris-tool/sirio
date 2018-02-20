@@ -25,10 +25,10 @@ import org.oristool.petrinet.Marking;
 
 public class SteadyStateSolution<T> {
 
-    private Map<T, BigDecimal> steadyState;
+    private final Map<T, BigDecimal> steadyState;
 
     public SteadyStateSolution() {
-        this.steadyState = new HashMap<T, BigDecimal>();
+        this.steadyState = new HashMap<>();
     }
 
     public SteadyStateSolution(Map<T, BigDecimal> steadyState) {
@@ -37,10 +37,6 @@ public class SteadyStateSolution<T> {
 
     public Map<T, BigDecimal> getSteadyState() {
         return steadyState;
-    }
-
-    public void setSteadyState(Map<T, BigDecimal> steadyState) {
-        this.steadyState = steadyState;
     }
 
     /**
@@ -52,6 +48,7 @@ public class SteadyStateSolution<T> {
      */
     public static SteadyStateSolution<RewardRate> computeRewards(
             SteadyStateSolution<Marking> solution, String rewardRates) {
+
         String[] c = rewardRates.split(";");
         RewardRate[] rs = new RewardRate[c.length];
         for (int i = 0; i < c.length; ++i)
@@ -69,9 +66,9 @@ public class SteadyStateSolution<T> {
      */
     public static SteadyStateSolution<RewardRate> computeRewards(
             SteadyStateSolution<Marking> solution, RewardRate... rewardRates) {
-        double time = 0;// Because steady state
 
-        SteadyStateSolution<RewardRate> solutionRewards = new SteadyStateSolution<RewardRate>();
+        double time = Double.MAX_VALUE;
+        SteadyStateSolution<RewardRate> solutionRewards = new SteadyStateSolution<>();
 
         for (RewardRate rewardRate : rewardRates) {
             solutionRewards.getSteadyState().put(rewardRate, BigDecimal.ZERO);

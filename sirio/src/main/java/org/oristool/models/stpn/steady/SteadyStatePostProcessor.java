@@ -24,19 +24,20 @@ import org.oristool.analyzer.SuccessionProcessor;
 import org.oristool.models.stpn.trees.StochasticSuccessionFeature;
 
 /**
- * Post-processor updating {@code ReachingProbabilityFeature}.
+ * Post-processor updating {@code ReachingProbabilityFeature}. This class is a
+ * decorator augmenting the operations performed by another post-processor.
  */
 public class SteadyStatePostProcessor implements SuccessionProcessor {
 
-    private SuccessionProcessor es;
+    private SuccessionProcessor baseProc;
 
-    public SteadyStatePostProcessor(SuccessionProcessor es) {
-        this.es = es;
+    public SteadyStatePostProcessor(SuccessionProcessor baseProc) {
+        this.baseProc = baseProc;
     }
 
     @Override
     public Succession process(Succession succession) {
-        Succession withEnablingSyncs = es.process(succession);
+        Succession withEnablingSyncs = baseProc.process(succession);
 
         if (succession.getParent() != null) {
             BigDecimal parentReachingProbability = withEnablingSyncs.getParent()
@@ -48,7 +49,7 @@ public class SteadyStatePostProcessor implements SuccessionProcessor {
             withEnablingSyncs.getChild().addFeature(
                     new ReachingProbabilityFeature(childReachingProbability));
         }
+
         return withEnablingSyncs;
     }
-
 }

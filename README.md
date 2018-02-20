@@ -302,7 +302,7 @@ before `timeBound` is lower than some error, you can select a
 greedy policy using the builder method `greedyPolicy(timeBound, error)`:
 
 ``` java
-TreeTransient analysis = TreeTransient.builder()
+RegTransient analysis = TreeTransient.builder()
     .greedyPolicy(new BigDecimal("5"), BigDecimal.ZERO)
     .timeStep(new BigDecimal("0.1"))
     .build();
@@ -312,3 +312,34 @@ Nodes with higher **reaching probability** (the probability of the
 firing sequence from the root node) are explored first; the analysis
 ends when the total reaching probability of unexplored nodes is lower
 than the allowed error.
+
+#### RegSteadyState
+
+The analysis method `RegSteadyState` can be applied when the
+underlying stochastic process finds regenerations in a bounded number
+of discrete events (e.g., within at most 20 transition firings).
+
+This method builds a tree of transient stochastic state classes from
+each regeneration until the next reachable regeneration. Each node of
+the tree encodes a marking and the joint PDF of enabled
+transitions. The DTMC embedded at regeneration points is solved to
+find equilibrium probabilities of regenerations; these are combined
+through sojourn times in each marking to compute the final result.
+
+Note that the current implementation assumes that the state space is
+irreducible.
+
+The analysis can be launched using instances of `RegSteadyState` (in
+most cases, without any configuration):
+
+``` java
+RegSteadyState analysis = RegSteadyState.builder().build();
+
+SteadyStateSolution<Marking> result = analysis.compute(pn, marking);
+Map<Marking, BigDecimal> probs = result.getSteadyState();
+
+System.out.println("Steady-state probabilities:");
+for (Marking m : probs.keySet()) {
+    System.out.printf("%1.6f -- %s%n", probs.get(m), m);
+}
+```

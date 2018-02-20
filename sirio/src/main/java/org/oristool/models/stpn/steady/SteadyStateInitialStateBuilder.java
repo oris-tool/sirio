@@ -23,7 +23,9 @@ import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.state.StateBuilder;
 
 /**
- * State builder for steady-state analysis of STPNs.
+ * State builder for steady-state analysis of STPNs. This class is a decorator
+ * adding a {@link ReachingProbabilityFeature} with value 1 to the state built
+ * by another {@code StateBuilder}.
  */
 public class SteadyStateInitialStateBuilder<T> implements StateBuilder<T> {
 

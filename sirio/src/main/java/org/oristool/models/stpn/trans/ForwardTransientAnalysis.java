@@ -74,25 +74,9 @@ import org.oristool.petrinet.Transition;
  */
 class ForwardTransientAnalysis {
     private Set<Marking> reachableMarkings;
-    private Set<Marking> alwaysRegenerativeMarkings;
-    private Set<Marking> neverRegenerativeMarkings;
-    private Set<Marking> regenerativeAndNotRegenerativeMarkings;
 
     public Set<Marking> getReachableMarkings() {
         return Collections.unmodifiableSet(reachableMarkings);
-    }
-
-    public Set<Marking> getAlwaysRegenerativeMarkings() {
-        return Collections.unmodifiableSet(alwaysRegenerativeMarkings);
-    }
-
-    public Set<Marking> getNeverRegenerativeMarkings() {
-        return Collections.unmodifiableSet(neverRegenerativeMarkings);
-    }
-
-    public Set<Marking> getRegenerativeAndNotRegenerativeMarkings() {
-        return Collections
-                .unmodifiableSet(regenerativeAndNotRegenerativeMarkings);
     }
 
     private Marking initialMarking;
@@ -240,10 +224,8 @@ class ForwardTransientAnalysis {
 
         a.stateClasses = new HashMap<Marking, Set<State>>();
 
-        Set<Marking> sometimesRegenerativeMarkings = new LinkedHashSet<Marking>();
-        Set<Marking> sometimesNotRegenerativeMarkings = new LinkedHashSet<Marking>();
-
-        sometimesRegenerativeMarkings.add(initialMarking);
+        a.reachableMarkings = new LinkedHashSet<Marking>();
+        a.reachableMarkings.add(initialMarking);
 
         // Performs the analysis starting from the initial marking
         StochasticComponentsFactory f = new StochasticComponentsFactory(true,
@@ -287,14 +269,14 @@ class ForwardTransientAnalysis {
 
             Node n = stack.pop();
             if (n != null) {
-                State s = graph.getState(n);
-                PetriStateFeature petriFeature = s
+                final State s = graph.getState(n);
+                final PetriStateFeature petriFeature = s
                         .getFeature(PetriStateFeature.class);
-                StochasticStateFeature stochasticFeature = s
+                final StochasticStateFeature stochasticFeature = s
                         .getFeature(StochasticStateFeature.class);
-                StateDensityFunction densityFunction = stochasticFeature
+                final StateDensityFunction densityFunction = stochasticFeature
                         .getStateDensity();
-                TransientStochasticStateFeature transientFeature = s
+                final TransientStochasticStateFeature transientFeature = s
                         .getFeature(TransientStochasticStateFeature.class);
 
                 // Update tree counts
@@ -305,14 +287,7 @@ class ForwardTransientAnalysis {
                     treeTerms += g.getDensity().getExmonomials().size();
                 treeDepth = Math.max(treeDepth, offset.length() / 2);
 
-                // Logs this marking as seen in a regenerative or not
-                // regenerative class
-                if (s.hasFeature(Regeneration.class))
-                    sometimesRegenerativeMarkings
-                            .add(petriFeature.getMarking());
-                else
-                    sometimesNotRegenerativeMarkings.add(petriFeature
-                            .getMarking());
+                a.reachableMarkings.add(petriFeature.getMarking());
 
                 // Adds this state class to the set corresponding to its marking
                 if (!a.stateClasses.containsKey(petriFeature.getMarking()))
@@ -446,33 +421,6 @@ class ForwardTransientAnalysis {
             l.log(String.format(">> Tree: %d classes, %d zones, %d terms\n",
                     treeClasses, treeZones, treeTerms));
 
-        }
-
-        a.alwaysRegenerativeMarkings = new LinkedHashSet<Marking>(
-                sometimesRegenerativeMarkings);
-        a.alwaysRegenerativeMarkings
-                .removeAll(sometimesNotRegenerativeMarkings);
-
-        a.neverRegenerativeMarkings = new LinkedHashSet<Marking>(
-                sometimesNotRegenerativeMarkings);
-        a.neverRegenerativeMarkings.removeAll(sometimesRegenerativeMarkings);
-
-        a.regenerativeAndNotRegenerativeMarkings = new LinkedHashSet<Marking>(
-                sometimesRegenerativeMarkings);
-        a.regenerativeAndNotRegenerativeMarkings
-                .retainAll(sometimesNotRegenerativeMarkings);
-
-        a.reachableMarkings = new LinkedHashSet<Marking>(
-                sometimesRegenerativeMarkings);
-        a.reachableMarkings.addAll(sometimesNotRegenerativeMarkings);
-
-        if (l != null) {
-            l.log("Always regenerative markings: "
-                    + a.alwaysRegenerativeMarkings + "\n");
-            l.log("Never regenerative markings: " + a.neverRegenerativeMarkings
-                    + "\n");
-            l.log("Markings both regenerative and not regenerative: "
-                    + a.regenerativeAndNotRegenerativeMarkings + "\n");
         }
 
         if (monitor != null)

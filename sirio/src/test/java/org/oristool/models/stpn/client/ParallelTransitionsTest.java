@@ -35,7 +35,9 @@ import org.oristool.analyzer.stop.AlwaysFalseStopCriterion;
 import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.math.OmegaBigDecimal;
 import org.oristool.models.pn.MarkingConditionStopCriterion;
+import org.oristool.models.stpn.SteadyStateSolution;
 import org.oristool.models.stpn.TransientSolution;
+import org.oristool.models.stpn.steady.RegSteadyState;
 import org.oristool.models.stpn.trans.RegTransient;
 import org.oristool.models.stpn.trans.TreeTransient;
 import org.oristool.models.stpn.trees.DeterministicEnablingState;
@@ -307,6 +309,40 @@ class ParallelTransitionsTest {
                     }
                 }
             }
+        }
+    }
+
+    @Test
+    void steadyStateAnalysisVariants() {
+
+        Supplier<StopCriterion> cond = () -> new MarkingConditionStopCriterion("p3 > 1");
+        List<Supplier<StopCriterion>> conditions = Arrays.asList(null, cond);
+
+        for (final Supplier<StopCriterion> stopOn : conditions) {
+
+            RegSteadyState.Builder builder = RegSteadyState.builder();
+            if (stopOn != null)
+                builder.stopOn(stopOn);
+
+            RegSteadyState analysis = builder.build();
+
+            // check that parameters are set correctly
+            if (stopOn == null)
+                assertEquals(AlwaysFalseStopCriterion.class,
+                        analysis.stopOn().get().getClass());
+            else
+                assertEquals(stopOn, analysis.stopOn());
+
+            SteadyStateSolution<Marking> result =
+                    analysis.compute(pn, marking);
+
+            assertEquals(stopOn == null ? 6 : 5,
+                    result.getSteadyState().keySet().size());
+
+            double maxError = 0.000001;
+            double sum = result.getSteadyState().values().stream()
+                    .reduce(BigDecimal.ZERO, BigDecimal::add).doubleValue();
+            assertTrue(Math.abs(1 - sum) < maxError);
         }
     }
 }

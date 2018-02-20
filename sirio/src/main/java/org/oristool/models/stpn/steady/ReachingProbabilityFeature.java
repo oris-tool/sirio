@@ -21,6 +21,10 @@ import java.math.BigDecimal;
 
 import org.oristool.analyzer.state.StateFeature;
 
+/**
+ * State feature encoding reaching probabilities in the trees of stochastic
+ * state classes.
+ */
 class ReachingProbabilityFeature implements StateFeature {
 
     private BigDecimal reachingProbability;
