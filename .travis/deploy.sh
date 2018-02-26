@@ -82,7 +82,7 @@ echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --quiet --import
 echo $GPG_OWNERTRUST  | base64 --decode | $GPG_EXECUTABLE --quiet --import-ownertrust
 
 echo -e "$INFO Deploying to the Central Repository..."
-# mvn clean deploy --settings ../.travis/settings.xml -DskipTests=true -B -U -P release
+mvn clean deploy --settings ../.travis/settings.xml -DskipTests=true -B -U -P release
 
 echo -e "$INFO Publishing new Javadoc to: www.oris-tool.org/apidoc."
 
