@@ -2,6 +2,46 @@
 
 [![Build Status](https://travis-ci.org/oris-tool/sirio.svg?branch=master)](https://travis-ci.org/oris-tool/sirio)
 
+## Installation
+
+Currently, we recommend version `2.0.0-SNAPSHOT` of Sirio. To add this 
+dependency to your Maven project, just insert the following lines into 
+your `pom.xml`:
+
+```xml
+<repositories>
+  <repository>
+    <id>oss-snapshots</id>
+    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    <releases><enabled>false</enabled></releases>
+    <snapshots><enabled>true</enabled></snapshots>
+  </repository>
+</repositories>
+
+<dependencies>
+  <dependency>
+    <groupId>org.oris-tool</groupId>
+    <artifactId>sirio</artifactId>
+    <version>2.0.0-SNAPSHOT</version>
+  </dependency>
+</dependencies>
+```
+
+Since Sirio requires Java 9, you will also need to set the following
+properties in `pom.xml`:
+
+```xml
+<properties>
+  <maven.compiler.source>9</maven.compiler.source>
+  <maven.compiler.target>9</maven.compiler.target>
+</properties>
+```
+
+If you are looking for a **ready-to-use project to import into Eclipse**, 
+please check the
+[sirio-examples](https://github.com/oris-tool/sirio-examples)
+repository.
+
 ## Introduction
 
 Sirio is a library for the analysis of **stochastic time Petri nets**
