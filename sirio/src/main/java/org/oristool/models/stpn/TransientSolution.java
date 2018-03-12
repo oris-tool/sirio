@@ -23,10 +23,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.MarkingCondition;
 
+/**
+ * Transient probabilities from many initial states.
+ *
+ * @param <R> type of initial states (such as regenerations)
+ * @param <S> type of reachable states (such as markings)
+ */
 public class TransientSolution<R, S> {
     private BigDecimal timeLimit;
     private BigDecimal step;
@@ -38,20 +46,53 @@ public class TransientSolution<R, S> {
 
     double[][][] solution;
 
-    public R getInitialRegeneration() {
-        return initialRegeneration;
+    private TransientSolution() {
+
     }
 
-    public TransientSolution(BigDecimal timeLimit, BigDecimal step, List<R> regenerations,
-            List<S> columnStates) {
-        this(timeLimit, step, regenerations, columnStates, regenerations.get(0));
+    /**
+     * Prepares a new instance from a given array.
+     *
+     * @param <S> type of reachable states (such as markings)
+     * @param probs array of transient probabilities for each time/state
+     * @param step time step between solutions in the array
+     * @param statePos mapping from states to position
+     * @param initialState initial state of the analysis
+     * @return a new transient solution backed by the input parameters
+     */
+    public static <S> TransientSolution<S, S> fromArray(double[][] probs,
+            double step, Map<S, Integer> statePos, S initialState) {
+
+        TransientSolution<S, S> solution = new TransientSolution<>();
+        solution.timeLimit = new BigDecimal(step * probs.length);
+        solution.step = new BigDecimal(step);
+        solution.samplesNumber = probs.length;
+        solution.initialRegeneration = initialState;
+        solution.regenerations = List.of(initialState);
+        solution.columnStates = statePos.entrySet().stream()
+                .sorted(Map.Entry.<S, Integer>comparingByValue())
+                .map(e -> e.getKey()).collect(Collectors.toList());
+        solution.solution = new double[probs.length][1][statePos.size()];
+        for (int t = 0; t < probs.length; t++)
+            for (int j = 0; j < statePos.size(); j++)
+                solution.solution[t][0][j] = probs[t][j];
+        return solution;
     }
 
-    public TransientSolution(BigDecimal timeLimit, BigDecimal step, List<R> regenerations,
+    /**
+     * Prepares a new instance and allocates the vector of probabilities.
+     *
+     * @param timeBound time bound for of the time series
+     * @param timeStep time step
+     * @param regenerations initial states
+     * @param columnStates reachable states
+     * @param initialRegeneration first initial state
+     */
+    public TransientSolution(BigDecimal timeBound, BigDecimal timeStep, List<R> regenerations,
             List<S> columnStates, R initialRegeneration) {
-        this.timeLimit = timeLimit;
-        this.step = step;
-        this.samplesNumber = timeLimit.divide(step, MathContext.DECIMAL128).intValue() + 1;
+        this.timeLimit = timeBound;
+        this.step = timeStep;
+        this.samplesNumber = timeBound.divide(timeStep, MathContext.DECIMAL128).intValue() + 1;
         this.initialRegeneration = initialRegeneration;
 
         this.regenerations = new ArrayList<R>(regenerations);
@@ -87,6 +128,15 @@ public class TransientSolution<R, S> {
         return b.toString();
     }
 
+    /**
+     * Returns the first initial state of the analysis.
+     *
+     * @return first initial state
+     */
+    public R getInitialRegeneration() {
+        return initialRegeneration;
+    }
+
     public BigDecimal getTimeLimit() {
         return timeLimit;
     }
@@ -111,9 +161,14 @@ public class TransientSolution<R, S> {
         return solution;
     }
 
+    /**
+     * Computes the integral of each time series.
+     *
+     * @return a transient solution with cumulative values
+     */
     public TransientSolution<R, S> computeIntegralSolution() {
         TransientSolution<R, S> integralSolution = new TransientSolution<R, S>(this.timeLimit,
-                this.step, this.regenerations, this.columnStates);
+                this.step, this.regenerations, this.columnStates, this.regenerations.get(0));
 
         for (int t = 1; t < integralSolution.solution.length; ++t)
             for (int i = 0; i < integralSolution.solution[t].length; ++i)
@@ -125,6 +180,14 @@ public class TransientSolution<R, S> {
         return integralSolution;
     }
 
+    /**
+     * Aggregates the marking probabilities based on a predicate.
+     *
+     * @param <R> type of initial states (such as regenerations)
+     * @param solution input solution
+     * @param markingConditions string of marking conditions separated by comma
+     * @return transient probabilities for each marking condition
+     */
     public static <R> TransientSolution<R, MarkingCondition> computeAggregateSolution(
             TransientSolution<R, Marking> solution, String markingConditions) {
 
@@ -133,21 +196,27 @@ public class TransientSolution<R, S> {
         for (int i = 0; i < c.length; ++i)
             mc[i] = MarkingCondition.fromString(c[i]);
 
-        return computeAggregateSolution(solution, mc);
+        return computeAggregateSolution(solution, solution.getInitialRegeneration(), mc);
     }
 
-    public static <R> TransientSolution<R, MarkingCondition> computeAggregateSolution(
-            TransientSolution<R, Marking> solution, MarkingCondition... markingConditions) {
-        return computeAggregateSolution(solution, solution.regenerations.get(0), markingConditions);
-    }
 
+    /**
+     * Aggregates the marking probabilities based on a predicate.
+     *
+     * @param <R> type of initial states (such as regenerations)
+     * @param solution input solution
+     * @param initialRegeneration first initial state
+     * @param markingConditions marking conditions
+     * @return transient probabilities for each marking condition
+     */
     public static <R> TransientSolution<R, MarkingCondition> computeAggregateSolution(
             TransientSolution<R, Marking> solution, R initialRegeneration,
             MarkingCondition... markingConditions) {
 
-        TransientSolution<R, MarkingCondition> aggregateSolution = new TransientSolution<R, MarkingCondition>(
-                solution.timeLimit, solution.step, Collections.singletonList(initialRegeneration),
-                Arrays.asList(markingConditions));
+        TransientSolution<R, MarkingCondition> aggregateSolution =
+                new TransientSolution<R, MarkingCondition>(solution.timeLimit, solution.step,
+                        Collections.singletonList(initialRegeneration),
+                        Arrays.asList(markingConditions), initialRegeneration);
 
         int initialRegenerationIndex = solution.regenerations.indexOf(initialRegeneration);
 
@@ -155,11 +224,21 @@ public class TransientSolution<R, S> {
             for (int m = 0; m < solution.columnStates.size(); ++m)
                 if (markingConditions[j].evaluate(solution.columnStates.get(m)))
                     for (int t = 0; t < aggregateSolution.solution.length; ++t)
-                        aggregateSolution.solution[t][0][j] += solution.solution[t][initialRegenerationIndex][m];
+                        aggregateSolution.solution[t][0][j]
+                                += solution.solution[t][initialRegenerationIndex][m];
 
         return aggregateSolution;
     }
 
+    /**
+     * Computes rewards from a transient solution (only for the first initial state).
+     *
+     * @param <R> type of initial states (such as regenerations)
+     * @param cumulative whether to compute cumulative rewards
+     * @param solution input transient solution
+     * @param rewardRates list of rewards separated by semicolon
+     * @return transient rewards for each reward expression
+     */
     public static <R> TransientSolution<R, RewardRate> computeRewards(boolean cumulative,
             TransientSolution<R, Marking> solution, String rewardRates) {
 
@@ -168,21 +247,26 @@ public class TransientSolution<R, S> {
         for (int i = 0; i < c.length; ++i)
             rs[i] = RewardRate.fromString(c[i]);
 
-        return computeRewards(cumulative, solution, rs);
+        return computeRewards(cumulative, solution,  rs);
     }
 
+    /**
+     * Computes rewards from a transient solution (only for the first initial state).
+     *
+     * @param <R> type of initial states (such as regenerations)
+     * @param cumulative whether to compute cumulative rewards
+     * @param solution input transient solution
+     * @param rewardRates list of rewards separated by semicolon
+     * @return transient rewards for each reward expression
+     */
     public static <R> TransientSolution<R, RewardRate> computeRewards(boolean cumulative,
             TransientSolution<R, Marking> solution, RewardRate... rewardRates) {
-        return computeRewards(cumulative, solution, solution.regenerations.get(0), rewardRates);
-    }
 
-    public static <R> TransientSolution<R, RewardRate> computeRewards(boolean cumulative,
-            TransientSolution<R, Marking> solution, R initialRegeneration,
-            RewardRate... rewardRates) {
+        R initialRegeneration = solution.getInitialRegeneration();
 
         TransientSolution<R, RewardRate> rewards = new TransientSolution<R, RewardRate>(
                 solution.timeLimit, solution.step, Collections.singletonList(initialRegeneration),
-                Arrays.asList(rewardRates));
+                Arrays.asList(rewardRates), initialRegeneration);
 
         int initialRegenerationIndex = solution.regenerations.indexOf(initialRegeneration);
 

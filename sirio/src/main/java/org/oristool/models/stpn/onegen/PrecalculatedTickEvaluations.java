@@ -31,24 +31,17 @@ class PrecalculatedTickEvaluations {
 
     public PrecalculatedTickEvaluations(Ticks ticks, Map<State, double[]> transientsPerState,
             List<OmegaBigDecimal> pdfEvals, List<OmegaBigDecimal> cdfEvals) {
-        super();
 
         if (transientsPerState.isEmpty()) {
             throw new IllegalArgumentException("Empty transient");
         }
 
         int n = ticks.getIntegralTicks().size();
+
         if (pdfEvals.size() != n || transientsPerState.values().iterator().next().length != n
                 || cdfEvals.size() != n) {
-            StringBuilder strBuilder = new StringBuilder();
-            strBuilder.append("pdfEvaluation, cdfEvaluation and trasientsEvaluation "
-                    + "must have the same size;\n");
-            strBuilder.append("provided input was:\n");
-            strBuilder.append("-pdfEvaluation size: " + pdfEvals.size() + "\n");
-            strBuilder.append("-cdfEvaluation size: " + cdfEvals.size() + "\n");
-            strBuilder.append("-transientsEvaluation size: "
-                    + transientsPerState.values().iterator().next().length + "\n");
-            throw new IllegalArgumentException(strBuilder.toString());
+            throw new IllegalArgumentException(
+                    "pdfEvaluation, cdfEvaluation and trasientsEvaluation must have the same size");
         }
 
         this.transientsPerState = transientsPerState;

@@ -277,7 +277,7 @@ public class GEN implements Function {
     public void substituteAndShift(Variable oldVar, Variable newVar,
             BigDecimal constant) {
 
-        List<Variable> domainVars = new ArrayList<Variable>(
+        List<Variable> domainVars = new ArrayList<>(
                 domain.getVariables());
 
         domain.substitute(Variable.TSTAR, newVar, constant.negate());
@@ -489,7 +489,8 @@ public class GEN implements Function {
 
         // rate * exp(rate*shift) * exp(-rate*X)
         Exmonomial monomial = new Exmonomial(rate);
-        monomial.multiply(new ExponentialTerm(Variable.X, rate.negate()).evaluate(new OmegaBigDecimal(shift)));
+        monomial.multiply(new ExponentialTerm(Variable.X, rate.negate())
+                .evaluate(new OmegaBigDecimal(shift)));
         monomial.addAtomicTerm(new ExponentialTerm(Variable.X, rate));
 
         Expolynomial expol = new Expolynomial();

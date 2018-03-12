@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,14 +30,15 @@ import org.oristool.math.OmegaBigDecimal;
 import org.oristool.math.expression.Expolynomial;
 import org.oristool.math.expression.Variable;
 import org.oristool.math.function.PartitionedFunction;
-import org.oristool.models.gspn.CTMCTransientSolution;
+import org.oristool.models.gspn.chains.CTMCTransient;
+import org.oristool.models.gspn.chains.DTMC;
+import org.oristool.util.Pair;
 
 class KernelRow {
     class KernelRowEvaluator {
         private PrecalculatedTickEvaluations evaluations;
 
         private KernelRowEvaluator(PrecalculatedTickEvaluations evaluations) {
-            super();
             this.evaluations = evaluations;
         }
 
@@ -57,12 +59,11 @@ class KernelRow {
 
     private BoundedExpolynomial pdf;
     private BoundedExpolynomial cdf;
-    private CTMCTransientSolution transientSolution;
+    private DTMC<OneGenState> ctmc;
     private Map<State, KernelFormula> localKernelEntries;
     private Map<State, KernelFormula> globalKernelEntries;
 
     public KernelRow() {
-        super();
         setNullPdf();
     }
 
@@ -77,8 +78,10 @@ class KernelRow {
     }
 
     public void setPdf(PartitionedFunction pdf) {
+
         if (pdf == null) {
             setNullPdf();
+
         } else if (pdf.getDensities().size() != 1) {
             throw new UnsupportedOperationException(
                     "Analysis under enabling restriction with piecewise GEN not yet supported");
@@ -86,16 +89,19 @@ class KernelRow {
             Expolynomial law = pdf.getDensities().get(0);
             Collection<Variable> vars = law.getVariables();
             Variable pdfVariable;
+
             if (vars.size() > 1) {
                 throw new IllegalStateException("Multivariate PDF");
+
             } else if (vars.size() < 1) {
                 pdfVariable = Variable.X;
+
             } else {
                 pdfVariable = vars.iterator().next();
             }
 
-            OmegaBigDecimal domainUpperBound = pdf.getDomains().get(0).getCoefficient(pdfVariable,
-                    Variable.TSTAR);
+            OmegaBigDecimal domainUpperBound = pdf.getDomains().get(0)
+                    .getCoefficient(pdfVariable, Variable.TSTAR);
             OmegaBigDecimal domainLowerBound = pdf.getDomains().get(0)
                     .getCoefficient(Variable.TSTAR, pdfVariable).negate();
             this.pdf = new BoundedExpolynomial(law, pdfVariable, domainLowerBound,
@@ -114,8 +120,8 @@ class KernelRow {
         this.globalKernelEntries = globalKernelEntries;
     }
 
-    public void setTransientSolution(CTMCTransientSolution transientSolution) {
-        this.transientSolution = transientSolution;
+    public void setCTMC(DTMC<OneGenState> ctmc) {
+        this.ctmc = ctmc;
     }
 
     public KernelRowEvaluator getEvaluator(Ticks ticks, BigDecimal step, BigDecimal error) {
@@ -129,9 +135,8 @@ class KernelRow {
 
         if (pdf.getLowerBound().equals(pdf.getUpperBound())
                 && pdf.getUpperBound().doubleValue() != 0) {
-            // Is a DET
-            // DET is a special case since its PDF is a Dirac delta, for this reason its
-            // duration is infinitely small
+
+            // DET is a special case since its PDF is a Dirac delta
             int integralTick = OmegaBigDecimal.ONE
                     .divide(ticks.getIntegralTickStep(), MathContext.DECIMAL128).intValue();
             for (int i = 0; i < pdfEvals.size(); i++) {
@@ -141,11 +146,38 @@ class KernelRow {
             }
         }
 
-        Map<State, double[]> transientsPerState = transientSolution
-                .computeTransients(ticks.getIntegralTicks(), step, error);
+        Pair<Map<State, Integer>, double[][]> solution =
+                CTMCTransient.<State, OneGenState>builder()
+                .error(error.doubleValue())
+                .build().apply(ctmc, toDoubleArray(ticks.getIntegralTicks()));
+
+        Map<State, double[]> transientsPerState = byState(solution.second(), solution.first());
 
         KernelRowEvaluator evaluator = new KernelRowEvaluator(
                 new PrecalculatedTickEvaluations(ticks, transientsPerState, pdfEvals, cdfEvals));
+
         return evaluator;
+    }
+
+    private static double[] toDoubleArray(List<BigDecimal> values) {
+        double[] doubleArray = new double[values.size()];
+        for (int i = 0; i < values.size(); i++)
+            doubleArray[i] = values.get(i).doubleValue();
+        return doubleArray;
+    }
+
+    private static Map<State, double[]> byState(double[][] byTimeProbs,
+            Map<State, Integer> statePos) {
+
+        Map<State, double[]> result = new HashMap<>(statePos.size());
+        for (State s : statePos.keySet()) {
+            int stateIdx = statePos.get(s);
+            double[] stateProbs = new double[byTimeProbs.length];
+            for (int t = 0; t < byTimeProbs.length; t++)
+                stateProbs[t] = byTimeProbs[t][stateIdx];
+            result.put(s, stateProbs);
+        }
+
+        return result;
     }
 }

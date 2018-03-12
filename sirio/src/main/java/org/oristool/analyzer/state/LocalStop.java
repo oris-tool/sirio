@@ -21,5 +21,10 @@ package org.oristool.analyzer.state;
  * State feature tagging states where a local stop criterion was applied.
  */
 public enum LocalStop implements StateFeature {
-    INSTANCE
+    INSTANCE;
+
+    @Override
+    public String toString() {
+        return "LocalStop.INSTANCE";
+    }
 }

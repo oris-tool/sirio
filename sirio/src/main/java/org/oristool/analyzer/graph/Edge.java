@@ -20,7 +20,7 @@ package org.oristool.analyzer.graph;
 /**
  * Edge of a {@code SuccessionGraph}.
  */
-public final class Edge {
+final class Edge {
     private final Node predecessor;
     private final Node successor;
 

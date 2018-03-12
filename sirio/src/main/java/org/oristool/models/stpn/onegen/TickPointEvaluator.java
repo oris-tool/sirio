@@ -27,6 +27,7 @@ class TickPointEvaluator implements TickEvaluator {
         for (int t = 0; t < result.length; t++) {
             result[t] = expression.evaluate(t * ticks.getNumIntegralTicksPerKernelTick());
         }
+
         return result;
     }
 }

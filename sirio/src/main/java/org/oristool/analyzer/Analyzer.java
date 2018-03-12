@@ -53,6 +53,9 @@ import org.oristool.analyzer.stop.StopCriterion;
  *     pre-process (parent, i)           // and notify
  *     G.add((parent, i))                // and notify
  * }</pre>
+ *
+ * @param <M> type of the model
+ * @param <E> type of the events
  */
 public final class Analyzer<M, E extends Event> {
     private final Set<AnalyzerObserver> observers = new LinkedHashSet<>();
@@ -123,14 +126,18 @@ public final class Analyzer<M, E extends Event> {
             this.notifySuccessionInserted(initialSuccession);
         }
 
-        // While queue is not empty and the global stop criterion is not
-        // satisfied
+        // While queue is not empty and the global stop criterion is false
         while (!enumerationPolicy.isEmpty() && !globalStopCriterion.stop()) {
 
-            // Extracts and postprocesses the next succession
+            // Extracts the next succession
             Succession currentSuccession = enumerationPolicy.remove();
             this.notifySuccessionExtracted(currentSuccession);
 
+            // Marks it as local stop if needed
+            if (localStopCriterion.stop())
+                currentSuccession.getChild().addFeature(LocalStop.INSTANCE);
+
+            // Allows preprocessors to modify as needed
             currentSuccession = preProcessor.process(currentSuccession);
             this.notifySuccessionPreProcessed(currentSuccession);
 
@@ -138,13 +145,9 @@ public final class Analyzer<M, E extends Event> {
             boolean newChild = graph.addSuccession(currentSuccession);
             this.notifyNodeAdded(currentSuccession);
 
-            // If new, expands the child of this succession
-            if (localStopCriterion.stop()) {
-                currentSuccession.getChild().addFeature(LocalStop.INSTANCE);
-
-            } else if (newChild) {
-                // Computes successions starting from the child of the current
-                // one
+            // If new and not a stop point, expands the child of this succession
+            if (newChild && !currentSuccession.getChild().hasFeature(LocalStop.class)) {
+                // Computes successions from the child of the current one
                 for (E e : enabledEventsBuilder.getEnabledEvents(model,
                         currentSuccession.getChild())) {
                     Succession childSuccession = successionEvaluator
@@ -152,11 +155,7 @@ public final class Analyzer<M, E extends Event> {
                                     currentSuccession.getChild(), e);
 
                     if (childSuccession != null) {
-                        // FIXME: forse andrebbe spostato fuori dall'if per
-                        // permettere il log delle successioni
-                        // nulle
                         this.notifySuccessionCreated(childSuccession);
-
                         childSuccession = postProcessor
                                 .process(childSuccession);
                         this.notifySuccessionPostProcessed(childSuccession);
@@ -165,10 +164,6 @@ public final class Analyzer<M, E extends Event> {
                         this.notifySuccessionInserted(childSuccession);
                     }
 
-                    // FIXME: questo non funziona con un random stop criterion.
-                    // Mettiamo nel contratto degli StopCriterion che se non
-                    // cambia lo stato
-                    // stop() ritorna sempre il solito valore.
                     if (globalStopCriterion.stop()) {
                         break;
                     }
@@ -176,8 +171,7 @@ public final class Analyzer<M, E extends Event> {
             }
         }
 
-        // se scatta il global stop criterion, aggiunge le le successioni (p,i)
-        // ancora in coda TODO: da disabilitare con opzione
+        // Add remaining successions from the queue
         while (!enumerationPolicy.isEmpty()) {
             Succession finalSuccession = enumerationPolicy.remove();
             this.notifySuccessionExtracted(finalSuccession);

@@ -272,7 +272,7 @@ public abstract class TimedAnalysis implements Engine<PetriNet, Marking, Success
         if (!canAnalyze(pn))
             throw new IllegalArgumentException("Cannot analyze the input Petri net");
 
-        TimedComponentsFactory components = new TimedComponentsFactory(includeAge(), true,
+        TimedComponentsFactory components = new TimedComponentsFactory(includeAge(), false,
                 excludeZeroProb(), markRegenerations(), true, policy().get(), stopOn().get(),
                 monitor(), null, null);
 

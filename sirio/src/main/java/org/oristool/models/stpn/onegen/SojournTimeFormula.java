@@ -19,18 +19,18 @@ package org.oristool.models.stpn.onegen;
 
 class SojournTimeFormula implements KernelFormula {
 
-    private double rateSum;
+    private final double rateSum;
 
     public SojournTimeFormula(double outgoingRateSum) {
-        super();
         this.rateSum = outgoingRateSum;
     }
 
     @Override
     public double[] compute(PrecalculatedTickEvaluations evaluations) {
-        TickExpression expression = t -> Math
-                .exp(-rateSum * evaluations.getTicks().getIntegralTick(t).doubleValue())
+        TickExpression expression = t ->
+            Math.exp(-rateSum * evaluations.getTicks().getIntegralTick(t).doubleValue())
                 * (1 - evaluations.getCdfAt(t));
+
         return new TickPointEvaluator().evaluate(expression, evaluations.getTicks());
     }
 

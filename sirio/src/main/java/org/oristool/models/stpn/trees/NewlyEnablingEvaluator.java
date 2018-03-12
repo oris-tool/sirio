@@ -79,9 +79,9 @@ public class NewlyEnablingEvaluator implements SuccessionProcessor {
                 if (!isZeroInf
                         || !t.hasFeature(StochasticTransitionFeature.class)
                         || !(t.getFeature(StochasticTransitionFeature.class)
-                                .getFiringTimeDensity().getDensities().size() == 1)
+                                .density().getDensities().size() == 1)
                         || !(t.getFeature(StochasticTransitionFeature.class)
-                                .getFiringTimeDensity().getDensities().get(0).isExponential())) {
+                                .density().getDensities().get(0).isExponential())) {
 
                     isRegenerative = false;
                     break;

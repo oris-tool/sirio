@@ -21,6 +21,8 @@ import java.util.Objects;
 
 /**
  * Immutable pair of elements.
+ * @param <A> type of first element
+ * @param <B> type of second element
  */
 public class Pair<A, B> {
 

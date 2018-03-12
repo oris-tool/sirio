@@ -15,9 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.models.gspn;
+package org.oristool.models.gspn.reachability;
 
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.oristool.analyzer.AnalyzerComponentsFactory;
@@ -31,45 +30,34 @@ import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.stop.AlwaysFalseStopCriterion;
 import org.oristool.analyzer.stop.MonitorStopCriterion;
 import org.oristool.analyzer.stop.StopCriterion;
-import org.oristool.models.pn.MarkingConditionStopCriterion;
-import org.oristool.models.pn.MarkingUpdater;
-import org.oristool.models.pn.PetriStateFeature;
-import org.oristool.models.pn.PetriSuccessionEvaluator;
-import org.oristool.models.pn.PetriTokensAdder;
-import org.oristool.models.pn.PetriTokensRemover;
-import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Marking;
-import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
+import org.oristool.util.Pair;
 
-class GSPNReachabilityComponentsFactory implements
+/**
+ * Factory of objects driving the state-space exploration for GSPNs.
+ */
+class GSPNReachabilityFactory implements
         AnalyzerComponentsFactory<PetriNet, Transition> {
 
     private EnumerationPolicy policy;
-    private PetriSuccessionEvaluator petriSuccessionEvaluator;
+    private SuccessionEvaluator<PetriNet, Transition> successionEvaluator;
 
     private StopCriterion localStopCriterion;
     private StopCriterion globalStopCriterion;
 
-    public GSPNReachabilityComponentsFactory(MarkingUpdater tokensRemover,
-            MarkingUpdater tokensAdder, boolean distinctNewlyEnabledConditions,
-            EnumerationPolicy policy, MarkingCondition stopCondition,
-            AnalysisMonitor monitor) {
+    public GSPNReachabilityFactory(EnumerationPolicy policy,
+            StopCriterion stopCondition, AnalysisMonitor monitor) {
 
         this.policy = policy;
 
-        this.petriSuccessionEvaluator = new PetriSuccessionEvaluator(
-                tokensRemover != null ? tokensRemover
-                        : new PetriTokensRemover(),
-                tokensAdder != null ? tokensAdder : new PetriTokensAdder(),
-                distinctNewlyEnabledConditions);
+        this.successionEvaluator = new GSPNSuccessionEvaluator();
 
         if (stopCondition == null)
             localStopCriterion = new AlwaysFalseStopCriterion();
         else
-            localStopCriterion = new MarkingConditionStopCriterion(
-                    stopCondition);
+            localStopCriterion = stopCondition;
 
         if (monitor == null)
             globalStopCriterion = new AlwaysFalseStopCriterion();
@@ -87,35 +75,15 @@ class GSPNReachabilityComponentsFactory implements
 
         return new EnabledEventsBuilder<PetriNet, Transition>() {
             @Override
-            public Set<Transition> getEnabledEvents(PetriNet petriNet,
-                    State state) {
-                Set<Transition> enabled = state.getFeature(PetriStateFeature.class).getEnabled();
-                Marking m = state.getFeature(PetriStateFeature.class).getMarking();
+            public Set<Transition> getEnabledEvents(PetriNet pn, State state) {
+                Marking m = state.getFeature(SPNState.class).state();
+                Pair<Set<Transition>, Set<Transition>> enabled =
+                        GSPNSuccessionEvaluator.enabledTransitions(m, pn);
 
-                Set<Transition> imm = new LinkedHashSet<Transition>();
-                Set<Transition> exp = new LinkedHashSet<Transition>();
+                Set<Transition> imm = enabled.first();
+                Set<Transition> exp = enabled.second();
 
-                for (Transition t : enabled)
-                    if (t.hasFeature(RateExpressionFeature.class)
-                            && t.getFeature(RateExpressionFeature.class)
-                                .getRate(petriNet, m) > 0.0) {
-
-                        exp.add(t);
-
-                    } else if (t.hasFeature(WeightExpressionFeature.class)
-                               && t.getFeature(WeightExpressionFeature.class)
-                                   .getWeight(petriNet, m) > 0.0
-                               && (!t.hasFeature(StochasticTransitionFeature.class)
-                               || t.getFeature(StochasticTransitionFeature.class).isIMM())) {
-
-                        imm.add(t);
-
-                    } else {
-                        throw new IllegalArgumentException(
-                                "In GSPNs, transitions should either be EXP or IMM");
-                    }
-
-                if (imm.size() > 0)
+                if (!imm.isEmpty())
                     return imm;
                 else
                     return exp;
@@ -125,7 +93,7 @@ class GSPNReachabilityComponentsFactory implements
 
     @Override
     public SuccessionEvaluator<PetriNet, Transition> getSuccessionEvaluator() {
-        return petriSuccessionEvaluator;
+        return successionEvaluator;
     }
 
     @Override
@@ -147,5 +115,4 @@ class GSPNReachabilityComponentsFactory implements
     public StopCriterion getGlobalStopCriterion() {
         return globalStopCriterion;
     }
-
 }

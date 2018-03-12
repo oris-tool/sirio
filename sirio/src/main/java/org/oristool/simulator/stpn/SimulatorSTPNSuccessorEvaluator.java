@@ -17,10 +17,14 @@
 
 package org.oristool.simulator.stpn;
 
+import java.math.BigDecimal;
+
 import org.oristool.analyzer.Succession;
 import org.oristool.analyzer.state.State;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.pn.PetriSuccessionEvaluator;
+import org.oristool.models.stpn.trees.StochasticTransitionFeature;
+import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
 import org.oristool.simulator.SimulatorSuccessorEvaluator;
@@ -42,9 +46,15 @@ public final class SimulatorSTPNSuccessorEvaluator implements SimulatorSuccessor
         TimedSimulatorStateFeature newTimedFeature = new TimedSimulatorStateFeature();
 
         for (Transition t : succession.getChild().getFeature(PetriStateFeature.class)
-                .getPersistent())
+                .getPersistent()) {
+            Marking m = succession.getParent().getFeature(PetriStateFeature.class).getMarking();
+            BigDecimal rate = new BigDecimal(
+                    t.getFeature(StochasticTransitionFeature.class).rate().evaluate(m));
+            BigDecimal elapsed = oldTimedFeature.getTimeToFire(fired).divide(rate);
+
             newTimedFeature.setTimeToFire(t, oldTimedFeature.getTimeToFire(t)
-                    .subtract(oldTimedFeature.getTimeToFire(fired)));
+                    .subtract(elapsed));
+        }
 
         for (Transition t : succession.getChild().getFeature(PetriStateFeature.class)
                 .getNewlyEnabled())
@@ -53,5 +63,4 @@ public final class SimulatorSTPNSuccessorEvaluator implements SimulatorSuccessor
         succession.getChild().addFeature(newTimedFeature);
         return succession;
     }
-
 }

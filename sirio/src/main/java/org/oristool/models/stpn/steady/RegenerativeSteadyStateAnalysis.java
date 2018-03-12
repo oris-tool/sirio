@@ -53,7 +53,7 @@ import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
 
-public class RegenerativeSteadyStateAnalysis<R> {
+class RegenerativeSteadyStateAnalysis<R> {
 
     private Set<Marking> reachableMarkings;
     private Map<R, Map<Marking, BigDecimal>> sojournMap;

@@ -38,7 +38,6 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.oristool.analyzer.Analyzer;
 import org.oristool.analyzer.Succession;
 import org.oristool.analyzer.SuccessionProcessor;
-import org.oristool.analyzer.graph.Edge;
 import org.oristool.analyzer.graph.Node;
 import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.log.AnalysisLogger;
@@ -392,7 +391,7 @@ class RegenerativeTransientAnalysis<R> {
 
                         Set<Variable> exps = stochasticFeature.getEXPVariables();
                         for (Node m : graph.getSuccessors(n)) {
-                            Succession succ = graph.getSuccessions(new Edge(n, m)).iterator()
+                            Succession succ = graph.getSuccessions(n, m).iterator()
                                     .next();
                             Transition t = (Transition) succ.getEvent();
                             Variable tau = new Variable(t.getName());
@@ -422,7 +421,7 @@ class RegenerativeTransientAnalysis<R> {
                         Set<Transition> notFiredEnabledTransitions = petriNet
                                 .getEnabledTransitions(petriFeature.getMarking());
                         for (Node m : graph.getSuccessors(n))
-                            for (Succession succ : graph.getSuccessions(new Edge(n, m)))
+                            for (Succession succ : graph.getSuccessions(n, m))
                                 if (!notFiredEnabledTransitions.contains(succ.getEvent()))
                                     throw new IllegalStateException(
                                             "A not enabled transition fired in the graph");
@@ -616,7 +615,7 @@ class RegenerativeTransientAnalysis<R> {
 
         // Builds a representation of the transient solution
         TransientSolution<R, Marking> p = new TransientSolution<R, Marking>(timeLimit, step,
-                regenerations, columnMarkings);
+                regenerations, columnMarkings, this.getInitialRegeneration());
         if (logger != null)
             logger.log(p.getSamplesNumber() + " solution samples\n");
 

@@ -176,8 +176,8 @@ public final class SuccessionGraph {
         return r;
     }
 
-    public Set<Succession> getSuccessions(Edge e) {
-        return successions.get(e);
+    public Set<Succession> getSuccessions(Node n1, Node n2) {
+        return successions.get(new Edge(n1, n2));
     }
 
     /**
@@ -187,7 +187,7 @@ public final class SuccessionGraph {
      * @return a set of successions
      */
     public Set<Succession> getIncomingSuccessions(Node n) {
-        Set<Succession> ingoingSuccessions = new LinkedHashSet<Succession>();
+        Set<Succession> ingoingSuccessions = new LinkedHashSet<>();
 
         for (Node predecessor : predecessors.get(n))
             ingoingSuccessions.addAll(successions.get(new Edge(predecessor, n)));
@@ -202,7 +202,7 @@ public final class SuccessionGraph {
      * @return a set of successions
      */
     public Set<Succession> getOutgoingSuccessions(Node n) {
-        Set<Succession> outgoingSuccessions = new LinkedHashSet<Succession>();
+        Set<Succession> outgoingSuccessions = new LinkedHashSet<>();
 
         for (Node successor : successors.get(n))
             outgoingSuccessions.addAll(successions.get(new Edge(n, successor)));

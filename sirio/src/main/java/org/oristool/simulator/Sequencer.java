@@ -31,7 +31,6 @@ import org.oristool.math.OmegaBigDecimal;
 import org.oristool.math.function.EXP;
 import org.oristool.math.function.Erlang;
 import org.oristool.math.function.Function;
-import org.oristool.models.gspn.WeightExpressionFeature;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.pn.Priority;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
@@ -95,28 +94,28 @@ public class Sequencer {
             if (!t.hasFeature(SamplerFeature.class))
                 if (t.hasFeature(StochasticTransitionFeature.class)) {
                     StochasticTransitionFeature s = t.getFeature(StochasticTransitionFeature.class);
-                    OmegaBigDecimal eft = s.getFiringTimeDensity().getDomainsEFT();
-                    OmegaBigDecimal lft = s.getFiringTimeDensity().getDomainsLFT();
+                    OmegaBigDecimal eft = s.density().getDomainsEFT();
+                    OmegaBigDecimal lft = s.density().getDomainsLFT();
 
-                    if (s.getFiringTimeDensity() instanceof EXP)
+                    if (s.density() instanceof EXP)
                         t.addFeature(new SamplerFeature(
-                                new ExponentialSampler(((EXP) s.getFiringTimeDensity()))));
+                                new ExponentialSampler(((EXP) s.density()))));
 
-                    else if (s.getFiringTimeDensity() instanceof Erlang)
+                    else if (s.density() instanceof Erlang)
                         t.addFeature(new SamplerFeature(
-                                new ErlangSampler((Erlang) s.getFiringTimeDensity())));
+                                new ErlangSampler((Erlang) s.density())));
 
-                    else if (s.getFiringTimeDensity().getDensities().size() == 1
-                            && s.getFiringTimeDensity().getDensities().get(0).isConstant())
+                    else if (s.density().getDensities().size() == 1
+                            && s.density().getDensities().get(0).isConstant())
                         // assumes a uniform distribution on the domain
                         t.addFeature(new SamplerFeature(
                                 new UniformSampler(eft.bigDecimalValue(), lft.bigDecimalValue())));
 
-                    else if (s.getFiringTimeDensity() instanceof Function)
+                    else if (s.density() instanceof Function)
                         // throw new IllegalArgumentException("No default sampler is available for
                         // the transition "+t);
                         t.addFeature(new SamplerFeature(
-                                new MetropolisHastings((Function) s.getFiringTimeDensity())));
+                                new MetropolisHastings((Function) s.density())));
 
                     else
                         new IllegalArgumentException(
@@ -165,21 +164,24 @@ public class Sequencer {
                 logger.debug("Enabled transitions: " + enabledTransitions);
 
                 BigDecimal minTimeToFire = null;
-                for (Transition t : enabledTransitions) {
-                    BigDecimal ttf = currentSimulatorState
-                            .getFeature(TimedSimulatorStateFeature.class).getTimeToFire(t);
-                    if (minTimeToFire == null || minTimeToFire.compareTo(ttf) > 0)
-                        minTimeToFire = ttf;
-                }
-                logger.debug("Minimum time to fire: " + minTimeToFire);
+                List<Transition> minTimeToFireTransitions = null;
 
-                List<Transition> minTimeToFireTransitions = new ArrayList<Transition>();
                 for (Transition t : enabledTransitions) {
                     BigDecimal ttf = currentSimulatorState
-                            .getFeature(TimedSimulatorStateFeature.class).getTimeToFire(t);
+                            .getFeature(TimedSimulatorStateFeature.class).getTimeToFire(t)
+                            .divide(new BigDecimal(
+                                    t.getFeature(StochasticTransitionFeature.class)
+                                    .rate().evaluate(m)));
+
+                    if (minTimeToFire == null || minTimeToFire.compareTo(ttf) > 0) {
+                        minTimeToFire = ttf;
+                        minTimeToFireTransitions = new ArrayList<Transition>();
+                    }
+
                     if (ttf.compareTo(minTimeToFire) == 0)
                         minTimeToFireTransitions.add(t);
                 }
+                logger.debug("Minimum time to fire: " + minTimeToFire);
                 logger.debug("Transitions with minimum time to fire: " + minTimeToFireTransitions);
 
                 int maxPriority = -1;
@@ -244,10 +246,7 @@ public class Sequencer {
     }
 
     private BigDecimal getWeight(Transition t, PetriNet n, Marking m) {
-        if (t.hasFeature(WeightExpressionFeature.class))
-            return new BigDecimal(t.getFeature(WeightExpressionFeature.class).getWeight(n, m));
-        else
-            return t.getFeature(StochasticTransitionFeature.class).getWeight();
+        return new BigDecimal(t.getFeature(StochasticTransitionFeature.class).weight().evaluate(m));
     }
 
     /**

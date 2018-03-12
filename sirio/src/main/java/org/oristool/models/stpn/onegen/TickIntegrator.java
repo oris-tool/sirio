@@ -17,27 +17,19 @@
 
 package org.oristool.models.stpn.onegen;
 
-import java.math.BigDecimal;
-
 class TickIntegrator implements TickEvaluator {
-
-    public TickIntegrator() {
-        super();
-    }
 
     @Override
     public double[] evaluate(TickExpression expression, Ticks ticks) {
 
-        BigDecimal base = ticks.getIntegralTickStep();
+        double integralTickStep = ticks.getIntegralTickStep().doubleValue();
+        double[] integrals = new double[ticks.getNumKernelTicks()];
 
-        int nKernelTicks = ticks.getNumKernelTicks();
-        double baseDoubleValue = base.doubleValue();
-        double[] integrals = new double[nKernelTicks];
-        double partialSum = 0;
+        double partialSum = 0.0;
         int kernelTick = 0;
 
         for (int t = 0; t < ticks.getIntegralTicks().size(); t++) {
-            partialSum += expression.evaluate(t) * baseDoubleValue;
+            partialSum += expression.evaluate(t) * integralTickStep;
             if (ticks.isKernelTick(t)) {
                 integrals[kernelTick] = partialSum;
                 kernelTick++;
@@ -46,5 +38,4 @@ class TickIntegrator implements TickEvaluator {
 
         return integrals;
     }
-
 }

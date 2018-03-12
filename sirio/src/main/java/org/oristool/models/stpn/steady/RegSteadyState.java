@@ -30,6 +30,7 @@ import org.oristool.analyzer.stop.AlwaysFalseStopCriterion;
 import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.models.Engine;
 import org.oristool.models.ValidationMessageCollector;
+import org.oristool.models.stpn.MarkingExpr;
 import org.oristool.models.stpn.SteadyStateSolution;
 import org.oristool.models.stpn.trees.DeterministicEnablingState;
 import org.oristool.models.stpn.trees.DeterministicEnablingStateBuilder;
@@ -195,6 +196,12 @@ public abstract class RegSteadyState
             if (!t.hasFeature(StochasticTransitionFeature.class)) {
                 canAnalyze = false;
                 c.addError("Transition '" + t + "' is not stochastic");
+
+            } else if (!t.getFeature(StochasticTransitionFeature.class).isEXP()
+                    && !t.getFeature(StochasticTransitionFeature.class)
+                        .rate().equals(MarkingExpr.ONE)) {
+                canAnalyze = false;
+                c.addError("Transition '" + t + "' has rate different than 1");
             }
         }
 

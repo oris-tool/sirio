@@ -66,10 +66,10 @@ class DetCyclesTest {
         final Transition t10 = pn.addTransition("t10");
         final Transition t20 = pn.addTransition("t20");
 
-        t01.addFeature(StochasticTransitionFeature.newDeterministicInstance(BigDecimal.ONE));
-        t02.addFeature(StochasticTransitionFeature.newDeterministicInstance(BigDecimal.ONE));
-        t10.addFeature(StochasticTransitionFeature.newDeterministicInstance(BigDecimal.ZERO));
-        t20.addFeature(StochasticTransitionFeature.newDeterministicInstance(BigDecimal.ONE));
+        t01.addFeature(StochasticTransitionFeature.newDeterministicInstance("1"));
+        t02.addFeature(StochasticTransitionFeature.newDeterministicInstance("1"));
+        t10.addFeature(StochasticTransitionFeature.newDeterministicInstance("0"));
+        t20.addFeature(StochasticTransitionFeature.newDeterministicInstance("1"));
 
         pn.addPrecondition(p0, t01);
         pn.addPostcondition(t01, p1);

@@ -48,8 +48,7 @@ import javax.swing.border.TitledBorder;
 import org.oristool.analyzer.Succession;
 import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.state.State;
-import org.oristool.models.pn.PetriStateFeature;
-import org.oristool.petrinet.Marking;
+import org.oristool.models.gspn.reachability.FiringProbability;
 
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.model.mxCell;
@@ -299,7 +298,13 @@ public class SuccessionGraphViewer extends JPanel {
 
                 if (s.getParent() != null) {
                     Object u = addVertex(g, s.getParent(), graph, parent);
-                    graph.insertEdge(parent, null, s.getEvent(), u, v);
+                    String label = s.getEvent().toString();
+                    if (s.hasFeature(StochasticSuccessionFeature.class))
+                        label += "\n" + s.getFeature(StochasticSuccessionFeature.class);
+                    if (s.hasFeature(FiringProbability.class))
+                        label +=  "\n" + s.getFeature(FiringProbability.class);
+
+                    graph.insertEdge(parent, null, label, u, v);
                 }
             }
         } finally {
@@ -315,8 +320,6 @@ public class SuccessionGraphViewer extends JPanel {
         if (stateVertex.containsKey(s)) {
             return stateVertex.get(s);
         } else {
-            Marking marking = s.getFeature(PetriStateFeature.class)
-                    .getMarking();
             int id = g.getNode(s).id();
 
             String style = "";
@@ -325,7 +328,7 @@ public class SuccessionGraphViewer extends JPanel {
             else if (s.hasFeature(Regeneration.class))
                 style = "regenerative";
 
-            Object v = graph.insertVertex(parent, null, id + ": " + marking,
+            Object v = graph.insertVertex(parent, null, id,
                     100, 100, 80, 30, style);
             vertexState.put(v, s);
             stateVertex.put(s, v);

@@ -160,7 +160,6 @@ public class OmegaBigDecimal extends Number implements
      *         to this {@code OmegaBigDecimal}'s or they are both positive
      *         (negative) infinity.
      * @see #compareTo(OmegaBigDecimal)
-     * @see #hashCode
      */
     @Override
     public boolean equals(Object x) {
@@ -518,7 +517,6 @@ public class OmegaBigDecimal extends Number implements
      *         {@code OmegaBigDecimal} and {@code val}. If they are equal, as
      *         defined by the {@link #compareTo(OmegaBigDecimal) compareTo}
      *         method, {@code this} is returned.
-     * @see #compareTo(it.unifi.oris.sirio.math.OmegaBigDecimal)
      */
     public OmegaBigDecimal min(OmegaBigDecimal val) {
         return compareTo(val) <= 0 ? this : val;
@@ -533,7 +531,6 @@ public class OmegaBigDecimal extends Number implements
      *         {@code OmegaBigDecimal} and {@code val}. If they are equal, as
      *         defined by the {@link #compareTo(OmegaBigDecimal) compareTo}
      *         method, {@code this} is returned.
-     * @see #compareTo(it.unifi.oris.sirio.math.OmegaBigDecimal)
      */
     public OmegaBigDecimal max(OmegaBigDecimal val) {
         return compareTo(val) >= 0 ? this : val;

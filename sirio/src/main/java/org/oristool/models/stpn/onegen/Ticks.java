@@ -25,7 +25,7 @@ import java.util.List;
 
 class Ticks {
 
-    private static final MathContext mathCtxt = MathContext.DECIMAL128;
+    private static final MathContext MATH_CTX = MathContext.DECIMAL128;
 
     private final List<BigDecimal> integralTicks;
 
@@ -38,6 +38,7 @@ class Ticks {
         if (kernelTicks < 1) {
             throw new IllegalArgumentException("At least 1 kernel tick is needed");
         }
+
         if (integralTicksPerKernelTick < 1) {
             throw new IllegalArgumentException(
                     "At least 1 integral tick per kernel tick is needed");
@@ -45,17 +46,18 @@ class Ticks {
 
         this.kernelTicks = kernelTicks;
         this.integralTicksPerKernelTick = integralTicksPerKernelTick;
-        this.integralTickStep = end.divide(new BigDecimal(kernelTicks - 1), mathCtxt)
-                .divide(new BigDecimal(integralTicksPerKernelTick), mathCtxt);
+        this.integralTickStep = end
+                .divide(new BigDecimal(kernelTicks - 1), MATH_CTX)
+                .divide(new BigDecimal(integralTicksPerKernelTick), MATH_CTX);
 
-        List<BigDecimal> it = new ArrayList<BigDecimal>();
+        List<BigDecimal> ticks = new ArrayList<>();
         for (BigDecimal tick = BigDecimal.ZERO; tick.compareTo(end) <= 0; tick = tick
                 .add(integralTickStep)) {
-            it.add(tick);
+            ticks.add(tick);
         }
-        assert (it.size() == (kernelTicks - 1) * integralTicksPerKernelTick + 1);
-        integralTicks = Collections.unmodifiableList(it);
 
+        assert (ticks.size() == (kernelTicks - 1) * integralTicksPerKernelTick + 1);
+        integralTicks = Collections.unmodifiableList(ticks);
     }
 
     public boolean isKernelTick(int index) {

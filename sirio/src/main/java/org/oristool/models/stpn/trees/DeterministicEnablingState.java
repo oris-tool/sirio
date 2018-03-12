@@ -53,7 +53,7 @@ public final class DeterministicEnablingState {
 
         for (Transition t : enabledTransitions)
             if (!(t.getFeature(StochasticTransitionFeature.class)
-                    .getFiringTimeDensity() instanceof EXP))
+                    .density() instanceof EXP))
                 enablingTimes.put(new Variable(t.getName()), BigDecimal.ZERO);
     }
 

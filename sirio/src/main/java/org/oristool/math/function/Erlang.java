@@ -185,8 +185,9 @@ public class Erlang implements Function {
         domain.imposeBound(v, Variable.TSTAR, max);
 
         BigDecimal integral = this.integrateOverDomain().bigDecimalValue();
-        //Integral is zero because its duration is end. To avoid a division by zero error, GEN is replaced by an IMM.
-        if(integral.compareTo(BigDecimal.ZERO) == 0){
+        // Integral is zero because its duration is end.
+        // To avoid a division by zero error, GEN is replaced by an IMM.
+        if (integral.compareTo(BigDecimal.ZERO) == 0){
             Variable x = Variable.X;
             OmegaBigDecimal omegaValue = OmegaBigDecimal.ZERO;
             DBMZone domain = new DBMZone();

@@ -75,22 +75,22 @@
       <version>${junit.jupiter.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
     <dependency><!-- remove when Eclipse 4.8 is released -->
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-launcher</artifactId>
       <version>${junit.platform.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency><!-- remove when Eclipse 4.8 is released -->
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <version>${junit.jupiter.version}</version>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>com.google.auto.value</groupId>
       <artifactId>auto-value</artifactId>
-      <version>1.5.3</version>
+      <version>1.5.4</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -109,9 +109,14 @@
       <version>2.3.0.5</version>
     </dependency>
     <dependency>
+      <groupId>org.ejml</groupId>
+      <artifactId>ejml-all</artifactId>
+      <version>0.33</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-math3</artifactId>
-      <version>3.5</version>
+      <version>3.6.1</version>
     </dependency>
     <dependency>
       <groupId>org.la4j</groupId>

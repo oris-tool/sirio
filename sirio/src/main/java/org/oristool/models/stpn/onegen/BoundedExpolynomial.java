@@ -25,14 +25,14 @@ import org.oristool.math.expression.Expolynomial;
 import org.oristool.math.expression.Variable;
 
 class BoundedExpolynomial {
-    private OmegaBigDecimal lowerBound;
-    private OmegaBigDecimal upperBound;
-    private OmegaBigDecimal minValue;
-    private OmegaBigDecimal maxValue;
-    private Expolynomial unboundedFunction;
-    private Variable var;
-    boolean upperBoundGEQ;
-    boolean shiftedLowerBound;
+    private final OmegaBigDecimal lowerBound;
+    private final OmegaBigDecimal upperBound;
+    private final OmegaBigDecimal minValue;
+    private final OmegaBigDecimal maxValue;
+    private final Expolynomial unboundedFunction;
+    private final Variable var;
+    private final boolean upperBoundGEQ;
+    private final boolean shiftedLowerBound;
 
     public BoundedExpolynomial(Expolynomial unboundedFunction, Variable var,
             OmegaBigDecimal lowerBound, OmegaBigDecimal minValue, OmegaBigDecimal upperBound,

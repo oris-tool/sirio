@@ -23,30 +23,34 @@ import org.oristool.analyzer.Succession;
 import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.state.StateFeature;
+import org.oristool.math.function.EXP;
 import org.oristool.math.function.PartitionedFunction;
-import org.oristool.models.gspn.RateExpressionFeature;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Marking;
-import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
 
 class SubordinatedCtmc {
-    private PetriNet pn;
-    private SuccessionGraph ctmc;
+    private final SuccessionGraph ctmc;
+    private final State rootSink;
+    private final State root;
     private Transition subordinatingGen;
-    private State rootSink;
     private BigDecimal rootRateSum;
 
-    public SubordinatedCtmc(State root, PetriNet pn) {
-        super();
-        this.pn = pn;
-        this.subordinatingGen = null;
-        this.rootSink = null;
+    public SubordinatedCtmc(State root) {
+
         this.rootRateSum = BigDecimal.ZERO;
 
         this.ctmc = new SuccessionGraph();
         this.ctmc.addSuccession(new Succession(null, null, root));
+        this.root = ctmc.getState(ctmc.getRoot());
+        this.rootSink = new State();
+        for (StateFeature f : root.getFeatures()) {
+            rootSink.addFeature(f);
+        }
+
+        // add a fake feature to distinguish rootSink from root
+        rootSink.addFeature(new StateFeature() { });
     }
 
     public SuccessionGraph getGraph() {
@@ -54,30 +58,21 @@ class SubordinatedCtmc {
     }
 
     public boolean addSuccession(Succession s) {
-        State root = ctmc.getState(ctmc.getRoot());
+
         if (s.getParent().equals(root)) {
+            // update outgoing rate from root
             Transition t = (Transition) s.getEvent();
-            Marking parentMarking = s.getParent().getFeature(PetriStateFeature.class).getMarking();
             if (Utils.isExponential(t)) {
-                BigDecimal exponentialRate = new BigDecimal(
-                        t.getFeature(RateExpressionFeature.class).getRate(pn, parentMarking));
-                rootRateSum = rootRateSum.add(exponentialRate);
+                Marking parentMarking = root.getFeature(PetriStateFeature.class).getMarking();
+                StochasticTransitionFeature f = t.getFeature(StochasticTransitionFeature.class);
+                BigDecimal rate = ((EXP)f.density()).getLambda();
+                BigDecimal scalingRate = new BigDecimal(f.rate().evaluate(parentMarking));
+                rootRateSum = rootRateSum.add(rate.multiply(scalingRate));
             }
         }
+
         if (s.getChild().equals(root)) {
-            if (null == rootSink) {
-                rootSink = new State();
-                for (StateFeature f : root.getFeatures()) {
-                    rootSink.addFeature(f);
-                }
-
-                // add a fake feature to distinguish rootSink from root
-                rootSink.addFeature(new StateFeature() {
-                });
-            }
-
-            ctmc.addSuccession(new Succession(s.getParent(), s.getEvent(), rootSink));
-            return false;
+            return ctmc.addSuccession(new Succession(s.getParent(), s.getEvent(), rootSink));
         } else {
             return ctmc.addSuccession(s);
         }
@@ -101,33 +96,26 @@ class SubordinatedCtmc {
 
     public PartitionedFunction getSubordinatingGenPdf() {
         if (hasSubordinatingGen()) {
-            return subordinatingGen.getFeature(StochasticTransitionFeature.class)
-                    .getFiringTimeDensity();
+            return subordinatingGen.getFeature(StochasticTransitionFeature.class).density();
         }
+
         return null;
     }
 
     public void setSubordinatingGen(Transition gen) {
-        if (gen.hasFeature(StochasticTransitionFeature.class)) {
 
-            if (Utils.isExponential(gen)) {
-                throw new IllegalArgumentException("GEN transition is actually EXP");
-            } else {
-
-                if (this.subordinatingGen != null) {
-                    if (!this.subordinatingGen.getName().equals(gen.getName())) {
-                        // FIXME quando si avrà il metodo per eseguire l'analisi
-                        // con più GEN
-                        throw new IllegalStateException("Two GEN found: "
-                                + this.subordinatingGen.getName() + " and " + gen.getName());
-                    }
-                } else {
-                    this.subordinatingGen = gen;
-                }
-            }
-        } else {
+        if (!gen.hasFeature(StochasticTransitionFeature.class))
             throw new IllegalArgumentException(
                     "GEN transition without stochastic transition features");
-        }
+
+        if (Utils.isExponential(gen))
+            throw new IllegalArgumentException("GEN transition is actually EXP");
+
+        if (this.subordinatingGen != null
+                && !this.subordinatingGen.getName().equals(gen.getName()))
+            throw new IllegalStateException("Two GEN found: "
+                    + this.subordinatingGen.getName() + " and " + gen.getName());
+
+        this.subordinatingGen = gen;
     }
 }

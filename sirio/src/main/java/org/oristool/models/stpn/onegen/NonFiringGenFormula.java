@@ -20,10 +20,10 @@ package org.oristool.models.stpn.onegen;
 import org.oristool.analyzer.state.State;
 
 class NonFiringGenFormula implements KernelFormula {
+
     private final State state;
 
     public NonFiringGenFormula(State state) {
-        super();
         this.state = state;
     }
 
@@ -31,6 +31,7 @@ class NonFiringGenFormula implements KernelFormula {
     public double[] compute(PrecalculatedTickEvaluations evaluations) {
         TickExpression expression = t -> (1 - evaluations.getCdfAt(t))
                 * evaluations.getTransientAt(state, t);
+
         return new TickPointEvaluator().evaluate(expression, evaluations.getTicks());
     }
 

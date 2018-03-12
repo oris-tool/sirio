@@ -31,6 +31,7 @@ import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.math.OmegaBigDecimal;
 import org.oristool.models.Engine;
 import org.oristool.models.ValidationMessageCollector;
+import org.oristool.models.stpn.MarkingExpr;
 import org.oristool.models.stpn.TransientSolution;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.models.stpn.trees.TruncationPolicy;
@@ -282,6 +283,12 @@ public abstract class TreeTransient implements
             if (!t.hasFeature(StochasticTransitionFeature.class)) {
                 canAnalyze = false;
                 c.addError("Transition '" + t + "' is not stochastic");
+
+            } else if (!t.getFeature(StochasticTransitionFeature.class).isEXP()
+                    && !t.getFeature(StochasticTransitionFeature.class)
+                        .rate().equals(MarkingExpr.ONE)) {
+                canAnalyze = false;
+                c.addError("Transition '" + t + "' has rate different than 1");
             }
         }
 

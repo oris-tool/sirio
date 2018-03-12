@@ -37,28 +37,27 @@ import org.oristool.analyzer.log.AnalysisLogger;
 import org.oristool.analyzer.log.AnalysisMonitor;
 import org.oristool.analyzer.policy.FIFOPolicy;
 import org.oristool.analyzer.state.State;
-import org.oristool.models.gspn.CTMCTransientSolution;
-import org.oristool.models.gspn.CTMCTransientSolution.EvaluationMode;
+import org.oristool.analyzer.stop.StopCriterion;
+import org.oristool.models.gspn.chains.DTMC;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.stpn.TransientSolution;
 import org.oristool.models.stpn.onegen.KernelRow.KernelRowEvaluator;
 import org.oristool.models.stpn.trees.DeterministicEnablingState;
 import org.oristool.models.stpn.trees.Regeneration;
 import org.oristool.models.stpn.trees.RegenerativeStopCriterion;
+import org.oristool.models.tpn.TimedAnalysis;
 import org.oristool.models.tpn.TimedComponentsFactory;
 import org.oristool.petrinet.Marking;
-import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
 
-public class EnablingRestrictionTransientAnalysis {
+class EnablingRestrictionTransientAnalysis {
 
     class KernelEvaluator {
-        private Map<State, KernelRowEvaluator> rowEvaluators;
-        private int evaluationLength;
+        private final Map<State, KernelRowEvaluator> rowEvaluators;
+        private final int evaluationLength;
 
         private KernelEvaluator(Ticks ticks) {
-            super();
             rowEvaluators = new HashMap<>();
             this.evaluationLength = ticks.getNumKernelTicks();
         }
@@ -71,17 +70,20 @@ public class EnablingRestrictionTransientAnalysis {
                     throw new IllegalStateException("Evaluation length mismatch");
                 }
             }
+
             return evaluation;
         }
 
         public double[] evaluateGlobalKernel(State source, State destination) {
             double[] evaluation = new double[evaluationLength];
+
             if (rowEvaluators.containsKey(source)) {
                 evaluation = rowEvaluators.get(source).evaluateGlobalKernel(destination);
                 if (evaluation.length != evaluationLength) {
                     throw new IllegalStateException("Evaluation length mismatch");
                 }
             }
+
             return evaluation;
         }
 
@@ -90,14 +92,13 @@ public class EnablingRestrictionTransientAnalysis {
         }
     }
 
-    private PetriNet petriNet;
-    private Marking initialMarking;
-    private SuccessionGraph successionGraph;
-    private VanishingStateAnalyzer analyzer;
-    private Map<State, KernelRow> kernel;
-    AnalysisLogger log;
-    AnalysisMonitor monitor;
-    boolean verbose;
+    private final PetriNet petriNet;
+    private final Marking initialMarking;
+    private final SuccessionGraph successionGraph;
+    private final VanishingStateAnalyzer analyzer;
+    private final Map<State, KernelRow> kernel;
+    private final AnalysisLogger log;
+    private final AnalysisMonitor monitor;
 
     private double[][][] globalKernel;
     private double[][][] localKernel;
@@ -114,17 +115,14 @@ public class EnablingRestrictionTransientAnalysis {
      * @param stopCondition stop condition
      * @param log logger
      * @param monitor monitor to stop the analysis
-     * @param verbose to control the log level
      */
     public EnablingRestrictionTransientAnalysis(PetriNet petriNet, Marking initialMarking,
-            MarkingCondition stopCondition, AnalysisLogger log, AnalysisMonitor monitor,
-            boolean verbose) {
+            StopCriterion stopCondition, AnalysisLogger log, AnalysisMonitor monitor) {
 
         this.petriNet = petriNet;
         this.initialMarking = initialMarking;
         this.log = log;
         this.monitor = monitor;
-        this.verbose = verbose;
 
         if (log != null)
             log.log("Computing transient analysis under enabling restriction");
@@ -317,11 +315,11 @@ public class EnablingRestrictionTransientAnalysis {
         SubordinatedCtmc subordinatedCtmc = buildSubordinatedCtmc(firstEpochChain);
         row.setPdf(subordinatedCtmc.getSubordinatingGenPdf());
 
-        CTMCTransientSolution transientSolution = new CTMCTransientSolution(
-                subordinatedCtmc.getGraph(), petriNet, log, monitor, EvaluationMode.ADAPTIVE);
-        row.setTransientSolution(transientSolution);
+        DTMC<OneGenState> ctmc = buildCTMC(subordinatedCtmc.getGraph(), petriNet);
+        row.setCTMC(ctmc);
 
-        row.setLocalKernelEntries(computeLocalKernelEntries(subordinatedCtmc.getGraph(),
+        row.setLocalKernelEntries(
+                computeLocalKernelEntries(subordinatedCtmc.getGraph(),
                 subordinatedCtmc.getRootRateSum()));
 
         row.setGlobalKernelEntries(
@@ -330,15 +328,38 @@ public class EnablingRestrictionTransientAnalysis {
         return row;
     }
 
+    private DTMC<OneGenState> buildCTMC(SuccessionGraph successionGraph, PetriNet petriNet) {
+
+        DTMC<OneGenState> dtmc = DTMC.create();
+
+        for (Succession succ : successionGraph.getSuccessions()) {
+            State parent = succ.getParent();
+            State child = succ.getChild();
+            OneGenState i = new OneGenState(parent);
+            OneGenState j = new OneGenState(child);
+            Set<Transition> enabled = parent.getFeature(PetriStateFeature.class).getEnabled();
+            Transition fired = (Transition) succ.getEvent();
+            double rate = OneGenState.rate(i.state(), fired);
+            double exitRate = OneGenState.exitRate(i.state(), enabled);
+            dtmc.probsGraph().putEdgeValue(i, j, rate / exitRate);
+        }
+
+        State initialState = successionGraph.getState(successionGraph.getRoot());
+        dtmc.initialStates().add(new OneGenState(initialState));
+        dtmc.initialProbs().add(1.0);
+        return dtmc;
+    }
+
     private SuccessionGraph buildSuccessionGraph(Marking initialMarking,
-            MarkingCondition stopCondition) {
-        boolean extended = true;
-        TimedComponentsFactory f = new TimedComponentsFactory(false, false, true, true, extended,
-                new FIFOPolicy(), stopCondition, null);
-        Analyzer<PetriNet, Transition> analyzer = new Analyzer<PetriNet, Transition>(f, petriNet,
-                f.buildInitialState(petriNet, initialMarking));
-        SuccessionGraph graph = analyzer.analyze();
-        return graph;
+            StopCriterion stopCondition) {
+
+        TimedAnalysis analysis = TimedAnalysis.builder()
+                .excludeZeroProb(true)
+                .markRegenerations(true)
+                .stopOn(() -> stopCondition)
+                .build();
+
+        return analysis.compute(this.petriNet, initialMarking);
     }
 
     private SuccessionGraph buildFirstEpochChain(State initialState) {
@@ -353,7 +374,7 @@ public class EnablingRestrictionTransientAnalysis {
 
     private SubordinatedCtmc buildSubordinatedCtmc(SuccessionGraph firstEpochChain) {
         SubordinatedCtmc subordinatedCTMC = new SubordinatedCtmc(
-                firstEpochChain.getState(firstEpochChain.getRoot()), this.petriNet);
+                firstEpochChain.getState(firstEpochChain.getRoot()));
 
         Deque<Node> frontier = Utils.newQueue(firstEpochChain.getRoot());
         while (!frontier.isEmpty()) {
@@ -366,6 +387,7 @@ public class EnablingRestrictionTransientAnalysis {
                     subordinatedCTMC.setSubordinatingGen(t);
                 } else {
                     boolean unvisitedSuccessor = subordinatedCTMC.addSuccession(s);
+
                     if (unvisitedSuccessor) {
                         frontier.push(firstEpochChain.getNode(s.getChild()));
                     }
@@ -457,5 +479,4 @@ public class EnablingRestrictionTransientAnalysis {
 
         return globalKernelEntries;
     }
-
 }

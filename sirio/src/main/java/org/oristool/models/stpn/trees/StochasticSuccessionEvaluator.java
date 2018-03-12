@@ -30,13 +30,13 @@ import org.oristool.analyzer.state.State;
 import org.oristool.math.OmegaBigDecimal;
 import org.oristool.math.expression.Expolynomial;
 import org.oristool.math.expression.Variable;
+import org.oristool.math.function.EXP;
 import org.oristool.math.function.StateDensityFunction;
-import org.oristool.models.gspn.RateExpressionFeature;
-import org.oristool.models.gspn.WeightExpressionFeature;
 import org.oristool.models.pn.MarkingUpdater;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.pn.PetriSuccessionEvaluator;
 import org.oristool.models.pn.Priority;
+import org.oristool.models.stpn.MarkingExpr;
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
@@ -210,18 +210,18 @@ public class StochasticSuccessionEvaluator implements
         for (Transition t : nextPetriStateFeature.getNewlyEnabled()) {
             nextStochasticStateFeature.addVariable(new Variable(t.getName()), t
                     .getFeature(StochasticTransitionFeature.class)
-                    .getFiringTimeDensity());
+                    .density());
         }
 
         // updating rates of all EXPs with a RateExpressionFeature
         for (Transition t : nextPetriStateFeature.getEnabled()) {
-            if (t.hasFeature(RateExpressionFeature.class)) {
-                nextStochasticStateFeature.setEXPRate(
-                        new Variable(t.getName()),
-                        new BigDecimal(t
-                                .getFeature(RateExpressionFeature.class)
-                                .getRate(petriNet,
-                                        nextPetriStateFeature.getMarking())));
+            StochasticTransitionFeature tf = t.getFeature(StochasticTransitionFeature.class);
+            if (tf.isEXP() && !tf.rate().equals(MarkingExpr.ONE)) {
+                BigDecimal scalingRate = new BigDecimal(tf.rate()
+                        .evaluate(nextPetriStateFeature.getMarking()));
+                BigDecimal rate = ((EXP)tf.density()).getLambda();
+                nextStochasticStateFeature.setEXPRate(new Variable(t.getName()),
+                        rate.multiply(scalingRate));
             }
         }
 
@@ -249,12 +249,10 @@ public class StochasticSuccessionEvaluator implements
         return succession;
     }
 
-    private BigDecimal getWeight(Transition t, PetriNet n, Marking m) {
-        if (t.hasFeature(WeightExpressionFeature.class))
-            return new BigDecimal(t.getFeature(WeightExpressionFeature.class)
-                    .getWeight(n, m));
-        else
-            return t.getFeature(StochasticTransitionFeature.class).getWeight();
+    private BigDecimal getWeight(Transition t, Marking m) {
+        double weight = t.getFeature(StochasticTransitionFeature.class)
+                .weight().evaluate(m);
+        return new BigDecimal(weight);
     }
 
     private BigDecimal computeRandomSwitchProbability(
@@ -269,9 +267,9 @@ public class StochasticSuccessionEvaluator implements
         for (Transition t : enabled)
             if (!t.equals(fired)
                     && nullDelayVariables.contains(new Variable(t.getName())))
-                totalWeight = totalWeight.add(getWeight(t, petriNet, marking));
+                totalWeight = totalWeight.add(getWeight(t, marking));
 
-        BigDecimal firedWeight = getWeight(fired, petriNet, marking);
+        BigDecimal firedWeight = getWeight(fired, marking);
         return firedWeight.divide(firedWeight.add(totalWeight),
                 Expolynomial.mathContext);
     }

@@ -25,9 +25,8 @@ import java.util.Set;
 
 import org.oristool.analyzer.state.State;
 import org.oristool.math.OmegaBigDecimal;
-import org.oristool.models.gspn.RateExpressionFeature;
-import org.oristool.models.gspn.WeightExpressionFeature;
 import org.oristool.models.pn.PetriStateFeature;
+import org.oristool.models.stpn.MarkingExpr;
 import org.oristool.models.stpn.trees.Regeneration;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Transition;
@@ -43,12 +42,11 @@ class Utils {
 
     public static void addExpTransition(Transition t, BigDecimal rate) {
         t.addFeature(StochasticTransitionFeature.newExponentialInstance(rate));
-        t.addFeature(new RateExpressionFeature(rate.toPlainString()));
     }
 
     public static void addDetTransition(Transition t, BigDecimal weight, BigDecimal ttf) {
-        t.addFeature(StochasticTransitionFeature.newDeterministicInstance(ttf, weight));
-        t.addFeature(new WeightExpressionFeature(weight.toPlainString()));
+        t.addFeature(StochasticTransitionFeature.newDeterministicInstance(ttf,
+                MarkingExpr.of(weight.doubleValue())));
     }
 
     public static void addImmTransition(Transition t, BigDecimal weight) {
@@ -62,11 +60,11 @@ class Utils {
     }
 
     public static boolean isExponential(Transition t) {
-        if (t.getFeature(StochasticTransitionFeature.class).getFiringTimeDensity().getDensities()
+        if (t.getFeature(StochasticTransitionFeature.class).density().getDensities()
                 .size() != 1)
             return false;
 
-        return t.getFeature(StochasticTransitionFeature.class).getFiringTimeDensity().getDensities()
+        return t.getFeature(StochasticTransitionFeature.class).density().getDensities()
                 .get(0).isExponential();
     }
 
@@ -85,5 +83,4 @@ class Utils {
         queue.push(initialValue);
         return queue;
     }
-
 }

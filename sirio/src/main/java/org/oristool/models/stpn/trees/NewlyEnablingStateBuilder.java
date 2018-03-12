@@ -24,10 +24,11 @@ import java.util.Set;
 import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.state.StateBuilder;
 import org.oristool.math.expression.Variable;
+import org.oristool.math.function.EXP;
 import org.oristool.math.function.StateDensityFunction;
-import org.oristool.models.gspn.RateExpressionFeature;
 import org.oristool.models.pn.InitialPetriStateBuilder;
 import org.oristool.models.pn.PetriStateFeature;
+import org.oristool.models.stpn.MarkingExpr;
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
@@ -88,19 +89,19 @@ public class NewlyEnablingStateBuilder implements StateBuilder<Marking> {
         // and adds deterministic functions manually
         for (Transition t : enabledTransitions) {
             ssf.addVariable(new Variable(t.getName()),
-                    t.getFeature(StochasticTransitionFeature.class)
-                            .getFiringTimeDensity());
+                    t.getFeature(StochasticTransitionFeature.class).density());
         }
 
-        // updates rates of all EXPs with a RateExpressionFeature
+        // updates rates of all EXPs
         for (Transition t : enabledTransitions) {
-            if (t.hasFeature(RateExpressionFeature.class)) {
-                ssf.setEXPRate(new Variable(t.getName()),
-                        new BigDecimal(t
-                                .getFeature(RateExpressionFeature.class)
-                                .getRate(petriNet, marking)));
+            StochasticTransitionFeature tf = t.getFeature(StochasticTransitionFeature.class);
+            if (tf.isEXP() && !tf.rate().equals(MarkingExpr.ONE)) {
+                BigDecimal scalingRate = new BigDecimal(tf.rate().evaluate(marking));
+                BigDecimal rate = ((EXP)tf.density()).getLambda();
+                ssf.setEXPRate(new Variable(t.getName()), rate.multiply(scalingRate));
             }
         }
+
 
         // flags update
         boolean hasEnabledImm = false;

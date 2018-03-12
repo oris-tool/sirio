@@ -31,10 +31,10 @@ import org.oristool.analyzer.Succession;
 import org.oristool.analyzer.graph.Node;
 import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.state.State;
-import org.oristool.models.gspn.WeightExpressionFeature;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.stpn.trees.Regeneration;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
+import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.Transition;
 
 // refactored from GSPNGraphAnalyzer.java
@@ -78,13 +78,12 @@ class VanishingStateAnalyzer {
 
         this.stateProbDenominator = new HashMap<>();
         for (State state : vanishingStates) {
-            stateProbDenominator.put(state, Double.valueOf(nodeProbability(state)));
+            stateProbDenominator.put(state, nodeProbability(state));
         }
     }
 
     private boolean isImmediate(Succession s) {
         boolean immediate = (s.getEvent() instanceof Transition)
-                && ((Transition) s.getEvent()).hasFeature(WeightExpressionFeature.class)
                 && ((Transition) s.getEvent()).hasFeature(StochasticTransitionFeature.class)
                 && ((Transition) s.getEvent()).getFeature(StochasticTransitionFeature.class)
                         .isIMM();
@@ -128,9 +127,10 @@ class VanishingStateAnalyzer {
 
     private double nodeProbability(State state) {
         double counter = 0.0;
+        Marking m = state.getFeature(PetriStateFeature.class).getMarking();
         for (Succession s : graph.getOutgoingSuccessions(graph.getNode(state))) {
             counter += ((Transition) s.getEvent()).getFeature(StochasticTransitionFeature.class)
-                    .getWeight().doubleValue();
+                    .weight().evaluate(m);
         }
         return counter;
     }
@@ -193,9 +193,10 @@ class VanishingStateAnalyzer {
             int stateIndex = vanishingReachableStates.get(source);
             matrixN[stateIndex][stateIndex] = 1.0;
 
+            Marking m = source.getFeature(PetriStateFeature.class).getMarking();
             for (Succession s : graph.getOutgoingSuccessions(graph.getNode(source))) {
                 double destProb = ((Transition) s.getEvent())
-                        .getFeature(StochasticTransitionFeature.class).getWeight().doubleValue()
+                        .getFeature(StochasticTransitionFeature.class).weight().evaluate(m)
                         / stateProbDenominator.get(source);
                 State dest = s.getChild();
 

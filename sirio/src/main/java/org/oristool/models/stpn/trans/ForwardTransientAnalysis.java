@@ -36,7 +36,6 @@ import java.util.Set;
 
 import org.oristool.analyzer.Analyzer;
 import org.oristool.analyzer.Succession;
-import org.oristool.analyzer.graph.Edge;
 import org.oristool.analyzer.graph.Node;
 import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.log.AnalysisLogger;
@@ -192,6 +191,8 @@ class ForwardTransientAnalysis {
      *            Stochastic Petri Net to be analyzed
      * @param initialMarking
      *            initial marking of the net
+     * @param timeBound
+     *            time bound for the analysis
      * @param policy
      *            encapsulates analysis options and pruning behavior
      * @param stopCriterion
@@ -203,7 +204,7 @@ class ForwardTransientAnalysis {
      */
     public static ForwardTransientAnalysis compute(PetriNet petriNet,
             Marking initialMarking, BigDecimal timeBound, EnumerationPolicy policy,
-            StopCriterion stopCondition, AnalysisLogger l,
+            StopCriterion stopCriterion, AnalysisLogger l,
             AnalysisMonitor monitor, boolean verbose) {
 
         ForwardTransientAnalysis a = new ForwardTransientAnalysis();
@@ -211,7 +212,7 @@ class ForwardTransientAnalysis {
         if (l != null) {
             l.log(">> Standard analysis starting from " + initialMarking
                     + " (policy: " + policy + ")");
-            if (stopCondition != MarkingCondition.NONE)
+            if (stopCriterion != MarkingCondition.NONE)
                 l.log(", stopCondition");
             l.log(")\n");
         }
@@ -230,7 +231,7 @@ class ForwardTransientAnalysis {
         // Performs the analysis starting from the initial marking
         StochasticComponentsFactory f = new StochasticComponentsFactory(true,
                 null, null, false, policy,
-                new OmegaBigDecimal(timeBound), stopCondition, null, 0,
+                new OmegaBigDecimal(timeBound), stopCriterion, null, 0,
                 monitor);
 
         Analyzer<PetriNet, Transition> analyzer = new Analyzer<PetriNet, Transition>(
@@ -324,7 +325,7 @@ class ForwardTransientAnalysis {
 
                     Set<Variable> exps = stochasticFeature.getEXPVariables();
                     for (Node m : graph.getSuccessors(n)) {
-                        Succession succ = graph.getSuccessions(new Edge(n, m))
+                        Succession succ = graph.getSuccessions(n, m)
                                 .iterator().next();
                         Transition t = (Transition) succ.getEvent();
                         Variable tau = new Variable(t.getName());
@@ -356,8 +357,7 @@ class ForwardTransientAnalysis {
                     Set<Transition> notFiredEnabledTransitions = petriNet
                             .getEnabledTransitions(petriFeature.getMarking());
                     for (Node m : graph.getSuccessors(n))
-                        for (Succession succ : graph.getSuccessions(new Edge(n,
-                                m)))
+                        for (Succession succ : graph.getSuccessions(n, m))
                             if (!notFiredEnabledTransitions.contains(succ
                                     .getEvent()))
                                 throw new IllegalStateException(
@@ -565,7 +565,7 @@ class ForwardTransientAnalysis {
 
         // Builds a representation of the transient solution
         TransientSolution<Marking, Marking> p = new TransientSolution<Marking, Marking>(
-                timeLimit, step, rowMarkings, columnMarkings);
+                timeLimit, step, rowMarkings, columnMarkings, this.getInitialMarking());
 
         // Computes the solution for each time instant and each marking
         OmegaBigDecimal timeValue = OmegaBigDecimal.ZERO;

@@ -27,7 +27,7 @@ import org.oristool.models.stpn.trees.StochasticSuccessionFeature;
  * Post-processor updating {@code ReachingProbabilityFeature}. This class is a
  * decorator augmenting the operations performed by another post-processor.
  */
-public class SteadyStatePostProcessor implements SuccessionProcessor {
+class SteadyStatePostProcessor implements SuccessionProcessor {
 
     private SuccessionProcessor baseProc;
 

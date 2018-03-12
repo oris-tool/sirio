@@ -260,9 +260,9 @@ public final class EnablingSyncsEvaluator implements SuccessionProcessor {
             return isZeroInf
                     && t.hasFeature(StochasticTransitionFeature.class)
                     && t.getFeature(StochasticTransitionFeature.class)
-                        .getFiringTimeDensity().getDensities().size() == 1
+                        .density().getDensities().size() == 1
                     && t.getFeature(StochasticTransitionFeature.class)
-                        .getFiringTimeDensity().getDensities().get(0).isExponential();
+                        .density().getDensities().get(0).isExponential();
         }
     }
 }
