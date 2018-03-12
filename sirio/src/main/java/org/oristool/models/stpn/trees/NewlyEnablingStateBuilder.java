@@ -95,8 +95,8 @@ public class NewlyEnablingStateBuilder implements StateBuilder<Marking> {
         // updates rates of all EXPs
         for (Transition t : enabledTransitions) {
             StochasticTransitionFeature tf = t.getFeature(StochasticTransitionFeature.class);
-            if (tf.isEXP() && !tf.rate().equals(MarkingExpr.ONE)) {
-                BigDecimal scalingRate = new BigDecimal(tf.rate().evaluate(marking));
+            if (tf.isEXP() && !tf.clockRate().equals(MarkingExpr.ONE)) {
+                BigDecimal scalingRate = new BigDecimal(tf.clockRate().evaluate(marking));
                 BigDecimal rate = ((EXP)tf.density()).getLambda();
                 ssf.setEXPRate(new Variable(t.getName()), rate.multiply(scalingRate));
             }

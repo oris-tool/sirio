@@ -48,7 +48,7 @@ public final class ContinuousRewardTime implements RewardTime {
         Transition fired = (Transition) succession.getEvent();
         Marking m = succession.getParent().getFeature(PetriStateFeature.class).getMarking();
         BigDecimal rate = new BigDecimal(
-                fired.getFeature(StochasticTransitionFeature.class).rate().evaluate(m));
+                fired.getFeature(StochasticTransitionFeature.class).clockRate().evaluate(m));
         return succession.getParent().getFeature(TimedSimulatorStateFeature.class)
                 .getTimeToFire(fired).divide(rate);
     }

@@ -230,7 +230,7 @@ public abstract class GSPNSteadyState implements Engine<PetriNet, Marking, Map<M
                     c.addError("Transition '" + t + "' is neither EXP nor IMM");
                 }
 
-                if (f.rate() != MarkingExpr.ONE && !f.isEXP()) {
+                if (f.clockRate() != MarkingExpr.ONE && !f.isEXP()) {
                     canAnalyze = false;
                     c.addError("Transition '" + t + "' has non-unitary rate but is not EXP");
                 }

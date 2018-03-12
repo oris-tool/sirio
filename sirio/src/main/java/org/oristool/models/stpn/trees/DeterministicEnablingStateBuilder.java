@@ -118,8 +118,8 @@ public final class DeterministicEnablingStateBuilder implements
         // updates rates of all EXPs with a RateExpressionFeature
         for (Transition t : enabledTransitions) {
             StochasticTransitionFeature tf = t.getFeature(StochasticTransitionFeature.class);
-            if (tf.isEXP() && !tf.rate().equals(MarkingExpr.ONE)) {
-                BigDecimal scalingRate = new BigDecimal(tf.rate().evaluate(s.getMarking()));
+            if (tf.isEXP() && !tf.clockRate().equals(MarkingExpr.ONE)) {
+                BigDecimal scalingRate = new BigDecimal(tf.clockRate().evaluate(s.getMarking()));
                 BigDecimal rate = ((EXP)tf.density()).getLambda();
                 ssf.setEXPRate(new Variable(t.getName()), rate.multiply(scalingRate));
             }

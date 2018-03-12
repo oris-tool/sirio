@@ -171,7 +171,7 @@ public class Sequencer {
                             .getFeature(TimedSimulatorStateFeature.class).getTimeToFire(t)
                             .divide(new BigDecimal(
                                     t.getFeature(StochasticTransitionFeature.class)
-                                    .rate().evaluate(m)));
+                                    .clockRate().evaluate(m)));
 
                     if (minTimeToFire == null || minTimeToFire.compareTo(ttf) > 0) {
                         minTimeToFire = ttf;

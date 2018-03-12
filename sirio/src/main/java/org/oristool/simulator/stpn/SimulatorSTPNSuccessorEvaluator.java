@@ -49,7 +49,7 @@ public final class SimulatorSTPNSuccessorEvaluator implements SimulatorSuccessor
                 .getPersistent()) {
             Marking m = succession.getParent().getFeature(PetriStateFeature.class).getMarking();
             BigDecimal rate = new BigDecimal(
-                    t.getFeature(StochasticTransitionFeature.class).rate().evaluate(m));
+                    t.getFeature(StochasticTransitionFeature.class).clockRate().evaluate(m));
             BigDecimal elapsed = oldTimedFeature.getTimeToFire(fired).divide(rate);
 
             newTimedFeature.setTimeToFire(t, oldTimedFeature.getTimeToFire(t)

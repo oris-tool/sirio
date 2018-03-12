@@ -216,8 +216,8 @@ public class StochasticSuccessionEvaluator implements
         // updating rates of all EXPs with a RateExpressionFeature
         for (Transition t : nextPetriStateFeature.getEnabled()) {
             StochasticTransitionFeature tf = t.getFeature(StochasticTransitionFeature.class);
-            if (tf.isEXP() && !tf.rate().equals(MarkingExpr.ONE)) {
-                BigDecimal scalingRate = new BigDecimal(tf.rate()
+            if (tf.isEXP() && !tf.clockRate().equals(MarkingExpr.ONE)) {
+                BigDecimal scalingRate = new BigDecimal(tf.clockRate()
                         .evaluate(nextPetriStateFeature.getMarking()));
                 BigDecimal rate = ((EXP)tf.density()).getLambda();
                 nextStochasticStateFeature.setEXPRate(new Variable(t.getName()),

@@ -241,7 +241,7 @@ public abstract class OneGenTransient
                 c.addError("Transition '" + t + "' is not stochastic");
 
             } else if (!t.getFeature(StochasticTransitionFeature.class)
-                    .rate().equals(MarkingExpr.ONE)) {
+                    .clockRate().equals(MarkingExpr.ONE)) {
                 canAnalyze = false;
                 c.addError("Transition '" + t + "' has rate different than 1");
             }

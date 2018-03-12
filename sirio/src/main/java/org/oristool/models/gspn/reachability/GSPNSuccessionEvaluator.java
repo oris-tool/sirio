@@ -108,7 +108,7 @@ class GSPNSuccessionEvaluator
             StochasticTransitionFeature f = t.getFeature(StochasticTransitionFeature.class);
 
             if (f.isEXP()) {
-                if (f.rate().evaluate(m) > 0.0)
+                if (f.clockRate().evaluate(m) > 0.0)
                     exp.add(t);
 
             } else if (f.isIMM()) {
@@ -159,7 +159,7 @@ class GSPNSuccessionEvaluator
         StochasticTransitionFeature f =
                 t.getFeature(StochasticTransitionFeature.class);
         double lambda = ((EXP)f.density()).getLambda().doubleValue();
-        double scalingRate = f.rate().evaluate(m);
+        double scalingRate = f.clockRate().evaluate(m);
         return lambda * scalingRate;
     }
 

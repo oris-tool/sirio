@@ -57,8 +57,8 @@ public class OneGenState implements CTMCState<State> {
         StochasticTransitionFeature f =
                 t.getFeature(StochasticTransitionFeature.class);
         double lambda = ((EXP)f.density()).getLambda().doubleValue();
-        double scalingRate = f.rate().evaluate(m);
-        return lambda * scalingRate;
+        double clockRate = f.clockRate().evaluate(m);
+        return lambda * clockRate;
     }
 
     static double exitRate(State s, Set<Transition> enabled) {

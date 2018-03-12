@@ -66,8 +66,8 @@ class SubordinatedCtmc {
                 Marking parentMarking = root.getFeature(PetriStateFeature.class).getMarking();
                 StochasticTransitionFeature f = t.getFeature(StochasticTransitionFeature.class);
                 BigDecimal rate = ((EXP)f.density()).getLambda();
-                BigDecimal scalingRate = new BigDecimal(f.rate().evaluate(parentMarking));
-                rootRateSum = rootRateSum.add(rate.multiply(scalingRate));
+                BigDecimal clockRate = new BigDecimal(f.clockRate().evaluate(parentMarking));
+                rootRateSum = rootRateSum.add(rate.multiply(clockRate));
             }
         }
 

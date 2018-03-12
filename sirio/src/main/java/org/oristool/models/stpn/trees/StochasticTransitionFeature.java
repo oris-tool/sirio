@@ -39,7 +39,7 @@ public class StochasticTransitionFeature implements TransitionFeature {
 
     private final PartitionedFunction density;
     private final MarkingExpr weight;
-    private final MarkingExpr rate;
+    private final MarkingExpr clockRate;
 
     /**
      * Returns the firing time density of this instance.
@@ -66,16 +66,16 @@ public class StochasticTransitionFeature implements TransitionFeature {
      *
      * @return transition rate
      */
-    public MarkingExpr rate() {
-        return this.rate;
+    public MarkingExpr clockRate() {
+        return this.clockRate;
     }
 
     private StochasticTransitionFeature(PartitionedFunction density,
-            MarkingExpr weight, MarkingExpr rate) {
+            MarkingExpr weight, MarkingExpr clockRate) {
 
         this.density = density;
         this.weight = weight;
-        this.rate = rate;
+        this.clockRate = clockRate;
     }
 
     public static StochasticTransitionFeature of(PartitionedFunction density) {
@@ -124,13 +124,13 @@ public class StochasticTransitionFeature implements TransitionFeature {
      *
      * @param eft minimum firing time
      * @param lft maximum firing time
-     * @param scalingRate scaling rate (depends on the state marking)
+     * @param clockRate scaling rate (depends on the state marking)
      * @return a stochastic feature with uniform distribution
      */
     public static StochasticTransitionFeature newUniformInstance(
-            BigDecimal eft, BigDecimal lft, MarkingExpr scalingRate) {
+            BigDecimal eft, BigDecimal lft, MarkingExpr clockRate) {
         return StochasticTransitionFeature.of(GEN.newUniform(
-                new OmegaBigDecimal(eft), new OmegaBigDecimal(lft)), MarkingExpr.ONE, scalingRate);
+                new OmegaBigDecimal(eft), new OmegaBigDecimal(lft)), MarkingExpr.ONE, clockRate);
     }
 
     /**
@@ -179,14 +179,14 @@ public class StochasticTransitionFeature implements TransitionFeature {
      *
      * @param value timer value
      * @param weight weight of the transition
-     * @param scalingRate scaling rate (depends on the state marking)
+     * @param clockRate scaling rate (depends on the state marking)
      * @return a stochastic feature with deterministic distribution
      */
     public static StochasticTransitionFeature newDeterministicInstance(
-            BigDecimal value, MarkingExpr weight, MarkingExpr scalingRate) {
+            BigDecimal value, MarkingExpr weight, MarkingExpr clockRate) {
 
         return StochasticTransitionFeature.of(GEN.newDeterministic(value),
-                weight, scalingRate);
+                weight, clockRate);
     }
 
     /**
@@ -220,14 +220,14 @@ public class StochasticTransitionFeature implements TransitionFeature {
      * state after evaluating the input rate parameter.
      *
      * @param expRate rate of the exponential
-     * @param scalingRate scaling rate (depends on the state marking)
+     * @param clockRate scaling rate (depends on the state marking)
      * @return a stochastic feature with exponential distribution and variable rate
      */
     public static StochasticTransitionFeature newExponentialInstance(BigDecimal expRate,
-            MarkingExpr scalingRate) {
+            MarkingExpr clockRate) {
 
         return StochasticTransitionFeature.of(new EXP(Variable.X, expRate),
-                MarkingExpr.ONE, scalingRate);
+                MarkingExpr.ONE, clockRate);
     }
 
     /**
@@ -261,13 +261,13 @@ public class StochasticTransitionFeature implements TransitionFeature {
      *
      * @param rate rate of the exponentials in the Erlang (rate)
      * @param k number of exponentials in the Erlang (shape)
-     * @param scalingRate scaling rate (depends on the state marking)
+     * @param clockRate scaling rate (depends on the state marking)
      * @return a stochastic feature with Erlang distribution
      */
     public static StochasticTransitionFeature newErlangInstance(int k, BigDecimal rate,
-            MarkingExpr scalingRate) {
+            MarkingExpr clockRate) {
         return StochasticTransitionFeature.of(new Erlang(Variable.X, k, rate),
-                MarkingExpr.ONE, scalingRate);
+                MarkingExpr.ONE, clockRate);
     }
 
     /**
