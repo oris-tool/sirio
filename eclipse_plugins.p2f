@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?p2f version='1.0.0'?>
+<p2f version='1.0.0'>
+  <ius size='10'>
+    <iu id='org.eclipse.eclemma.feature.feature.group' name='EclEmma Java Code Coverage' version='3.0.1.201711142128'>
+      <repositories size='2'>
+        <repository location='http://download.eclipse.org/releases/oxygen'/>
+        <repository location='http://update.eclemma.org/'/>
+      </repositories>
+    </iu>
+    <iu id='net.sf.eclipsecs.feature.group' name='Eclipse Checkstyle Plug-in' version='8.8.0.201802200627'>
+      <repositories size='1'>
+        <repository location='https://checkstyle.github.io/eclipse-cs/update'/>
+      </repositories>
+    </iu>
+    <iu id='ch.acanda.eclipse.pmd.feature.feature.group' name='Eclipse PMD Plug-in' version='1.10.0.201707041807'>
+      <repositories size='1'>
+        <repository location='http://www.acanda.ch/eclipse-pmd/release/latest'/>
+      </repositories>
+    </iu>
+    <iu id='org.eclipse.wst.xml_ui.feature.feature.group' name='Eclipse XML Editors and Tools' version='3.9.1.v201707252002'>
+      <repositories size='1'>
+        <repository location='http://download.eclipse.org/releases/oxygen'/>
+      </repositories>
+    </iu>
+    <iu id='org.eclipse.m2e.feature.feature.group' name='m2e - Maven Integration for Eclipse (includes Incubating components)' version='1.8.2.20171007-0217'>
+      <repositories size='1'>
+        <repository location='http://download.eclipse.org/releases/oxygen'/>
+      </repositories>
+    </iu>
+    <iu id='org.eclipse.m2e.logback.feature.feature.group' name='m2e - slf4j over logback logging (Optional)' version='1.8.2.20171007-0217'>
+      <repositories size='1'>
+        <repository location='http://download.eclipse.org/releases/oxygen'/>
+      </repositories>
+    </iu>
+    <iu id='org.ucdetector.feature.feature.group' name='UCDetector' version='2.0.0'>
+      <repositories size='1'>
+        <repository location='http://ucdetector.sourceforge.net/update/'/>
+      </repositories>
+    </iu>
+    <iu id='org.dadacoalition.yedit.feature.feature.group' name='YEdit Feature' version='1.0.20.201509041456-RELEASE'>
+      <repositories size='1'>
+        <repository location='http://dadacoalition.org/yedit'/>
+      </repositories>
+    </iu>
+  </ius>
+</p2f>
