@@ -61,14 +61,13 @@ class GSPNSuccessionEvaluator
 
         double prob = 0.0;
         if (!imm.isEmpty()) {
-            if (!imm.contains(t))
+            Set<Transition> maxPriority = Priority.maxPriority(imm);
+            if (!maxPriority.contains(t))
                 return null;
 
-            prob = weight(m, t) / exitWeight(m, imm);
+            prob = StochasticTransitionFeature.weightProbs(maxPriority, m).get(t);
 
-        } else if (!exp.isEmpty()) {
-            if (!exp.contains(t))
-                return null;
+        } else if (exp.contains(t)) {
 
             double exitRate = f.exitRate();
             assert exitRate < Double.POSITIVE_INFINITY;
@@ -102,28 +101,14 @@ class GSPNSuccessionEvaluator
 
         Set<Transition> imm = new LinkedHashSet<>();
         Set<Transition> exp = new LinkedHashSet<>();
-        int requiredPriority = Integer.MIN_VALUE;
 
         for (Transition t : enabled) {
             StochasticTransitionFeature f = t.getFeature(StochasticTransitionFeature.class);
-
             if (f.isEXP()) {
-                if (f.clockRate().evaluate(m) > 0.0)
-                    exp.add(t);
+                exp.add(t);
 
             } else if (f.isIMM()) {
-                if (f.weight().evaluate(m) > 0.0) {
-                    Priority p = t.getFeature(Priority.class);
-                    int priority = p == null ? Integer.MIN_VALUE : p.value();
-
-                    if (priority > requiredPriority) {
-                        imm.clear();
-                        requiredPriority = priority;
-                    }
-
-                    if (priority == requiredPriority)
-                        imm.add(t);
-                }
+                imm.add(t);
 
             } else {
                 throw new IllegalStateException(
@@ -159,24 +144,7 @@ class GSPNSuccessionEvaluator
         StochasticTransitionFeature f =
                 t.getFeature(StochasticTransitionFeature.class);
         double lambda = ((EXP)f.density()).getLambda().doubleValue();
-        double scalingRate = f.clockRate().evaluate(m);
-        return lambda * scalingRate;
-    }
-
-    private static double exitWeight(Marking m, Set<Transition> imm) {
-
-        double exitWeight = 0.0;
-        for (Transition t : imm) {
-            StochasticTransitionFeature f =
-                    t.getFeature(StochasticTransitionFeature.class);
-            double weight = f.weight().evaluate(m);
-            exitWeight += weight;
-        }
-
-        return exitWeight;
-    }
-
-    private static double weight(Marking m, Transition t) {
-        return t.getFeature(StochasticTransitionFeature.class).weight().evaluate(m);
+        double clockRate = f.clockRate().evaluate(m);
+        return lambda * clockRate;
     }
 }

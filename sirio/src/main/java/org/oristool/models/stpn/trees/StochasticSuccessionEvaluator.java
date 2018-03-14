@@ -20,7 +20,8 @@ package org.oristool.models.stpn.trees;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -28,7 +29,6 @@ import org.oristool.analyzer.Succession;
 import org.oristool.analyzer.SuccessionEvaluator;
 import org.oristool.analyzer.state.State;
 import org.oristool.math.OmegaBigDecimal;
-import org.oristool.math.expression.Expolynomial;
 import org.oristool.math.expression.Variable;
 import org.oristool.math.function.EXP;
 import org.oristool.math.function.StateDensityFunction;
@@ -37,7 +37,6 @@ import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.pn.PetriSuccessionEvaluator;
 import org.oristool.models.pn.Priority;
 import org.oristool.models.stpn.MarkingExpr;
-import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
 
@@ -132,35 +131,25 @@ public class StochasticSuccessionEvaluator implements
         } else {
 
             // computes the random switch probability
-            Set<Variable> nullDelayVariables = prevStateDensity
-                    .getNullDelayVariables(firedVar);
-            Set<Variable> nullDelaySamePriority = new LinkedHashSet<Variable>();
-            Priority firedPriority = fired.getFeature(Priority.class);
+            Set<Variable> nullDelayVariables = prevStateDensity.getNullDelayVariables(firedVar);
+            nullDelayVariables.remove(Variable.AGE);
 
-            for (Variable v : nullDelayVariables) {
-                if (!v.equals(Variable.AGE)) {
-                    Priority otherPriority = petriNet.getTransition(
-                            v.toString()).getFeature(Priority.class);
-                    if (otherPriority != null
-                            && (firedPriority == null || firedPriority.value() < otherPriority
-                                    .value()))
-                        // there is a null-delay transition with higher priority
-                        // => abort
-                        return null;
+            if (nullDelayVariables.size() > 0) {
+                Set<Transition> nullDelayTransitions = new HashSet<>();
+                nullDelayTransitions.add(fired);
+                for (Variable v : nullDelayVariables)
+                    nullDelayTransitions.add(petriNet.getTransition(v.toString()));
 
-                    else if ((firedPriority == null && otherPriority == null)
-                            || (firedPriority != null && firedPriority
-                                    .equals(otherPriority)))
-                        // v has a null-delay and the same priority of firedVar
-                        // => random switch
-                        nullDelaySamePriority.add(v);
+                Set<Transition> maxPriority = Priority.maxPriority(nullDelayTransitions);
+                if (!maxPriority.contains(fired))
+                    return null;
+
+                if (maxPriority.size() > 1) {
+                    Map<Transition, Double> switchProbs = StochasticTransitionFeature.weightProbs(
+                            maxPriority, prevPetriStateFeature.getMarking());
+                    prob = prob.multiply(new BigDecimal(switchProbs.get(fired)));
                 }
             }
-
-            prob = prob.multiply(computeRandomSwitchProbability(
-                    nullDelaySamePriority, fired,
-                    prevPetriStateFeature.getEnabled(), petriNet,
-                    prevPetriStateFeature.getMarking()));
         }
 
         // conditioning the state density
@@ -198,10 +187,8 @@ public class StochasticSuccessionEvaluator implements
 
             if (nextStateDensity.getVariables().equals(
                     Collections.singleton(Variable.AGE)))
-                // optimization: can save a copy of the state density as the
-                // `age` density
-                tssf.setEnteringTimeDensity(new StateDensityFunction(
-                        nextStateDensity));
+                // optimization: can save a copy of the state density as the `age` density
+                tssf.setEnteringTimeDensity(new StateDensityFunction(nextStateDensity));
 
             succession.getChild().addFeature(tssf);
         }
@@ -217,11 +204,11 @@ public class StochasticSuccessionEvaluator implements
         for (Transition t : nextPetriStateFeature.getEnabled()) {
             StochasticTransitionFeature tf = t.getFeature(StochasticTransitionFeature.class);
             if (tf.isEXP() && !tf.clockRate().equals(MarkingExpr.ONE)) {
-                BigDecimal scalingRate = new BigDecimal(tf.clockRate()
+                BigDecimal clockRate = new BigDecimal(tf.clockRate()
                         .evaluate(nextPetriStateFeature.getMarking()));
                 BigDecimal rate = ((EXP)tf.density()).getLambda();
                 nextStochasticStateFeature.setEXPRate(new Variable(t.getName()),
-                        rate.multiply(scalingRate));
+                        rate.multiply(clockRate));
             }
         }
 
@@ -247,30 +234,5 @@ public class StochasticSuccessionEvaluator implements
         succession.getChild().addFeature(nextStochasticStateFeature);
 
         return succession;
-    }
-
-    private BigDecimal getWeight(Transition t, Marking m) {
-        double weight = t.getFeature(StochasticTransitionFeature.class)
-                .weight().evaluate(m);
-        return new BigDecimal(weight);
-    }
-
-    private BigDecimal computeRandomSwitchProbability(
-            Set<Variable> nullDelayVariables, Transition fired,
-            Set<Transition> enabled, PetriNet petriNet, Marking marking) {
-
-        if (nullDelayVariables.size() == 0)
-            return BigDecimal.ONE;
-
-        // Total weight of transitions with zero delay wrt fired
-        BigDecimal totalWeight = BigDecimal.ZERO;
-        for (Transition t : enabled)
-            if (!t.equals(fired)
-                    && nullDelayVariables.contains(new Variable(t.getName())))
-                totalWeight = totalWeight.add(getWeight(t, marking));
-
-        BigDecimal firedWeight = getWeight(fired, marking);
-        return firedWeight.divide(firedWeight.add(totalWeight),
-                Expolynomial.mathContext);
     }
 }

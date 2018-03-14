@@ -17,6 +17,11 @@
 
 package org.oristool.models.pn;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.oristool.petrinet.Transition;
 import org.oristool.petrinet.TransitionFeature;
 
 /**
@@ -57,5 +62,33 @@ public final class Priority implements TransitionFeature {
     @Override
     public String toString() {
         return "Priority: " + priority;
+    }
+
+    /**
+     * Finds the subset of transitions with maximum priority.
+     *
+     * @param transitions a group of transitions
+     * @return {@code true} if the transition is enabled by the marking
+     */
+    public static Set<Transition> maxPriority(Collection<Transition> transitions) {
+
+        Set<Transition> maxPriority = new HashSet<>();
+
+        int requiredPriority = Integer.MIN_VALUE;
+        for (Transition t : transitions) {
+            Priority p = t.getFeature(Priority.class);
+            int priority = p == null ? Integer.MIN_VALUE : p.value();
+
+            if (priority > requiredPriority) {
+                maxPriority.clear();
+                requiredPriority = priority;
+            }
+
+            if (priority == requiredPriority) {
+                maxPriority.add(t);
+            }
+        }
+
+        return maxPriority;
     }
 }

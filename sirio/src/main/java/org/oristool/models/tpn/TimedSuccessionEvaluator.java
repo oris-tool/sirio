@@ -17,6 +17,7 @@
 
 package org.oristool.models.tpn;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.oristool.analyzer.Succession;
@@ -87,52 +88,44 @@ public final class TimedSuccessionEvaluator implements
         Variable firedVar = new Variable(fired.toString());
         DBMZone prevDomain = prevTimedStateFeature.getDomain();
 
-        if (excludeZeroProb) {
-            for (Variable other : prevDomain.getVariables()) {
-                if (!other.equals(firedVar)
-                        && !other.equals(Variable.TSTAR)
-                        && !other.equals(Variable.AGE)
-                        // i != 0, i != *, i != age
-                        && prevDomain.getBound(other, firedVar).compareTo(
-                                OmegaBigDecimal.ZERO) == 0
-                        // b_i0 == 0 i.e. i turns into an IMM
-                        && prevDomain.getBound(firedVar, other).compareTo(
-                                OmegaBigDecimal.ZERO) > 0
-                        // b_0i > 0 so that b_i0 + b_0i > 0 i.e. i and 0 not
-                        // synchronized
-                        && (prevDomain
-                                .getBound(firedVar, Variable.TSTAR)
-                                .add(prevDomain.getBound(Variable.TSTAR,
-                                        firedVar))
-                                .compareTo(OmegaBigDecimal.ZERO) > 0 || prevDomain
-                                .getBound(other, Variable.TSTAR)
-                                .add(prevDomain.getBound(Variable.TSTAR, other))
-                                .compareTo(OmegaBigDecimal.ZERO) > 0))
-                    // either i or 0 is distributed
-
-                    return null;
-            }
-        }
-
         // impose a priority-based order on the execution of immediate timers:
         // note that firedVar can have null-delay vars even if fired is
         // not deterministic (e.g. two [0,1] after the firing of [1,1])
-        Set<Variable> nullDelayVariables = prevDomain
-                .getNullDelayVariables(firedVar);
+        Set<Variable> nullDelayVariables = prevDomain.getNullDelayVariables(firedVar);
         nullDelayVariables.remove(Variable.TSTAR);
         nullDelayVariables.remove(Variable.AGE);
 
-        Priority firedPriority = fired.getFeature(Priority.class);
+        if (nullDelayVariables.size() > 0) {
+            Set<Transition> nullDelayTransitions = new HashSet<>();
+            nullDelayTransitions.add(fired);
+            for (Variable v : nullDelayVariables)
+                nullDelayTransitions.add(petriNet.getTransition(v.toString()));
 
-        for (Variable v : nullDelayVariables) {
-            Priority otherPriority = petriNet.getTransition(v.toString())
-                    .getFeature(Priority.class);
-            if (otherPriority != null
-                    && (firedPriority == null || firedPriority.value() < otherPriority
-                            .value()))
-                // there is a deterministic transition with the same value and
-                // higher priority
+            Set<Transition> maxPriority = Priority.maxPriority(nullDelayTransitions);
+            if (!maxPriority.contains(fired))
                 return null;
+        }
+
+        if (excludeZeroProb) {
+            for (Variable other : prevDomain.getVariables()) {
+                if (!other.equals(firedVar)              // i != 0
+                        && !other.equals(Variable.TSTAR) // i != *
+                        && !other.equals(Variable.AGE)   // i != age
+                        && prevDomain.getBound(other, firedVar)
+                            .compareTo(OmegaBigDecimal.ZERO) == 0  // now IMM
+                        && prevDomain.getBound(firedVar, other)
+                            .compareTo(OmegaBigDecimal.ZERO) > 0   // not before
+                        // either i or 0 was distributed
+                        && (prevDomain.getBound(firedVar, Variable.TSTAR)
+                                .add(prevDomain.getBound(Variable.TSTAR, firedVar))
+                                .compareTo(OmegaBigDecimal.ZERO) > 0
+                         || prevDomain.getBound(other, Variable.TSTAR)
+                                .add(prevDomain.getBound(Variable.TSTAR, other))
+                                .compareTo(OmegaBigDecimal.ZERO) > 0)) {
+
+                    return null;
+                }
+            }
         }
 
         // conditioning
@@ -149,14 +142,11 @@ public final class TimedSuccessionEvaluator implements
                 .newVariableSetInstance(nextPetriStateFeature.getDisabled()));
 
         // newly enabling
-        newDomain
-                .addVariables(Transition
-                        .newVariableSetInstance(nextPetriStateFeature
-                                .getNewlyEnabled()));
+        newDomain.addVariables(
+                Transition.newVariableSetInstance(nextPetriStateFeature.getNewlyEnabled()));
 
         for (Transition t : nextPetriStateFeature.getNewlyEnabled()) {
-            TimedTransitionFeature ttf = t
-                    .getFeature(TimedTransitionFeature.class);
+            TimedTransitionFeature ttf = t.getFeature(TimedTransitionFeature.class);
             newDomain.setCoefficient(t.newVariableInstance(), Variable.TSTAR,
                     ttf.getLFT());
             newDomain.setCoefficient(Variable.TSTAR, t.newVariableInstance(),

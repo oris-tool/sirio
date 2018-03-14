@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.util.Featurizable;
 
 /**
@@ -440,38 +441,48 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
     /**
      * Returns the set of transitions enabled by a given marking.
      *
-     * @param marking any marking
+     * @param marking a marking
      * @return set of transitions enabled by the marking
      */
     public Set<Transition> getEnabledTransitions(Marking marking) {
 
         Set<Transition> enabled = new LinkedHashSet<Transition>();
-
         for (Transition t : this.getTransitions()) {
-            boolean isEnabled = true;
-
-            for (Precondition pc : this.getPreconditions(t))
-                if (marking.getTokens(pc.getPlace()) < pc.getMultiplicity()) {
-                    isEnabled = false;
-                    break;
-                }
-
-            if (isEnabled)
-                for (InhibitorArc ia : this.getInhibitorArcs(t))
-                    if (marking.getTokens(ia.getPlace()) >= ia
-                            .getMultiplicity()) {
-                        isEnabled = false;
-                        break;
-                    }
-
-            EnablingFunction ec = t.getFeature(EnablingFunction.class);
-            if (isEnabled && ec != null)
-                isEnabled = ec.getMarkingCondition().evaluate(marking);
-
-            if (isEnabled)
+            if (isEnabled(t, marking)) {
                 enabled.add(t);
+            }
         }
 
         return enabled;
+    }
+
+    /**
+     * Checks if a transition is enabled by a marking.
+     *
+     * @param t a transition
+     * @param m a marking
+     * @return {@code true} if the transition is enabled by the marking
+     */
+    public boolean isEnabled(Transition t, Marking m) {
+
+        for (Precondition pc : this.getPreconditions(t)) {
+            if (m.getTokens(pc.getPlace()) < pc.getMultiplicity())
+                return false;
+        }
+
+        for (InhibitorArc ia : this.getInhibitorArcs(t)) {
+            if (m.getTokens(ia.getPlace()) >= ia.getMultiplicity())
+                return false;
+        }
+
+        EnablingFunction ec = t.getFeature(EnablingFunction.class);
+        if (ec != null && !ec.getMarkingCondition().evaluate(m))
+            return false;
+
+        StochasticTransitionFeature sf = t.getFeature(StochasticTransitionFeature.class);
+        if (sf != null && sf.weight().evaluate(m) <= 0.0)
+            return false;
+
+        return true;
     }
 }

@@ -18,7 +18,10 @@
 package org.oristool.models.stpn.trees;
 
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.oristool.math.OmegaBigDecimal;
 import org.oristool.math.domain.DBMZone;
@@ -30,6 +33,8 @@ import org.oristool.math.function.GEN;
 import org.oristool.math.function.PartitionedFunction;
 import org.oristool.models.stpn.MarkingExpr;
 import org.oristool.models.tpn.TimedTransitionFeature;
+import org.oristool.petrinet.Marking;
+import org.oristool.petrinet.Transition;
 import org.oristool.petrinet.TransitionFeature;
 
 /**
@@ -163,7 +168,7 @@ public class StochasticTransitionFeature implements TransitionFeature {
      * rate is always equal to 1.
      *
      * @param value timer value
-     * @param weight weight of the transition
+     * @param weight weight of the transition (depends on the state marking)
      * @return a stochastic feature with deterministic distribution
      */
     public static StochasticTransitionFeature newDeterministicInstance(
@@ -178,7 +183,7 @@ public class StochasticTransitionFeature implements TransitionFeature {
      * rate is always equal to 1.
      *
      * @param value timer value
-     * @param weight weight of the transition
+     * @param weight weight of the transition (depends on the state marking)
      * @param clockRate scaling rate (depends on the state marking)
      * @return a stochastic feature with deterministic distribution
      */
@@ -199,7 +204,7 @@ public class StochasticTransitionFeature implements TransitionFeature {
     public static StochasticTransitionFeature newExponentialInstance(
             String expRate) {
         return StochasticTransitionFeature.newExponentialInstance(new BigDecimal(expRate),
-                MarkingExpr.ONE);
+                MarkingExpr.ONE, MarkingExpr.ONE);
     }
 
     /**
@@ -211,7 +216,8 @@ public class StochasticTransitionFeature implements TransitionFeature {
      */
     public static StochasticTransitionFeature newExponentialInstance(
             BigDecimal expRate) {
-        return StochasticTransitionFeature.newExponentialInstance(expRate, MarkingExpr.ONE);
+        return StochasticTransitionFeature.newExponentialInstance(expRate,
+                MarkingExpr.ONE, MarkingExpr.ONE);
     }
 
     /**
@@ -228,6 +234,23 @@ public class StochasticTransitionFeature implements TransitionFeature {
 
         return StochasticTransitionFeature.of(new EXP(Variable.X, expRate),
                 MarkingExpr.ONE, clockRate);
+    }
+
+    /**
+     * Builds the stochastic feature of a transition with exponentially distributed
+     * timer and variable rate. The rate of the exponential is rescaled in each
+     * state after evaluating the input rate parameter.
+     *
+     * @param expRate rate of the exponential
+     * @param clockRate scaling rate (depends on the state marking)
+     * @param weight weight of the transition (depends on the state marking)
+     * @return a stochastic feature with exponential distribution and variable rate
+     */
+    public static StochasticTransitionFeature newExponentialInstance(BigDecimal expRate,
+            MarkingExpr clockRate, MarkingExpr weight) {
+
+        return StochasticTransitionFeature.of(new EXP(Variable.X, expRate),
+                weight, clockRate);
     }
 
     /**
@@ -262,12 +285,13 @@ public class StochasticTransitionFeature implements TransitionFeature {
      * @param rate rate of the exponentials in the Erlang (rate)
      * @param k number of exponentials in the Erlang (shape)
      * @param clockRate scaling rate (depends on the state marking)
+     * @param weight weight of the transition (depends on the state marking)
      * @return a stochastic feature with Erlang distribution
      */
     public static StochasticTransitionFeature newErlangInstance(int k, BigDecimal rate,
-            MarkingExpr clockRate) {
+            MarkingExpr clockRate, MarkingExpr weight) {
         return StochasticTransitionFeature.of(new Erlang(Variable.X, k, rate),
-                MarkingExpr.ONE, clockRate);
+                weight, clockRate);
     }
 
     /**
@@ -351,8 +375,8 @@ public class StochasticTransitionFeature implements TransitionFeature {
         OmegaBigDecimal lft = z.getBound(Variable.X, Variable.TSTAR);
 
         return c.equals(OmegaBigDecimal.ONE)
-                && eft.equals(OmegaBigDecimal.ZERO)
-                && lft.equals(OmegaBigDecimal.ZERO);
+                && eft.compareTo(OmegaBigDecimal.ZERO) == 0
+                && lft.compareTo(OmegaBigDecimal.ZERO) == 0;
     }
 
     /**
@@ -375,5 +399,40 @@ public class StochasticTransitionFeature implements TransitionFeature {
 
         return new TimedTransitionFeature(
                 density().getDomainsEFT(), density().getDomainsLFT());
+    }
+
+    /**
+     * Computes the discrete distribution determined by weights.
+     *
+     * <p>Note that transitions with zero weight are always assigned zero
+     * probability, even if they are the only ones in the input set.
+     *
+     * @param transitions a group of transitions with {@link StochasticStateFeature}
+     * @param marking a marking (weights can depend on the marking)
+     * @return a map from transitions to probabilities
+     * @throws IllegalArgumentException if a weight is not positive
+     */
+    public static Map<Transition, Double> weightProbs(
+            Collection<Transition> transitions, Marking marking) {
+
+        Map<Transition, Double> probs = new HashMap<>(transitions.size());
+        double totalWeight = 0.0;
+
+        for (Transition t : transitions) {
+            double weight = t.getFeature(StochasticTransitionFeature.class)
+                    .weight().evaluate(marking);
+            if (weight <= 0.0)
+                throw new IllegalArgumentException("Weight must be positive for " + t);
+
+            probs.put(t, weight);
+            totalWeight += weight;
+        }
+
+        for (Transition t : transitions) {
+            double weight = probs.get(t);
+            probs.put(t, weight / totalWeight);
+        }
+
+        return probs;
     }
 }
