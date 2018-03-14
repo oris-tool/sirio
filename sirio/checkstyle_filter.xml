@@ -7,4 +7,5 @@
     <suppress checks="MethodName" files="org[\\/]oristool[\\/]lello"/>
     <suppress checks="LocalVariableName" files="org[\\/]oristool"/>
     <suppress checks="[a-zA-Z0-9]*" files="org[\\/]oristool[\\/]math[\\/]Calculus.java"/>
+    <suppress checks="[a-zA-Z0-9]*" files=".*[\\/]AutoValue_.*java"/>
 </suppressions>
