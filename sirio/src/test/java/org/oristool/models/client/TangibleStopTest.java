@@ -54,7 +54,7 @@ import org.oristool.util.Pair;
 /**
  * Test of all engines with an absorbing condition stopping on a tangible state.
  */
-public class TangibleAbsorbingTest {
+public class TangibleStopTest {
     PetriNet pn;
     Marking marking;
     List<Marking> expectedMarkings;

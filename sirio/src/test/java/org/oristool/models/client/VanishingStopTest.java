@@ -54,7 +54,7 @@ import org.oristool.util.Pair;
 /**
  * Test of all engines with an absorbing condition stopping on a vanishing state.
  */
-public class VanishingAbsorbingTest {
+public class VanishingStopTest {
     PetriNet pn;
     Marking marking;
     List<Marking> expectedMarkings;
