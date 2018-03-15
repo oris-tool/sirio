@@ -15,40 +15,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.oristool.analyzer;
+package org.oristool.analyzer.stop;
+
+import java.util.function.Predicate;
+
+import org.oristool.analyzer.Succession;
+import org.oristool.analyzer.state.State;
 
 /**
- * No-op adapter for the {@link AnalyzerObserver} interface.
+ * Stop criterion based on a state predicate.
  */
-public class AnalyzerObserverAdapter implements AnalyzerObserver {
+public final class StateStopCriterion implements StopCriterion {
+
+    private final Predicate<State> predicate;
+    private State lastExtractedState;
+
+    public StateStopCriterion(Predicate<State> predicate) {
+        this.predicate = predicate;
+    }
 
     @Override
     public void notifySuccessionExtracted(Succession succession) {
-
+        lastExtractedState = succession.getChild();
     }
 
     @Override
-    public void notifySuccessionPreProcessed(Succession succession) {
-
-    }
-
-    @Override
-    public void notifyNodeAdded(Succession succession) {
-
-    }
-
-    @Override
-    public void notifySuccessionCreated(Succession succession) {
-
-    }
-
-    @Override
-    public void notifySuccessionPostProcessed(Succession succession) {
-
-    }
-
-    @Override
-    public void notifySuccessionInserted(Succession succession) {
-
+    public boolean stop() {
+        return predicate.test(lastExtractedState);
     }
 }

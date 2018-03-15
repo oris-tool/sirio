@@ -34,6 +34,7 @@ import org.oristool.models.gspn.reachability.SPNState;
 import org.oristool.models.stpn.MarkingExpr;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Marking;
+import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Place;
 import org.oristool.petrinet.Transition;
@@ -166,12 +167,44 @@ public class SimpleCycleTest {
         assertEquals(root1Rate, result.initialStates().get(root1Index).exitRate(), 1e-15);
         assertEquals(root2Rate, result.initialStates().get(root2Index).exitRate(), 1e-15);
 
-
         assertEquals(root1Prob, result.initialProbs().get(root1Index), 1e-15);
         assertEquals(root2Prob, result.initialProbs().get(root2Index), 1e-15);
 
         Set<SPNState> nodes = Set.of(root1, root2, child1);
         assertEquals(nodes, result.probsGraph().nodes());
+
+        assertEquals(3, result.probsGraph().edges().size());
+        assertTrue(result.probsGraph().hasEdgeConnecting(root1, child1));
+        assertTrue(result.probsGraph().hasEdgeConnecting(child1, root1));
+        assertTrue(result.probsGraph().hasEdgeConnecting(root2, root2));
+    }
+
+    @Test
+    public void reachabilityAbsorbing() {
+
+        MarkingCondition mc = MarkingCondition.fromString("root1 > 0");
+
+        final DTMC<SPNState> result = GSPNReachability.builder()
+                .stopOn(mc)
+                .build().compute(pn, marking);
+
+        assertEquals(2, result.initialStates().size());
+        assertTrue(result.initialStates().contains(root1));
+        assertTrue(result.initialStates().contains(root2));
+        int root1Index = result.initialStates().indexOf(root1);
+        int root2Index = result.initialStates().indexOf(root2);
+
+        assertEquals(0.0, result.initialStates().get(root1Index).exitRate(), 1e-15);
+        assertEquals(root2Rate, result.initialStates().get(root2Index).exitRate(), 1e-15);
+
+        assertEquals(root1Prob, result.initialProbs().get(root1Index), 1e-15);
+        assertEquals(root2Prob, result.initialProbs().get(root2Index), 1e-15);
+
+        Set<SPNState> nodes = Set.of(root1, root2);
+        assertEquals(nodes, result.probsGraph().nodes());
+
+        assertEquals(1, result.probsGraph().edges().size());
+        assertTrue(result.probsGraph().hasEdgeConnecting(root2, root2));
     }
 
     @Test

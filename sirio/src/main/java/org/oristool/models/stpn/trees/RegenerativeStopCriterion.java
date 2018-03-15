@@ -17,15 +17,13 @@
 
 package org.oristool.models.stpn.trees;
 
-import org.oristool.analyzer.AnalyzerObserverAdapter;
 import org.oristool.analyzer.Succession;
 import org.oristool.analyzer.stop.StopCriterion;
 
 /**
  * Stop criterion halting the analysis after regenerations.
  */
-public class RegenerativeStopCriterion extends AnalyzerObserverAdapter
-        implements StopCriterion {
+public class RegenerativeStopCriterion implements StopCriterion {
 
     boolean lastStateClassExtractedIsRegenerative;
     int addedNodes;
@@ -41,5 +39,4 @@ public class RegenerativeStopCriterion extends AnalyzerObserverAdapter
                 .hasFeature(Regeneration.class);
         addedNodes++;
     }
-
 }

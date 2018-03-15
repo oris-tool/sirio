@@ -35,7 +35,9 @@ import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.pn.Priority;
 import org.oristool.models.stpn.MarkingExpr;
 import org.oristool.models.stpn.TransientSolution;
+import org.oristool.models.stpn.trans.RegTransient;
 import org.oristool.models.stpn.trans.TreeTransient;
+import org.oristool.models.stpn.trees.DeterministicEnablingState;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.models.tpn.TimedAnalysis;
 import org.oristool.petrinet.Marking;
@@ -203,10 +205,18 @@ class PriorityWeightsDetTest {
         SteadyStateSolution<Marking> steadyProbs = steadyAnalysis.compute(pn, marking);
         assertEquals(new HashSet<>(expectedMarkings), steadyProbs.getSteadyState().keySet()); */
 
-        TreeTransient transientAnalysis = TreeTransient.builder()
+        TreeTransient treeAnalysis = TreeTransient.builder()
                 .timeStep(new BigDecimal("0.1"))
                 .greedyPolicy(BigDecimal.ONE, new BigDecimal("0.1")).build();
-        TransientSolution<Marking, Marking> solution = transientAnalysis.compute(pn, marking);
+        TransientSolution<Marking, Marking> solution = treeAnalysis.compute(pn, marking);
         assertEquals(new HashSet<>(expectedMarkings), new HashSet<>(solution.getColumnStates()));
+
+        RegTransient regAnalysis = RegTransient.builder()
+                .timeStep(new BigDecimal("0.1"))
+                .greedyPolicy(BigDecimal.ONE, new BigDecimal("0.1")).build();
+        TransientSolution<DeterministicEnablingState, Marking> regSolution =
+                regAnalysis.compute(pn, marking);
+        assertEquals(new HashSet<>(expectedMarkings),
+                new HashSet<>(regSolution.getColumnStates()));
     }
 }

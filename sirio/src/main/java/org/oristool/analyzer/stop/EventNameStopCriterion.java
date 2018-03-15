@@ -17,14 +17,12 @@
 
 package org.oristool.analyzer.stop;
 
-import org.oristool.analyzer.AnalyzerObserverAdapter;
 import org.oristool.analyzer.Succession;
 
 /**
  * Criterion stopping the analysis when a specific event fired.
  */
-public class EventNameStopCriterion extends AnalyzerObserverAdapter
-        implements StopCriterion {
+public class EventNameStopCriterion implements StopCriterion {
 
     private final String eventName;
     private String lastEventName;

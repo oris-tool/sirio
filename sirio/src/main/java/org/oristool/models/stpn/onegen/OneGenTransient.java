@@ -18,21 +18,26 @@
 package org.oristool.models.stpn.onegen;
 
 import java.math.BigDecimal;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.oristool.analyzer.log.AnalysisLogger;
 import org.oristool.analyzer.log.AnalysisMonitor;
 import org.oristool.analyzer.log.NoOpLogger;
 import org.oristool.analyzer.log.NoOpMonitor;
+import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.stop.AlwaysFalseStopCriterion;
+import org.oristool.analyzer.stop.StateStopCriterion;
 import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.models.Engine;
 import org.oristool.models.ValidationMessageCollector;
+import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.stpn.MarkingExpr;
 import org.oristool.models.stpn.TransientSolution;
 import org.oristool.models.stpn.trees.DeterministicEnablingState;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Marking;
+import org.oristool.petrinet.MarkingCondition;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
 
@@ -169,6 +174,21 @@ public abstract class OneGenTransient
          * @return error of subordinated transient probabilities
          */
         public abstract Builder error(BigDecimal value);
+
+        /**
+         * Uses a marking condition to create local stop criterion instances used by
+         * this analysis. It can be used to avoid the expansion of some state classes,
+         * as if their states were absorbing.
+         *
+         * @param value the supplier of local stop criterion
+         * @return this builder instance
+         */
+        public Builder stopOn(MarkingCondition value) {
+            Predicate<State> p = s ->
+                value.evaluate(s.getFeature(PetriStateFeature.class).getMarking());
+            stopOn(() -> new StateStopCriterion(p));
+            return this;
+        }
 
         /**
          * Sets the supplier of local stop criterion instances used by this analysis. It

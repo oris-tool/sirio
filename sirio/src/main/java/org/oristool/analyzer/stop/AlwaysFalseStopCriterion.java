@@ -17,13 +17,10 @@
 
 package org.oristool.analyzer.stop;
 
-import org.oristool.analyzer.AnalyzerObserverAdapter;
-
 /**
  * A stop criterion that evaluates always to false.
  */
-public final class AlwaysFalseStopCriterion extends AnalyzerObserverAdapter implements
-        StopCriterion {
+public final class AlwaysFalseStopCriterion implements StopCriterion {
 
     @Override
     public boolean stop() {

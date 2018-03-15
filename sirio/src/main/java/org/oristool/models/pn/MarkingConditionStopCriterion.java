@@ -17,7 +17,6 @@
 
 package org.oristool.models.pn;
 
-import org.oristool.analyzer.AnalyzerObserverAdapter;
 import org.oristool.analyzer.Succession;
 import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.petrinet.Marking;
@@ -26,8 +25,7 @@ import org.oristool.petrinet.MarkingCondition;
 /**
  * Stop criterion based on a marking condition.
  */
-public final class MarkingConditionStopCriterion extends AnalyzerObserverAdapter
-        implements StopCriterion {
+public final class MarkingConditionStopCriterion implements StopCriterion {
 
     MarkingCondition markingCondition;
     Marking lastExtractedMarking;

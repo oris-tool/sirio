@@ -27,7 +27,9 @@ public interface AnalyzerObserver {
      *
      * @param succession succession extracted by the analyzer
      */
-    void notifySuccessionExtracted(Succession succession);
+    default void notifySuccessionExtracted(Succession succession) {
+
+    }
 
     /**
      * Notifies the observer that the analyzer has pre-processed the given
@@ -35,7 +37,9 @@ public interface AnalyzerObserver {
      *
      * @param succession succession pre-processed by the analyzer
      */
-    void notifySuccessionPreProcessed(Succession succession);
+    default void notifySuccessionPreProcessed(Succession succession) {
+
+    }
 
     /**
      * Notifies the observer that the analyzer has added the child node of the given
@@ -43,7 +47,9 @@ public interface AnalyzerObserver {
      *
      * @param succession succession added to the graph by the analyzer
      */
-    void notifyNodeAdded(Succession succession);
+    default void notifyNodeAdded(Succession succession) {
+
+    }
 
     /**
      * Notifies the observer that the analyzer has created the given succession
@@ -51,7 +57,9 @@ public interface AnalyzerObserver {
      *
      * @param succession succession created by the analyzer
      */
-    void notifySuccessionCreated(Succession succession);
+    default void notifySuccessionCreated(Succession succession) {
+
+    }
 
     /**
      * Notifies the observer that the analyzer has post-processed the given
@@ -59,7 +67,9 @@ public interface AnalyzerObserver {
      *
      * @param succession succession post-processed by the analyzer
      */
-    void notifySuccessionPostProcessed(Succession succession);
+    default void notifySuccessionPostProcessed(Succession succession) {
+
+    }
 
     /**
      * Notifies the observer that the analyzer has inserted the given succession
@@ -67,5 +77,7 @@ public interface AnalyzerObserver {
      *
      * @param succession succession added by the analyzer to the policy queue
      */
-    void notifySuccessionInserted(Succession succession);
+    default void notifySuccessionInserted(Succession succession) {
+
+    }
 }

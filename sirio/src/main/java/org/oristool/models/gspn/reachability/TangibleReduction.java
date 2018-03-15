@@ -29,6 +29,7 @@ import java.util.Set;
 import org.oristool.analyzer.Succession;
 import org.oristool.analyzer.graph.Node;
 import org.oristool.analyzer.graph.SuccessionGraph;
+import org.oristool.analyzer.state.LocalStop;
 import org.oristool.analyzer.state.State;
 import org.oristool.models.gspn.chains.AbsorptionProbs;
 import org.oristool.models.gspn.chains.DTMC;
@@ -156,7 +157,12 @@ class TangibleReduction {
     }
 
     private static SPNState feature(State state) {
-        return state.getFeature(SPNState.class);
+        // impose sojourn rate equal to zero for stop states
+        SPNState f = state.getFeature(SPNState.class);
+        if (state.hasFeature(LocalStop.class))
+            return new SPNState(f.state(), 0.0);
+        else
+            return f;
     }
 
     private SPNState feature(Node n) {

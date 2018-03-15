@@ -17,15 +17,13 @@
 
 package org.oristool.analyzer.stop;
 
-import org.oristool.analyzer.AnalyzerObserverAdapter;
 import org.oristool.analyzer.Succession;
 
 /**
  * A stop criterion that stops the analysis after the given number of nodes has
  * been added.
  */
-public final class IterationsNumberStopCriterion extends AnalyzerObserverAdapter
-        implements StopCriterion {
+public final class IterationsNumberStopCriterion implements StopCriterion {
 
     private final int maxIterationsCount;
     private int currentIterationsCount;

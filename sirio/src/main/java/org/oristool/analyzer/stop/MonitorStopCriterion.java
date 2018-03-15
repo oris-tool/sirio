@@ -17,15 +17,13 @@
 
 package org.oristool.analyzer.stop;
 
-import org.oristool.analyzer.AnalyzerObserverAdapter;
 import org.oristool.analyzer.Succession;
 import org.oristool.analyzer.log.AnalysisMonitor;
 
 /**
  * A stop criterion controlled by an external {@code AnalysisMonitor}.
  */
-public class MonitorStopCriterion extends AnalyzerObserverAdapter implements
-        StopCriterion {
+public class MonitorStopCriterion implements StopCriterion {
 
     private final AnalysisMonitor monitor;
     private boolean interruptedExecution;
