@@ -381,8 +381,7 @@ public class StochasticStateFeature implements StateFeature {
             StochasticStateFeature o = (StochasticStateFeature) obj;
             return exponentials.equals(o.exponentials)
                     && ageVariables.equals(o.ageVariables)
-                    && stateDensity.equals(o.getStateDensity(), numSamples,
-                            epsilon);
+                    && stateDensity.equals(o.getStateDensity());
         }
 
     }

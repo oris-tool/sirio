@@ -32,25 +32,34 @@ import org.oristool.math.domain.DBMZone;
 import org.oristool.math.expression.Expolynomial;
 import org.oristool.math.expression.Variable;
 
+/**
+ * Joint probability density function over DBM zones.
+ */
 public class StateDensityFunction {
 
     private Map<Variable, BigDecimal> deterministicVariables;
     private Map<Variable, Synchronization> synchronizedVariables;
     private PartitionedGEN partitionedGEN;
 
+    /**
+     * Creates an empty PDF.
+     */
     public StateDensityFunction() {
 
-        this.deterministicVariables = new LinkedHashMap<Variable, BigDecimal>();
-        this.synchronizedVariables = new LinkedHashMap<Variable, Synchronization>();
+        this.deterministicVariables = new LinkedHashMap<>();
+        this.synchronizedVariables = new LinkedHashMap<>();
         this.partitionedGEN = PartitionedGEN.newOneInstance();
     }
 
+    /**
+     * Creates the copy of a PDF.
+     *
+     * @param other PDF to copy
+     */
     public StateDensityFunction(StateDensityFunction other) {
 
-        this.deterministicVariables = new LinkedHashMap<Variable, BigDecimal>(
-                other.deterministicVariables);
-        this.synchronizedVariables = new LinkedHashMap<Variable, Synchronization>(
-                other.synchronizedVariables);
+        this.deterministicVariables = new LinkedHashMap<>(other.deterministicVariables);
+        this.synchronizedVariables = new LinkedHashMap<>(other.synchronizedVariables);
         this.partitionedGEN = new PartitionedGEN(other.partitionedGEN);
     }
 
@@ -77,25 +86,9 @@ public class StateDensityFunction {
         return true;
     }
 
-    public boolean equals(StateDensityFunction o, int numSamples,
-            BigDecimal epsilon) {
-
-        if (this == o)
-            return true;
-
-        if (!deterministicVariables.equals(o.deterministicVariables))
-            return false;
-
-        if (!synchronizedVariables.equals(o.synchronizedVariables))
-            return false;
-
-        return partitionedGEN.equals(o.partitionedGEN, numSamples, epsilon);
-    }
-
     @Override
     public int hashCode() {
         int result = 17;
-
         result = 31 * result + this.deterministicVariables.hashCode();
         result = 31 * result + this.synchronizedVariables.hashCode();
         result = 31 * result + this.partitionedGEN.getFunctions().size();
@@ -103,11 +96,22 @@ public class StateDensityFunction {
         return result;
     }
 
+    /**
+     * Returns the PDF of continuous variables (i.e., not deterministic or
+     * synchronized).
+     *
+     * @return PDF of continuous variables
+     */
     public PartitionedGEN getContinuosVariablesDensity() {
         return new PartitionedGEN(partitionedGEN);
     }
 
-    // variable adders
+    /**
+     * Adds a deterministic variable to this PDF.
+     *
+     * @param v new variable
+     * @param value deterministic value
+     */
     public void addDeterministicVariable(Variable v, BigDecimal value) {
 
         if (deterministicVariables.keySet().contains(v)
@@ -119,6 +123,14 @@ public class StateDensityFunction {
         deterministicVariables.put(v, value);
     }
 
+    /**
+     * Adds a variable with deterministic delay with respect to an existing
+     * continuous variable.
+     *
+     * @param v new variable
+     * @param distributed continuous variable
+     * @param delay deterministic delay
+     */
     public void addSynchronizedVariable(Variable v, Variable distributed,
             BigDecimal delay) {
 
@@ -139,6 +151,12 @@ public class StateDensityFunction {
         synchronizedVariables.put(v, new Synchronization(distributed, delay));
     }
 
+    /**
+     * Adds a continuous variable with give PDF.
+     *
+     * @param v new variable
+     * @param f PDF (with respect to {@code Variable.X})
+     */
     public void addContinuousVariable(Variable v, PartitionedFunction f) {
 
         for (DBMZone d: f.getDomains()) {
@@ -162,10 +180,14 @@ public class StateDensityFunction {
             piecesRenamed.add(g);
         }
 
-        this.partitionedGEN = this.partitionedGEN.cartesianProduct(new PartitionedGEN(piecesRenamed));
+        partitionedGEN = partitionedGEN.cartesianProduct(new PartitionedGEN(piecesRenamed));
     }
 
-    // variable getters
+    /**
+     * Returns the set of variables (deterministic, synchronized, continuous).
+     *
+     * @return variables of this PDF
+     */
     public Set<Variable> getVariables() {
 
         Set<Variable> variables = new LinkedHashSet<Variable>();
@@ -176,21 +198,51 @@ public class StateDensityFunction {
         return variables;
     }
 
+    /**
+     * Returns the set of continuous variables.
+     *
+     * @return continuous variables of this PDF
+     */
     public Set<Variable> getContinuousVariables() {
 
-        return this.partitionedGEN.getVariables();
+        return partitionedGEN.getVariables();
     }
 
+    /**
+     * Returns the set of deterministic variables.
+     *
+     * @return deterministic variables of this PDF
+     */
     public Set<Variable> getDeterministicVariables() {
 
         return deterministicVariables.keySet();
     }
 
+    /**
+     * Returns the set of deterministic variables and their values.
+     *
+     * @return deterministic variables of this PDF and their values
+     */
     public Set<Entry<Variable, BigDecimal>> getDeterministicValues() {
 
         return deterministicVariables.entrySet();
     }
 
+    /**
+     * Returns the PDF of continuous variables.
+     *
+     * @return PDF of continuous variables
+     */
+    public PartitionedGEN getPartitionedGen() {
+        return this.partitionedGEN;
+    }
+
+    /**
+     * Returns the minimum value of deterministic variables.
+     *
+     * @return minimum deterministic value or {@code null} if no deterministic
+     *         variable is present
+     */
     public Entry<Variable, BigDecimal> getLowestDeterministicValue() {
 
         Entry<Variable, BigDecimal> lowest = null;
@@ -202,6 +254,13 @@ public class StateDensityFunction {
         return lowest;
     }
 
+    /**
+     * Returns the minimum value of deterministic variables among a given set.
+     *
+     * @param detVariables set of deterministic varuables
+     * @return minimum deterministic value or {@code null} if the set is empty or
+     *         disjoint from {@code this.getDeterministicVariables()}
+     */
     public Entry<Variable, BigDecimal> getLowestDeterministicValue(
             Set<Variable> detVariables) {
 
@@ -215,22 +274,44 @@ public class StateDensityFunction {
         return lowest;
     }
 
+    /**
+     * Returns the deterministic value of a given variable.
+     *
+     * @param v variable
+     * @return deterministic value
+     */
     public BigDecimal getDeterministicValue(Variable v) {
 
         return deterministicVariables.get(v);
     }
 
+    /**
+     * Returns the set of synchronized variables.
+     *
+     * @return synchronized variables of this PDF
+     */
     public Set<Variable> getSynchronizedVariables() {
 
         return synchronizedVariables.keySet();
     }
 
+    /**
+     * Returns synchronization information of a variable.
+     *
+     * @param v input variable
+     * @return synchronized information, or {@code null} if the variable is not
+     *         synchronized
+     */
     public Synchronization getSynchronization(Variable v) {
 
         return synchronizedVariables.get(v);
     }
 
-    // variable removers
+    /**
+     * Removes a variable from this PDF.
+     *
+     * @param v target variable
+     */
     public void marginalizeVariable(Variable v) {
 
         if (deterministicVariables.containsKey(v)) {
@@ -253,6 +334,12 @@ public class StateDensityFunction {
 
     }
 
+    /**
+     * Moves a synchronized variable into the distributed set, and the current
+     * distributed one into the synchronized set.
+     *
+     * @param synch a synchronized variable
+     */
     public void swap(Variable synch) {
 
         Synchronization s = synchronizedVariables.get(synch);
@@ -275,6 +362,13 @@ public class StateDensityFunction {
                 .negate());
     }
 
+    /**
+     * Returns the synchronized variable with minimum delay with respect to a given
+     * distributed one.
+     *
+     * @param distributedVariable a distributed variable
+     * @return a synchronized variable with minimum delay
+     */
     public Variable getLowestSynchronizedWrt(Variable distributedVariable) {
 
         Variable lowestSynchronizedVariable = null;
@@ -334,13 +428,19 @@ public class StateDensityFunction {
         return b.toString();
     }
 
+    /**
+     * Returns all the variables synchronized with a given one (and their delays).
+     *
+     * <p>The input variable can be in the distributed or synchronized set.
+     *
+     * @param v input variable
+     * @return synchronized variables
+     */
     public Map<Variable, BigDecimal> getSynchDelaysWrt(Variable v) {
 
-        // FIXME Da modificare quando saranno presenti synch suspended
         Variable distributedVariable = null;
         BigDecimal vDelayWrtDistributedVariable = BigDecimal.ZERO;
-        for (Entry<Variable, Synchronization> e : synchronizedVariables
-                .entrySet())
+        for (Entry<Variable, Synchronization> e : synchronizedVariables.entrySet()) {
             if (e.getKey().equals(v)) {
                 // v is synchronized with some distributed variable
                 vDelayWrtDistributedVariable = e.getValue().getDelay();
@@ -350,8 +450,9 @@ public class StateDensityFunction {
                 // v is distributed and has variables synchronized with it
                 distributedVariable = v;
             }
+        }
 
-        Map<Variable, BigDecimal> result = new LinkedHashMap<Variable, BigDecimal>();
+        Map<Variable, BigDecimal> result = new LinkedHashMap<>();
 
         // return an empty map if v is not in a synch group
         if (distributedVariable == null)
@@ -359,29 +460,27 @@ public class StateDensityFunction {
 
         // add the distributed variable if it is not v
         if (!distributedVariable.equals(v))
-            result.put(distributedVariable,
-                    vDelayWrtDistributedVariable.negate());
+            result.put(distributedVariable, vDelayWrtDistributedVariable.negate());
 
         // add any variable (other than v) synchronized with the same as v
-        for (Entry<Variable, Synchronization> e : synchronizedVariables
-                .entrySet())
-            if (!e.getKey().equals(v)
-                    && e.getValue().getDistributed()
-                            .equals(distributedVariable))
-                // vDelayWrtDistributedVariable equals 0 if v is the distributed
-                // variable
-                result.put(
-                        e.getKey(),
-                        e.getValue().getDelay()
-                                .subtract(vDelayWrtDistributedVariable));
-
+        for (Entry<Variable, Synchronization> e : synchronizedVariables.entrySet()) {
+            if (!e.getKey().equals(v) && e.getValue().getDistributed().equals(distributedVariable))
+                // vDelayWrtDistributedVariable equals 0 if v is the distributed variable
+                result.put(e.getKey(),
+                        e.getValue().getDelay().subtract(vDelayWrtDistributedVariable));
+        }
         return result;
     }
 
+    /**
+     * Returns the minimum delay of variables synchronized with the input one.
+     *
+     * @param distributedVariable a variable in the distributed set
+     * @return the minimum synchronization delay
+     */
     public BigDecimal getLowestSynchronizedDelayWrt(Variable distributedVariable) {
 
-        Variable lowestSynchronized = this
-                .getLowestSynchronizedWrt(distributedVariable);
+        Variable lowestSynchronized = this.getLowestSynchronizedWrt(distributedVariable);
 
         if (lowestSynchronized == null)
             return null;
@@ -389,26 +488,30 @@ public class StateDensityFunction {
             return synchronizedVariables.get(lowestSynchronized).getDelay();
     }
 
+    /**
+     * Returns the deterministic, synchronized or distributed variables with zero
+     * delay with respect to an input one.
+     *
+     * @param v a deterministic, synchronized or distributed variable
+     * @return the set of variables with zero delay
+     */
     public Set<Variable> getNullDelayVariables(Variable v) {
 
-        Set<Variable> nullDelayVariables = new LinkedHashSet<Variable>();
+        Set<Variable> nullDelayVariables = new LinkedHashSet<>();
 
         if (deterministicVariables.containsKey(v)) {
             BigDecimal value = deterministicVariables.get(v);
 
             // adds other deterministic variables with same value
-            for (Entry<Variable, BigDecimal> e : deterministicVariables
-                    .entrySet())
+            for (Entry<Variable, BigDecimal> e : deterministicVariables.entrySet())
                 if (!e.getKey().equals(v) && e.getValue().compareTo(value) == 0)
                     nullDelayVariables.add(e.getKey());
 
         } else if (synchronizedVariables.containsKey(v)) {
             Synchronization s = synchronizedVariables.get(v);
 
-            // adds other synchronized variables with same delay to the same
-            // distributed
-            for (Entry<Variable, Synchronization> e : synchronizedVariables
-                    .entrySet())
+            // adds other synchronized variables with same delay to the same distributed
+            for (Entry<Variable, Synchronization> e : synchronizedVariables.entrySet())
                 if (!e.getKey().equals(v) && e.getValue().equals(s))
                     nullDelayVariables.add(e.getKey());
 
@@ -419,19 +522,23 @@ public class StateDensityFunction {
         } else if (partitionedGEN.getVariables().contains(v)) {
 
             // adds synchronized variables with null delay
-            for (Entry<Variable, Synchronization> e : synchronizedVariables
-                    .entrySet())
+            for (Entry<Variable, Synchronization> e : synchronizedVariables.entrySet())
                 if (e.getValue().getDistributed().equals(v)
                         && e.getValue().getDelay().compareTo(BigDecimal.ZERO) == 0)
                     nullDelayVariables.add(e.getKey());
 
-        } else
-            throw new IllegalArgumentException("The variable " + v
-                    + " is not present");
+        } else {
+            throw new IllegalArgumentException("The variable " + v + " is not present");
+        }
 
         return nullDelayVariables;
     }
 
+    /**
+     * Subtracts a variable from all others and removes it from this PDF.
+     *
+     * @param firedVar target variable
+     */
     public void shiftAndProject(Variable firedVar) {
 
         if (deterministicVariables.containsKey(firedVar)) {
@@ -441,6 +548,7 @@ public class StateDensityFunction {
             this.marginalizeVariable(firedVar);
 
         } else { // PartitionedGEN firing
+
             if (synchronizedVariables.containsKey(firedVar)) {
                 // turns a SYNCH firing into a GEN firing (by a swapping)
                 swap(firedVar);
@@ -451,40 +559,44 @@ public class StateDensityFunction {
             if (deterministicVariables.size() > 0) {
                 // The lowest deterministic transition becomes a PartitionedGEN
                 // (through a variable substitution and a constant shift)
-                Entry<Variable, BigDecimal> lowestDeterministicValue = this
-                        .getLowestDeterministicValue();
+                Entry<Variable, BigDecimal> lowestDeterministicValue =
+                        this.getLowestDeterministicValue();
+
                 partitionedGEN.substituteAndShift(firedVar,
                         lowestDeterministicValue.getKey(),
                         lowestDeterministicValue.getValue());
 
                 // Other deterministic transitions become synchronized with the
                 // lowest DET
-                for (Entry<Variable, BigDecimal> e : deterministicVariables
-                        .entrySet())
-                    if (!e.getKey().equals(lowestDeterministicValue.getKey()))
-                        synchronizedVariables.put(
-                                e.getKey(),
-                                new Synchronization(lowestDeterministicValue
-                                        .getKey(), e.getValue().subtract(
-                                        lowestDeterministicValue.getValue())));
+                for (Entry<Variable, BigDecimal> e : deterministicVariables.entrySet()) {
+                    if (!e.getKey().equals(lowestDeterministicValue.getKey())) {
+                        synchronizedVariables.put(e.getKey(),
+                                new Synchronization(lowestDeterministicValue.getKey(),
+                                        e.getValue()
+                                        .subtract(lowestDeterministicValue.getValue())));
+                    }
+                }
+
             } else {
                 // No DETs: partitionedGEN is updated with a shift and project
-                // of fired
-                // (or set to 1 if fired was the only GEN variable)
+                // of fired (or set to 1 if fired was the only GEN variable)
                 partitionedGEN.shiftAndProject(firedVar);
             }
 
-            // Transitions synchronized with the fired PartitionedGEN become the
-            // only DETs
+            // Transitions synchronized with the fired PartitionedGEN become the only DETs
             deterministicVariables.clear();
-            for (Entry<Variable, BigDecimal> e : this.getSynchDelaysWrt(
-                    firedVar).entrySet()) {
+            for (Entry<Variable, BigDecimal> e : this.getSynchDelaysWrt(firedVar).entrySet()) {
                 synchronizedVariables.remove(e.getKey());
                 deterministicVariables.put(e.getKey(), e.getValue());
             }
         }
     }
 
+    /**
+     * Removes a constant from all variables of this PDF.
+     *
+     * @param constant input constant
+     */
     public void constantShift(BigDecimal constant) {
 
         // decreases each deterministic variable
@@ -495,59 +607,74 @@ public class StateDensityFunction {
         partitionedGEN.constantShift(constant);
     }
 
+    /**
+     * Removes a constant from a set of input variables.
+     *
+     * @param constant input constant
+     * @param progressing set of variables
+     */
     public void constantShift(BigDecimal constant, Set<Variable> progressing) {
 
         // decreases each deterministic variable
-        for (Entry<Variable, BigDecimal> e : deterministicVariables.entrySet())
-            if (progressing.contains(e.getKey()))
-                deterministicVariables.put(e.getKey(),
-                        e.getValue().subtract(constant));
+        for (Entry<Variable, BigDecimal> e : deterministicVariables.entrySet()) {
+            if (progressing.contains(e.getKey())) {
+                deterministicVariables.put(e.getKey(), e.getValue().subtract(constant));
+            }
+        }
 
-        Set<Variable> genProgressing = new LinkedHashSet<Variable>(
-                partitionedGEN.getVariables());
+        Set<Variable> genProgressing = new LinkedHashSet<>(partitionedGEN.getVariables());
         genProgressing.retainAll(progressing);
         partitionedGEN.constantShift(constant, genProgressing);
 
-        // updates the coefficients of progressing/suspended synchronized
-        // variables
-        for (Entry<Variable, Synchronization> e : synchronizedVariables
-                .entrySet())
+        // updates the coefficients of progressing/suspended synchronized variables
+        for (Entry<Variable, Synchronization> e : synchronizedVariables.entrySet()) {
             if (progressing.contains(e.getKey())) {
                 // the synchronized variable is progressing
                 if (!progressing.contains(e.getValue().getDistributed()))
                     // the distributed variable is suspended
-                    synchronizedVariables.put(e.getKey(), new Synchronization(e
-                            .getValue().getDistributed(), e.getValue()
-                            .getDelay().subtract(constant)));
+                    synchronizedVariables.put(e.getKey(),
+                            new Synchronization(e.getValue().getDistributed(),
+                                    e.getValue().getDelay().subtract(constant)));
             } else {
                 // the synchronized variable is suspended
                 if (progressing.contains(e.getValue().getDistributed()))
                     // the distributed variable is progressing
-                    synchronizedVariables.put(e.getKey(), new Synchronization(e
-                            .getValue().getDistributed(), e.getValue()
-                            .getDelay().add(constant)));
+                    synchronizedVariables.put(e.getKey(),
+                            new Synchronization(e.getValue().getDistributed(),
+                                    e.getValue().getDelay().add(constant)));
             }
-
+        }
     }
 
-    /*
-     * Impose the bound without normalizing densities, keep only subzones with
-     * non-null measure
+    /**
+     * Imposes the bound {@code leftVar - rightVar <= bound} on the support, keeping
+     * only subzones with nonzero measure.
+     *
+     * <p>Densities are not normalized.
+     *
+     * @param leftVar first variable of the difference
+     * @param rightVar second variable of the difference
+     * @param bound upper bound on the difference
+     *
      */
-    public void imposeBound(Variable leftVar, Variable rightVar,
-            OmegaBigDecimal bound) {
+    public void imposeBound(Variable leftVar, Variable rightVar, OmegaBigDecimal bound) {
         imposeBound(leftVar, Collections.singleton(rightVar), bound);
     }
 
-    /*
-     * Impose the bound without normalizing densities, keep only subzones with
-     * non-null measure
+    /**
+     * Imposes the bound {@code leftVar - rightVar <= bound} on the support for all
+     * pairs of left/right variables, keeping only subzones with nonzero measure.
+     *
+     * <p>Densities are not normalized.
+     *
+     * @param leftVar first variable of the difference
+     * @param rightVars second variables of the difference
+     * @param bound upper bound on the difference
+     *
      */
-    public void imposeBound(Variable leftVar, Set<Variable> rightVars,
-            OmegaBigDecimal bound) {
+    public void imposeBound(Variable leftVar, Set<Variable> rightVars, OmegaBigDecimal bound) {
 
-        // reduce the case of a synchronized variable to that of a distributed
-        // one
+        // reduce the case of a synchronized variable to that of a distributed one
         OmegaBigDecimal leftCons = OmegaBigDecimal.ZERO;
         if (deterministicVariables.containsKey(leftVar)) {
             leftCons = new OmegaBigDecimal(deterministicVariables.get(leftVar));
@@ -597,7 +724,7 @@ public class StateDensityFunction {
         }
 
         // keep only subzones with non-null measure
-        List<GEN> nonNullFunctions = new ArrayList<GEN>(partitionedGEN
+        List<GEN> nonNullFunctions = new ArrayList<>(partitionedGEN
                 .getFunctions().size());
         for (GEN f : partitionedGEN.getFunctions())
             if (f.getDomain().isFullDimensional())
@@ -606,9 +733,17 @@ public class StateDensityFunction {
         partitionedGEN = new PartitionedGEN(nonNullFunctions);
     }
 
-    /*
-     * Returns the probability of conditionement (zero if the resulting state
-     * density has null measure)
+    /**
+     * Imposes the bound {@code leftVar - rightVar <= bound} on the support for all
+     * pairs of left/right variables, keeping only subzones with nonzero measure.
+     *
+     * <p>Densities are normalized on the new support.
+     *
+     * @param leftVar first variable of the difference
+     * @param rightVars second variables of the difference
+     * @param bound upper bound on the difference
+     * @return the probability measure of the restricted support before
+     *         normalization
      */
     public BigDecimal conditionAllToBound(Variable leftVar,
             Set<Variable> rightVars, OmegaBigDecimal bound) {
@@ -623,19 +758,17 @@ public class StateDensityFunction {
             return BigDecimal.ZERO;
 
         if (partitionedGEN.getFunctions().size() == 1
-                && partitionedGEN.getFunctions().get(0).getDomain()
-                        .getVariables().size() == 1)
+                && partitionedGEN.getFunctions().get(0).getDomain().getVariables().size() == 1)
             return BigDecimal.ONE;
 
         // Discard subzones with negligible measure, and
         // normalize the other ones by the /total/ measure of the class
         BigDecimal totalProbability = BigDecimal.ZERO;
-        List<GEN> nonNullFunctions = new ArrayList<GEN>(partitionedGEN
+        List<GEN> nonNullFunctions = new ArrayList<>(partitionedGEN
                 .getFunctions().size());
 
         for (GEN f : partitionedGEN.getFunctions()) {
-            BigDecimal integralOverDomain = f.integrateOverDomain()
-                    .bigDecimalValue();
+            BigDecimal integralOverDomain = f.integrateOverDomain().bigDecimalValue();
             if (integralOverDomain.compareTo(new BigDecimal("0.0000001")) > 0) {
                 // keeps the subzone (density to be conditioned)
                 totalProbability = totalProbability.add(integralOverDomain);
@@ -654,28 +787,37 @@ public class StateDensityFunction {
         return totalProbability;
     }
 
+    /**
+     * Returns the integral of this PDF on the support.
+     *
+     * <p>The result should be 1, unless the support has been reduced without
+     * normalization.
+     *
+     * @return integral over support
+     */
     public BigDecimal measure() {
         return partitionedGEN.integrateOverDomain().bigDecimalValue();
     }
 
+    /**
+     * Returns the marginal density of a variable.
+     *
+     * @param v input variable
+     * @return PDF of the input variable
+     */
     public StateDensityFunction getMarginalDensity(Variable v) {
 
         if (!this.getVariables().contains(v))
-            throw new IllegalArgumentException("The variable " + v
-                    + " is not present");
+            throw new IllegalArgumentException("The variable " + v + " is not present");
 
         if (this.getDeterministicVariables().contains(v)) {
-            // optimization: no need to project variables one at a time if v is
-            // deterministic
+            // optimization: no need to project variables one at a time if v is deterministic
             StateDensityFunction diracDelta = new StateDensityFunction();
-            diracDelta.addDeterministicVariable(v,
-                    this.getDeterministicValue(v));
+            diracDelta.addDeterministicVariable(v, this.getDeterministicValue(v));
             return diracDelta;
 
         } else {
-            StateDensityFunction marginalDensity = new StateDensityFunction(
-                    this);
-
+            StateDensityFunction marginalDensity = new StateDensityFunction(this);
             for (Variable other : marginalDensity.getVariables())
                 if (!other.equals(v))
                     marginalDensity.marginalizeVariable(other);
@@ -684,13 +826,27 @@ public class StateDensityFunction {
         }
     }
 
+    /**
+     * Returns the maximum upper bound on the difference {@code left - right}
+     * between two variables.
+     *
+     * @param left first variable
+     * @param right second variable
+     * @return maximum upper bound on {@code left - right}
+     */
     public OmegaBigDecimal getMaxBound(Variable left, Variable right) {
-        return getMaxBound(Collections.singleton(left),
-                Collections.singleton(right));
+        return getMaxBound(Collections.singleton(left), Collections.singleton(right));
     }
 
-    public OmegaBigDecimal getMaxBound(Set<Variable> leftVars,
-            Set<Variable> rightVars) {
+    /**
+     * Returns the maximum upper bound on the difference {@code left - right}
+     * between variables in two sets.
+     *
+     * @param leftVars first set of variables
+     * @param rightVars second set of variables
+     * @return maximum upper bound on {@code left - right}
+     */
+    public OmegaBigDecimal getMaxBound(Set<Variable> leftVars, Set<Variable> rightVars) {
 
         OmegaBigDecimal maxBound = OmegaBigDecimal.NEGATIVE_INFINITY;
 
@@ -710,8 +866,7 @@ public class StateDensityFunction {
                 OmegaBigDecimal rightCons = OmegaBigDecimal.ZERO;
 
                 if (deterministicVariables.containsKey(right)) {
-                    rightCons = new OmegaBigDecimal(
-                            deterministicVariables.get(right));
+                    rightCons = new OmegaBigDecimal(deterministicVariables.get(right));
                     right = Variable.TSTAR;
                 } else if (synchronizedVariables.containsKey(right)) {
                     Synchronization s = synchronizedVariables.get(right);
@@ -720,16 +875,14 @@ public class StateDensityFunction {
                 }
 
                 if (left.equals(right)) {
-                    // left and right are both deterministic or both
-                    // synchronized
+                    // left and right are both deterministic or both synchronized
                     // with the same: hence, their difference is a constant
                     OmegaBigDecimal newBound = leftCons.subtract(rightCons);
                     if (newBound.compareTo(maxBound) > 0)
                         maxBound = newBound;
                 } else {
                     // checks the domain of every subzone (we are looking for
-                    // the maximum bound,
-                    // so the maximum bound among subzones is fine)
+                    // the maximum bound, so the maximum bound among subzones is fine)
                     for (GEN f : partitionedGEN.getFunctions()) {
                         OmegaBigDecimal newBound = f.getDomain()
                                 .getBound(left, right).add(leftCons)
@@ -744,13 +897,27 @@ public class StateDensityFunction {
         return maxBound;
     }
 
+    /**
+     * Returns the minimum upper bound on the difference {@code left - right}
+     * between two variables.
+     *
+     * @param left first variable
+     * @param right second variable
+     * @return minimum upper bound on {@code left - right}
+     */
     public OmegaBigDecimal getMinBound(Variable left, Variable right) {
-        return getMinBound(Collections.singleton(left),
-                Collections.singleton(right));
+        return getMinBound(Collections.singleton(left), Collections.singleton(right));
     }
 
-    public OmegaBigDecimal getMinBound(Set<Variable> leftVars,
-            Set<Variable> rightVars) {
+    /**
+     * Returns the minimum upper bound on the difference {@code left - right}
+     * between variables in two sets.
+     *
+     * @param leftVars first set of variables
+     * @param rightVars second set of variables
+     * @return minimum upper bound on {@code left - right}
+     */
+    public OmegaBigDecimal getMinBound(Set<Variable> leftVars, Set<Variable> rightVars) {
 
         OmegaBigDecimal minBound = OmegaBigDecimal.POSITIVE_INFINITY;
 
@@ -781,8 +948,7 @@ public class StateDensityFunction {
 
                 if (left.equals(right)) {
                     // left and right are both deterministic or both
-                    // synchronized
-                    // with the same: hence, their difference is a constant
+                    // synchronized with the same: hence, their difference is a constant
                     OmegaBigDecimal newBound = leftCons.subtract(rightCons);
                     if (newBound.compareTo(minBound) < 0)
                         minBound = newBound;
@@ -807,16 +973,23 @@ public class StateDensityFunction {
         return minBound;
     }
 
-    /*
-     * Returns the probability of conditionement (zero if the resulting state
-     * density has null measure)
+    /**
+     * Imposes the bound {@code x <= v <= y} on the support, keeping only subzones
+     * with nonzero measure.
+     *
+     * <p>Densities are normalized on the new support.
+     *
+     * @param v target variable
+     * @param min lower bound
+     * @param max upper bound
+     * @return the probability measure of the restricted support before
+     *         normalization
      */
-    public BigDecimal conditionToInterval(Variable v, OmegaBigDecimal x,
-            OmegaBigDecimal y) {
+    public BigDecimal conditionToInterval(Variable v, OmegaBigDecimal min, OmegaBigDecimal max) {
 
-        // impose that x <= v <= y
-        this.imposeBound(v, Variable.TSTAR, y);
-        this.imposeBound(Variable.TSTAR, v, x.negate());
+        // impose that min <= v <= max
+        this.imposeBound(v, Variable.TSTAR, max);
+        this.imposeBound(Variable.TSTAR, v, min.negate());
 
         // empty partitionedGEN in case of unsatisfied deterministic constraints
         if (partitionedGEN.getFunctions().size() == 0)
@@ -831,7 +1004,7 @@ public class StateDensityFunction {
         // Discard subzones with negligible measure, and
         // normalize the other ones by the /total/ measure of the class
         BigDecimal totalProbability = BigDecimal.ZERO;
-        List<GEN> nonNullFunctions = new ArrayList<GEN>(partitionedGEN
+        List<GEN> nonNullFunctions = new ArrayList<>(partitionedGEN
                 .getFunctions().size());
 
         for (GEN f : partitionedGEN.getFunctions()) {
@@ -855,11 +1028,18 @@ public class StateDensityFunction {
         return totalProbability;
     }
 
-    public PartitionedGEN getPartitionedGen() {
-        return this.partitionedGEN;
-    }
-
+    /**
+     * Intersects the support with the input zone, keeping only subzones with
+     * nonzero measure.
+     *
+     * <p>Densities are normalized on the new support.
+     *
+     * @param zone input zone
+     * @return the probability measure of the restricted support before
+     *         normalization
+     */
     public BigDecimal conditionToZone(DBMZone zone) {
+
         this.imposeZone(zone);
         if (partitionedGEN.getFunctions().size() == 0)
             return BigDecimal.ZERO;
@@ -874,12 +1054,10 @@ public class StateDensityFunction {
         // Discard subzones with negligible measure, and
         // normalize the other ones by the /total/ measure of the class
         BigDecimal totalProbability = BigDecimal.ZERO;
-        List<GEN> nonNullFunctions = new ArrayList<GEN>(partitionedGEN
-                .getFunctions().size());
+        List<GEN> nonNullFunctions = new ArrayList<>(partitionedGEN.getFunctions().size());
 
         for (GEN f : partitionedGEN.getFunctions()) {
-            BigDecimal integralOverDomain = f.integrateOverDomain()
-                    .bigDecimalValue();
+            BigDecimal integralOverDomain = f.integrateOverDomain().bigDecimalValue();
             if (integralOverDomain.compareTo(new BigDecimal("0.0000001")) > 0) {
                 // keeps the subzone (density to be conditioned)
                 totalProbability = totalProbability.add(integralOverDomain);
@@ -898,21 +1076,27 @@ public class StateDensityFunction {
         return totalProbability;
     }
 
-    /*
-     * Impose the bound without normalizing densities, keep only subzones with
-     * non-null measure
+    /**
+     * Intersects the support with the input zone, keeping only subzones with
+     * nonzero measure.
+     *
+     * <p>Densities are not normalized on the new support.
+     *
+     * @param zone input zone
      */
     public void imposeZone(DBMZone zone) {
 
         zone.normalize();
-        Variable leftVar, rightVar;
+        Variable leftVar;
+        Variable rightVar;
+
         for (Variable left : zone.getVariables()) {
             OmegaBigDecimal leftCons = OmegaBigDecimal.ZERO;
-            leftVar = (left == Variable.TSTAR) ? Variable.TSTAR : new Variable(
-                    left.toString());
+            leftVar = (left == Variable.TSTAR)
+                    ? Variable.TSTAR : new Variable(left.toString());
+
             if (deterministicVariables.containsKey(leftVar)) {
-                leftCons = new OmegaBigDecimal(
-                        deterministicVariables.get(leftVar));
+                leftCons = new OmegaBigDecimal(deterministicVariables.get(leftVar));
                 leftVar = Variable.TSTAR;
 
             } else if (synchronizedVariables.containsKey(leftVar)) {
@@ -920,15 +1104,16 @@ public class StateDensityFunction {
                 leftCons = new OmegaBigDecimal(s.getDelay());
                 leftVar = s.getDistributed();
             }
+
             for (Variable right : zone.getVariables()) {
                 rightVar = (right == Variable.TSTAR) ? Variable.TSTAR
                         : new Variable(right.toString());
+
                 if (right != left) {
                     OmegaBigDecimal bound = zone.getBound(left, right);
                     OmegaBigDecimal rightCons = OmegaBigDecimal.ZERO;
                     if (deterministicVariables.containsKey(rightVar)) {
-                        rightCons = new OmegaBigDecimal(
-                                deterministicVariables.get(rightVar));
+                        rightCons = new OmegaBigDecimal(deterministicVariables.get(rightVar));
                         rightVar = Variable.TSTAR;
 
                     } else if (synchronizedVariables.containsKey(rightVar)) {
@@ -936,11 +1121,13 @@ public class StateDensityFunction {
                         rightCons = new OmegaBigDecimal(s.getDelay());
                         rightVar = s.getDistributed();
                     }
+
                     if (leftVar.equals(rightVar)) {
                         if (leftCons.subtract(rightCons).compareTo(bound) > 0) {
                             partitionedGEN = new PartitionedGEN();
                             return;
                         }
+
                     } else {
                         for (GEN f : partitionedGEN.getFunctions()) {
                             f.getDomain().imposeBound(leftVar, rightVar,
@@ -950,8 +1137,8 @@ public class StateDensityFunction {
                 }
             }
         }
-        List<GEN> nonNullFunctions = new ArrayList<GEN>(partitionedGEN
-                .getFunctions().size());
+
+        List<GEN> nonNullFunctions = new ArrayList<>(partitionedGEN.getFunctions().size());
         for (GEN f : partitionedGEN.getFunctions())
             if (f.getDomain().isFullDimensional())
                 nonNullFunctions.add(f);
@@ -959,6 +1146,12 @@ public class StateDensityFunction {
         partitionedGEN = new PartitionedGEN(nonNullFunctions);
     }
 
+    /**
+     * Computes the mean value of a variable.
+     *
+     * @param v target variable
+     * @return mean value according to this PDF
+     */
     public BigDecimal computeMeanValue(Variable v) {
 
         if (deterministicVariables.containsKey(v)) {
@@ -979,5 +1172,4 @@ public class StateDensityFunction {
             return f.integrateOverDomain().bigDecimalValue();
         }
     }
-
 }

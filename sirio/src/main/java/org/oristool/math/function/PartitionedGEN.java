@@ -19,10 +19,8 @@ package org.oristool.math.function;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,20 +31,33 @@ import org.oristool.math.expression.Expolynomial;
 import org.oristool.math.expression.Variable;
 
 /**
- * Multidimensional PDF on a support (piecewise).
+ * Multidimensional PDF on a piecewise DBM zone support.
  */
 public class PartitionedGEN implements PartitionedFunction {
 
     private List<GEN> functions;
 
+    /**
+     * Creates an empty PDF.
+     */
+    public PartitionedGEN() {
+        this.functions = Collections.emptyList();
+    }
+
+    /**
+     * Creates a new piecewise PDF from a list of PDFs with DBM zone support.
+     *
+     * @param functions PDFs with DBM zone support
+     */
     public PartitionedGEN(List<GEN> functions) {
         this.functions = functions;
     }
 
-    public PartitionedGEN(GEN... functions) {
-        this.functions = Arrays.asList(functions);
-    }
-
+    /**
+     * Creates a copy of the input piecewise PDF.
+     *
+     * @param partitionedGEN input piecewise PDF
+     */
     public PartitionedGEN(PartitionedGEN partitionedGEN) {
 
         this.functions = new ArrayList<GEN>(partitionedGEN.functions.size());
@@ -54,6 +65,21 @@ public class PartitionedGEN implements PartitionedFunction {
             this.functions.add(new GEN(f));
 
     }
+
+    /**
+     * Creates an empty instance with integral equal to 1. This instance has empty
+     * support and density equal to 1; it can be used as neutral element in products
+     * with other PDFs.
+     *
+     * @return an empty PDF
+     */
+    public static PartitionedGEN newOneInstance() {
+        List<GEN> GENs = new ArrayList<>();
+        GENs.add(new GEN(new DBMZone(), Expolynomial.newOneInstance()));
+
+        return new PartitionedGEN(GENs);
+    }
+
 
     @Override
     public boolean equals(Object obj) {
@@ -74,11 +100,7 @@ public class PartitionedGEN implements PartitionedFunction {
 
     @Override
     public int hashCode() {
-        int result = 17;
-
-        result = 31 * result + this.getFunctions().hashCode();
-
-        return result;
+        return this.getFunctions().hashCode();
     }
 
     @Override
@@ -86,12 +108,15 @@ public class PartitionedGEN implements PartitionedFunction {
         return functions;
     }
 
-    public void setFunctions(List<GEN> functions) {
-        this.functions = functions;
-    }
-
+    /**
+     * Returns the product with another PDF, which is the product of densities over
+     * the Cartesian product of supports.
+     *
+     * @param f input PDF
+     * @return product PDF
+     */
     public PartitionedGEN cartesianProduct(Function f) {
-        List<GEN> newFunctions = new ArrayList<GEN>();
+        List<GEN> newFunctions = new ArrayList<>();
         for (GEN g: functions)
             newFunctions.add(g.cartesianProduct(f));
 
@@ -99,8 +124,15 @@ public class PartitionedGEN implements PartitionedFunction {
         return partitionedGEN;
     }
 
+    /**
+     * Returns the product with another partitioned function, which is the product
+     * of densities over the Cartesian product of supports.
+     *
+     * @param partitionedFunction input function
+     * @return product PDF
+     */
     public PartitionedGEN cartesianProduct(PartitionedFunction partitionedFunction) {
-        List<GEN> newGEN = new ArrayList<GEN>();
+        List<GEN> newGEN = new ArrayList<>();
         for (GEN g: functions)
             for (Function f: partitionedFunction.getFunctions())
                 newGEN.add(g.cartesianProduct(f));
@@ -109,14 +141,36 @@ public class PartitionedGEN implements PartitionedFunction {
         return partitionedGEN;
     }
 
-    public void conditionToMin(Variable v, OmegaBigDecimal min) {
-        conditionToBound(v, min, OmegaBigDecimal.POSITIVE_INFINITY);
+    /**
+     * Imposes the bound {@code v >= min} and normalizes the density.
+     *
+     * @param v target variable
+     * @param min minimum value
+     * @return probability that the bound is satisfied (before normalization)
+     */
+    public BigDecimal conditionToMin(Variable v, OmegaBigDecimal min) {
+        return conditionToBound(v, min, OmegaBigDecimal.POSITIVE_INFINITY);
     }
 
-    public void conditionToMax(Variable v, OmegaBigDecimal max) {
-        conditionToBound(v, OmegaBigDecimal.NEGATIVE_INFINITY, max);
+    /**
+     * Imposes the bound {@code v <= max} and normalizes the density.
+     *
+     * @param v target variable
+     * @param max maximum value
+     * @return probability that the bound is satisfied (before normalization)
+     */
+    public BigDecimal conditionToMax(Variable v, OmegaBigDecimal max) {
+        return conditionToBound(v, OmegaBigDecimal.NEGATIVE_INFINITY, max);
     }
 
+    /**
+     * Imposes the bound {@code min <= v <= max} and normalizes the density.
+     *
+     * @param v target variable
+     * @param min minimum value
+     * @param max maximum value
+     * @return probability that the bound is satisfied (before normalization)
+     */
     public BigDecimal conditionToBound(Variable v, OmegaBigDecimal min,
             OmegaBigDecimal max) {
 
@@ -126,7 +180,7 @@ public class PartitionedGEN implements PartitionedFunction {
         }
 
         BigDecimal totalProbability = BigDecimal.ZERO;
-        List<GEN> nonNullFunctions = new ArrayList<GEN>(functions.size());
+        List<GEN> nonNullFunctions = new ArrayList<>(functions.size());
 
         for (GEN f: functions) {
             BigDecimal integralOverDomain = f.integrateOverDomain().bigDecimalValue();
@@ -139,30 +193,24 @@ public class PartitionedGEN implements PartitionedFunction {
         for (GEN f: nonNullFunctions)
             f.getDensity().divide(totalProbability);
 
-        // Integral is zero because its duration is end. To avoid a division by zero
-        // error, PartitionedGEN is replaced by an IMM.
-        if(totalProbability.compareTo(BigDecimal.ZERO) == 0){
-            GEN immediate = GEN.getDETInstance(Variable.X, BigDecimal.ZERO);
-            functions = new ArrayList<>();
-            functions.add(immediate);
-            return BigDecimal.ZERO;
-        }else{
-            functions = nonNullFunctions;
-            return totalProbability;
-        }
+        functions = nonNullFunctions;
+        return totalProbability;
     }
 
-
+    /**
+     * Subtracts the input variable from all others and removes it.
+     *
+     * @param var target variable
+     */
     public void shiftAndProject(Variable var) {
 
-        List<GEN> allFunctions = new ArrayList<GEN>();
+        List<GEN> allFunctions = new ArrayList<>();
         for (int i = 0; i < functions.size(); i++) {
-            PartitionedGEN partitionedGEN = functions.get(i).shiftAndProject(
-                    var);
+            PartitionedGEN partitionedGEN = functions.get(i).shiftAndProject(var);
             allFunctions.addAll(partitionedGEN.getFunctions());
         }
 
-        List<GEN> finalFunctions = new ArrayList<GEN>();
+        List<GEN> finalFunctions = new ArrayList<>();
         while (allFunctions.size() > 0) {
             GEN gen = allFunctions.get(0);
 
@@ -180,25 +228,30 @@ public class PartitionedGEN implements PartitionedFunction {
                 allFunctions.addAll(gen.getSubZonesInducted(foundGen));
                 allFunctions.remove(foundGen);
             }
+
             allFunctions.remove(0);
         }
 
         functions = finalFunctions;
         if (functions.size() == 0) {
-            functions
-                    .add(new GEN(new DBMZone(), Expolynomial.newOneInstance()));
+            functions.add(new GEN(new DBMZone(), Expolynomial.newOneInstance()));
         }
     }
 
+    /**
+     * Removes the input variable.
+     *
+     * @param var target variable
+     */
     public void project(Variable var) {
 
-        List<GEN> allFunctions = new ArrayList<GEN>();
+        List<GEN> allFunctions = new ArrayList<>();
         for (int i = 0; i < functions.size(); i++) {
             PartitionedGEN partitionedGEN = functions.get(i).project(var);
             allFunctions.addAll(partitionedGEN.getFunctions());
         }
 
-        List<GEN> finalFunctions = new ArrayList<GEN>();
+        List<GEN> finalFunctions = new ArrayList<>();
         while (allFunctions.size() > 0) {
             GEN gen = allFunctions.get(0);
 
@@ -216,52 +269,88 @@ public class PartitionedGEN implements PartitionedFunction {
                 allFunctions.addAll(gen.getSubZonesInducted(foundGen));
                 allFunctions.remove(foundGen);
             }
+
             allFunctions.remove(0);
         }
 
         functions = finalFunctions;
         if (functions.size() == 0) {
-            functions
-                    .add(new GEN(new DBMZone(), Expolynomial.newOneInstance()));
+            functions.add(new GEN(new DBMZone(), Expolynomial.newOneInstance()));
         }
     }
 
+    /**
+     * Subtracts a constant from all variables.
+     *
+     * @param constant input constant
+     */
     public void constantShift(BigDecimal constant) {
 
         for (int c = 0; c < functions.size(); c++)
             functions.get(c).constantShift(constant);
     }
 
-    // Shift della partitioned gen solo delle progressing
-    public void constantShift(BigDecimal constant, Collection<Variable> others) {
+    /**
+     * Subtracts a constant from a set of variables.
+     *
+     * @param constant input constant
+     * @param variables variables to be shifted
+     */
+    public void constantShift(BigDecimal constant, Collection<Variable> variables) {
 
         for (int c = 0; c < functions.size(); c++)
-            functions.get(c).constantShift(constant, others);
+            functions.get(c).constantShift(constant, variables);
     }
 
+    /**
+     * Replaces one variable name with another one.
+     *
+     * @param oldVar old variable name
+     * @param newVar new variable name
+     */
     public void substitute(Variable oldVar, Variable newVar) {
 
         for (int c = 0; c < functions.size(); c++)
             functions.get(c).substitute(oldVar, newVar);
     }
 
-    public void substitute(Variable oldVar, Variable newVar,
-            BigDecimal coefficient) {
+    /**
+     * Replaces one variable name with another one plus a constant.
+     *
+     * @param oldVar old variable name
+     * @param newVar new variable name
+     * @param constant constant to add
+     */
+    public void substitute(Variable oldVar, Variable newVar, BigDecimal constant) {
 
         for (int c = 0; c < functions.size(); c++)
-            functions.get(c).substitute(oldVar, newVar, coefficient);
+            functions.get(c).substitute(oldVar, newVar, constant);
     }
 
-    public void substituteAndShift(Variable oldVar, Variable newVar,
-            BigDecimal coefficient) {
+    /**
+     * Replaces {@code oldVar} with {@code Variable.TSTAR} and makes
+     * {@code newVar - constant} the new ground.
+     *
+     * @param oldVar old variable name
+     * @param newVar new variable name
+     * @param constant constant to subtract from newVar
+     */
+    public void substituteAndShift(Variable oldVar, Variable newVar, BigDecimal constant) {
 
         for (int c = 0; c < functions.size(); c++)
-            functions.get(c).substituteAndShift(oldVar, newVar, coefficient);
+            functions.get(c).substituteAndShift(oldVar, newVar, constant);
     }
 
+    /**
+     * Integrates this PDF over the support.
+     *
+     * <p>The result should be 1, unless the support has been restricted without
+     * normalization.
+     *
+     * @return integral over the support
+     */
     public OmegaBigDecimal integrateOverDomain() {
 
-        // Return one in case of a deterministic-only state density function
         if (functions.size() == 1
                 && functions.get(0).getDomain().getVariables().size() == 1)
             return OmegaBigDecimal.ONE;
@@ -271,20 +360,6 @@ public class PartitionedGEN implements PartitionedFunction {
             integral = integral.add(functions.get(i).integrateOverDomain());
 
         return integral;
-    }
-
-    public boolean equals(PartitionedGEN other, int numSamples,
-            BigDecimal epsilon) {
-
-        // TODO testare con costrutture per copia di PartitionedGEN
-        // the discrete error norm would be null
-        if (other == this)
-            return true;
-
-        if (functions.size() != other.getFunctions().size())
-            return false;
-
-        return false;
     }
 
     @Override
@@ -302,65 +377,17 @@ public class PartitionedGEN implements PartitionedFunction {
         return b.toString();
     }
 
-    public static PartitionedGEN newOneInstance() {
-        List<GEN> GENs = new ArrayList<GEN>();
-        GENs.add(new GEN(new DBMZone(), Expolynomial.newOneInstance()));
-
-        PartitionedGEN partitionedGEN = new PartitionedGEN(GENs);
-
-        return partitionedGEN;
-    }
-
+    /**
+     * Returns the list of variables of this PDF.
+     *
+     * @return list of variables (not including {@code Variable.TSTAR})
+     */
     public Set<Variable> getVariables() {
-        Set<Variable> variables = new LinkedHashSet<Variable>(functions.get(0)
-                .getDomain().getVariables());
+        Set<Variable> variables = new LinkedHashSet<>(
+                functions.get(0).getDomain().getVariables());
         variables.remove(Variable.TSTAR);
 
         return variables;
-    }
-
-    public BigDecimal evaluateMeanValue(int samples) {
-        // BigDecimal width = BigDecimal.ZERO;
-        BigDecimal meanValue = BigDecimal.ZERO;
-        BigDecimal sumProbs = BigDecimal.ZERO;
-
-        for (int i = 0; i < this.getFunctions().size(); i++) {
-            GEN gen = this.getFunctions().get(i);
-            if (gen.getDomain().getVariables().size() != 2)
-                return BigDecimal.ZERO;
-
-            Iterator<Variable> itor = gen.getDomain().getVariables().iterator();
-            Variable var = itor.next();
-            if (var.equals(Variable.TSTAR))
-                var = itor.next();
-            BigDecimal eft = gen.getDomain()
-                    .getCoefficient(Variable.TSTAR, var).negate()
-                    .bigDecimalValue();
-            BigDecimal lft = gen.getDomain()
-                    .getCoefficient(var, Variable.TSTAR).bigDecimalValue();
-            BigDecimal step = lft.subtract(eft).divide(
-                    new BigDecimal(samples - 1));
-
-            for (BigDecimal point = eft; point.compareTo(lft) <= 0; point = point
-                    .add(step)) {
-                HashMap<Variable, OmegaBigDecimal> hm = new HashMap<Variable, OmegaBigDecimal>();
-                hm.put(var, new OmegaBigDecimal(point));
-                BigDecimal prob = gen.getDensity().evaluate(hm)
-                        .bigDecimalValue();
-                BigDecimal addend = point.multiply(prob);
-                if (point.equals(eft) == false && point.equals(lft) == false) {
-                    meanValue = meanValue.add(addend);
-                    sumProbs = sumProbs.add(prob);
-                } else {
-                    meanValue = meanValue.add(addend.divide(new BigDecimal(2),
-                            Expolynomial.mathContext));
-                    sumProbs = sumProbs.add(prob.divide(new BigDecimal(2),
-                            Expolynomial.mathContext));
-                }
-            }
-        }
-        meanValue = meanValue.divide(sumProbs, Expolynomial.mathContext);
-        return meanValue;
     }
 
     @Override

@@ -48,7 +48,7 @@ public final class MathUtil {
      * @param n set size
      * @return distinct ordered permutations of n objects
      */
-    public static BigInteger calculateFactorial(Integer n) {
+    public static BigInteger calculateFactorial(int n) {
 
         if (n < 0)
             throw new IllegalArgumentException("The argument of a factorial should be positive");

@@ -21,6 +21,9 @@ import java.math.BigDecimal;
 
 import org.oristool.math.expression.Variable;
 
+/**
+ * Synchronization information of a variable.
+ */
 public class Synchronization {
 
     private Variable distributed;
