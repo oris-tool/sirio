@@ -325,6 +325,8 @@
 /instance/org.eclipse.jdt.ui/sp_cleanup.remove_trailing_whitespaces=true
 /instance/org.eclipse.jdt.ui/sp_cleanup.remove_trailing_whitespaces_all=true
 /instance/org.eclipse.jdt.ui/sp_cleanup.remove_trailing_whitespaces_ignore_empty=false
+/instance/org.eclipse.wst.xml.core/indentationChar=space
+/instance/org.eclipse.wst.xml.core/indentationSize=2
 @org.eclipse.jdt.core=3.13.100.v20171123-1049
 @org.eclipse.jdt.ui=3.13.51.v20171122-0652
 file_export_version=3.0
