@@ -48,6 +48,7 @@ public class TransientSolutionViewer extends JFrame {
     public static <R, S> ChartPanel solutionChart(TransientSolution<R, S> s) {
 
         XYSeriesCollection dataset = new XYSeriesCollection();
+        int r = s.getRegenerations().indexOf(s.getInitialRegeneration());
 
         for (int m = 0; m < s.getColumnStates().size(); m++) {
 
@@ -55,7 +56,7 @@ public class TransientSolutionViewer extends JFrame {
 
             double step = s.getStep().doubleValue();
             for (int i = 0, size = s.getSamplesNumber(); i < size; i++)
-                series.add(i * step, s.getSolution()[i][0][m]);
+                series.add(i * step, s.getSolution()[i][r][m]);
 
             dataset.addSeries(series);
         }
@@ -116,6 +117,8 @@ public class TransientSolutionViewer extends JFrame {
 
         for (int index = 0; index < solutions.length; index++) {
             TransientSolution<R, S> s = solutions[index];
+            int r = s.getRegenerations().indexOf(s.getInitialRegeneration());
+
             for (int m = 0; m < s.getColumnStates().size(); m++) {
 
                 XYSeries series = new XYSeries("("
@@ -123,7 +126,7 @@ public class TransientSolutionViewer extends JFrame {
 
                 double step = s.getStep().doubleValue();
                 for (int i = 0, size = s.getSamplesNumber(); i < size; i++)
-                    series.add(i * step, s.getSolution()[i][0][m]);
+                    series.add(i * step, s.getSolution()[i][r][m]);
 
                 dataset.addSeries(series);
             }
@@ -194,6 +197,8 @@ public class TransientSolutionViewer extends JFrame {
 
         for (int index = 0; index < solutions.length; index++) {
             TransientSolution<R, S> s = solutions[index];
+            int r = s.getRegenerations().indexOf(s.getInitialRegeneration());
+
             for (int m = 0; m < s.getColumnStates().size(); m++) {
 
                 XYSeries series = new XYSeries("("
@@ -201,7 +206,7 @@ public class TransientSolutionViewer extends JFrame {
 
                 double step = s.getStep().doubleValue();
                 for (int i = 0, size = s.getSamplesNumber(); i < size; i++)
-                    series.add(i * step, s.getSolution()[i][0][m]);
+                    series.add(i * step, s.getSolution()[i][r][m]);
 
                 dataset.addSeries(series);
             }

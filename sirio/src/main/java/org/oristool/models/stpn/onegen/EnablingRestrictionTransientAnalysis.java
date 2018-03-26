@@ -36,7 +36,9 @@ import org.oristool.analyzer.graph.SuccessionGraph;
 import org.oristool.analyzer.log.AnalysisLogger;
 import org.oristool.analyzer.log.AnalysisMonitor;
 import org.oristool.analyzer.policy.FIFOPolicy;
+import org.oristool.analyzer.state.LocalStop;
 import org.oristool.analyzer.state.State;
+import org.oristool.analyzer.state.StateFeature;
 import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.models.gspn.chains.DTMC;
 import org.oristool.models.pn.PetriStateFeature;
@@ -474,8 +476,18 @@ class EnablingRestrictionTransientAnalysis {
                 }
             }
         }
-        globalKernelTerms.forEach((state, terms) ->
-            globalKernelEntries.put(state, new CompositeFormula(terms)));
+
+        for (Entry<State, List<KernelFormula>> e : globalKernelTerms.entrySet()) {
+            // remove LocalStop.INSTANCE from features
+            State state = new State();
+            for (StateFeature f : e.getKey().getFeatures()) {
+                if (!(f instanceof LocalStop))
+                    state.addFeature(f);
+            }
+
+            List<KernelFormula> terms = e.getValue();
+            globalKernelEntries.put(state, new CompositeFormula(terms));
+        }
 
         return globalKernelEntries;
     }

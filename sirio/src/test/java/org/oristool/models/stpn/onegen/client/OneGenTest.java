@@ -20,6 +20,7 @@ package org.oristool.models.stpn.onegen.client;
 import java.math.BigDecimal;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.oristool.models.stpn.TransientSolution;
 import org.oristool.models.stpn.onegen.OneGenTransient;
 import org.oristool.models.stpn.trans.RegTransient;
@@ -72,8 +73,9 @@ class OneGenTest {
         t2.addFeature(StochasticTransitionFeature.newExponentialInstance("1"));
     }
 
-    void test() throws InterruptedException {
-        BigDecimal error = new BigDecimal("0.001");
+    @Test
+    void testResults() {
+        BigDecimal error = new BigDecimal("0.0001");
         BigDecimal timeBound = new BigDecimal("5");
         BigDecimal timeStep = new BigDecimal("0.1");
 
@@ -85,9 +87,6 @@ class OneGenTest {
         TransientSolution<DeterministicEnablingState, Marking> solutionRegenerative =
                   analysis.compute(pn, marking);
 
-        // new TransientSolutionViewer(solutionRegenerative);
-        // Thread.sleep(100000);
-
         OneGenTransient analysisOneGen = OneGenTransient.builder()
                   .timeBound(timeBound)
                   .timeStep(timeStep)
@@ -96,9 +95,6 @@ class OneGenTest {
 
         TransientSolution<DeterministicEnablingState, Marking> solutionOneGen =
                 analysisOneGen.compute(pn, marking);
-
-        // new TransientSolutionViewer(solutionOneGen);
-        // Thread.sleep(100000);
 
         double[][][] solutionMatrixRegen = solutionRegenerative.getSolution();
         double[][][] orderedSolutionMatrixOnegen = OneGenUtils.order(solutionRegenerative,
