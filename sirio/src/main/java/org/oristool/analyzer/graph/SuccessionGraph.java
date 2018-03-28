@@ -17,13 +17,19 @@
 
 package org.oristool.analyzer.graph;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.UnaryOperator;
 
 import org.oristool.analyzer.Succession;
+import org.oristool.analyzer.SuccessionFeature;
 import org.oristool.analyzer.state.State;
 
 /**
@@ -177,7 +183,7 @@ public final class SuccessionGraph {
     }
 
     public Set<Succession> getSuccessions(Node n1, Node n2) {
-        return successions.get(new Edge(n1, n2));
+        return successions.getOrDefault(new Edge(n1, n2), Collections.emptySet());
     }
 
     /**
@@ -208,5 +214,70 @@ public final class SuccessionGraph {
             outgoingSuccessions.addAll(successions.get(new Edge(n, successor)));
 
         return outgoingSuccessions;
+    }
+
+    /**
+     * Modifies this graph by applying a function to each state. This can also
+     * modify the structure of the graph (confluences can be introduced or removed).
+     *
+     * @param stateChange function applied to each state
+     * @return resulting graph
+     */
+    public SuccessionGraph modifyStates(UnaryOperator<State> stateChange) {
+
+        final SuccessionGraph newGraph = new SuccessionGraph();
+        final Node root = this.getRoot();
+        final State rootState = stateChange.apply(this.getState(root));
+
+        // add the initial succession of root node
+        newGraph.addSuccession(new Succession(null, null, rootState));
+
+        // visit the rest of the graph
+        Deque<Node> stack = new ArrayDeque<>();
+        Deque<Iterator<Node>> adj = new ArrayDeque<>();
+        Set<Node> opened = new HashSet<>();
+
+        opened.add(root);
+        stack.push(root);
+        adj.push(this.getSuccessors(root).iterator());
+
+        while (!stack.isEmpty()) {
+            if (adj.peek().hasNext()) {
+                Node prev = stack.peek();
+                Node next = adj.peek().next();
+
+                // visit edge
+                for (Succession succ : this.getSuccessions(prev, next)) {
+                    newGraph.addSuccession(modifySuccession(succ, stateChange));
+                }
+
+                // open node
+                if (!opened.contains(next)) {
+                    opened.add(next);
+                    stack.push(next);
+                    adj.push(this.getSuccessors(next).iterator());
+                }
+
+            } else {
+                stack.pop();
+                adj.pop();
+            }
+        }
+
+        assert opened.size() == this.getNodes().size();
+        return newGraph;
+    }
+
+    private static Succession modifySuccession(Succession succ, UnaryOperator<State> stateChange) {
+
+        Succession newSucc = new Succession(
+                stateChange.apply(succ.getParent()),
+                succ.getEvent(),
+                stateChange.apply(succ.getChild()));
+
+        for (SuccessionFeature f : succ.getFeatures())
+            newSucc.addFeature(f);
+
+        return newSucc;
     }
 }

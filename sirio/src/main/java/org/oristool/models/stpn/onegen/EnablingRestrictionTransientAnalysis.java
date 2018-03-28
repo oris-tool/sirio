@@ -39,6 +39,7 @@ import org.oristool.analyzer.policy.FIFOPolicy;
 import org.oristool.analyzer.state.LocalStop;
 import org.oristool.analyzer.state.State;
 import org.oristool.analyzer.state.StateFeature;
+import org.oristool.analyzer.stop.OrStopCriterion;
 import org.oristool.analyzer.stop.StopCriterion;
 import org.oristool.models.gspn.chains.DTMC;
 import org.oristool.models.pn.PetriStateFeature;
@@ -139,7 +140,7 @@ class EnablingRestrictionTransientAnalysis {
                 break;
             }
             if (state.hasFeature(Regeneration.class)) {
-                kernel.put(state, buildKernelRow(state));
+                kernel.put(state, buildKernelRow(state, stopCondition));
             }
         }
     }
@@ -306,10 +307,10 @@ class EnablingRestrictionTransientAnalysis {
         return p;
     }
 
-    private KernelRow buildKernelRow(State rowState) {
+    private KernelRow buildKernelRow(State rowState, StopCriterion stop) {
         KernelRow row = new KernelRow();
 
-        SuccessionGraph firstEpochChain = buildFirstEpochChain(rowState);
+        SuccessionGraph firstEpochChain = buildFirstEpochChain(rowState, stop);
 
         SubordinatedCtmc subordinatedCtmc = buildSubordinatedCtmc(firstEpochChain);
         row.setPdf(subordinatedCtmc.getSubordinatingGenPdf());
@@ -343,8 +344,10 @@ class EnablingRestrictionTransientAnalysis {
             dtmc.probsGraph().putEdgeValue(i, j, rate / exitRate);
         }
 
-        State initialState = successionGraph.getState(successionGraph.getRoot());
-        dtmc.initialStates().add(new OneGenState(initialState));
+        State rootState = successionGraph.getState(successionGraph.getRoot());
+        OneGenState initialState = new OneGenState(rootState);
+        dtmc.probsGraph().addNode(initialState);
+        dtmc.initialStates().add(initialState);
         dtmc.initialProbs().add(1.0);
         return dtmc;
     }
@@ -358,17 +361,21 @@ class EnablingRestrictionTransientAnalysis {
                 .stopOn(() -> stopCondition)
                 .build();
 
-        return analysis.compute(this.petriNet, initialMarking);
+        return analysis.compute(this.petriNet, initialMarking)
+                .modifyStates(state -> removeLocalStop(state));
     }
 
-    private SuccessionGraph buildFirstEpochChain(State initialState) {
+    private SuccessionGraph buildFirstEpochChain(State initialState, StopCriterion stop) {
         boolean extended = true;
+        StopCriterion combinedStop = new OrStopCriterion(stop, new RegenerativeStopCriterion());
         Marking initialMarking = initialState.getFeature(PetriStateFeature.class).getMarking();
         TimedComponentsFactory f = new TimedComponentsFactory(false, false, true, true, extended,
-                new FIFOPolicy(), new RegenerativeStopCriterion(), null, null, null);
+                new FIFOPolicy(), combinedStop, null, null, null);
+
         Analyzer<PetriNet, Transition> analyzer = new Analyzer<PetriNet, Transition>(f, petriNet,
                 f.buildInitialState(petriNet, initialMarking));
-        return analyzer.analyze();
+
+        return analyzer.analyze().modifyStates(state -> removeLocalStop(state));
     }
 
     private SubordinatedCtmc buildSubordinatedCtmc(SuccessionGraph firstEpochChain) {
@@ -475,17 +482,23 @@ class EnablingRestrictionTransientAnalysis {
         }
 
         for (Entry<State, List<KernelFormula>> e : globalKernelTerms.entrySet()) {
-            // remove LocalStop.INSTANCE from features
-            State state = new State();
-            for (StateFeature f : e.getKey().getFeatures()) {
-                if (!(f instanceof LocalStop))
-                    state.addFeature(f);
-            }
-
             List<KernelFormula> terms = e.getValue();
-            globalKernelEntries.put(state, new CompositeFormula(terms));
+            globalKernelEntries.put(e.getKey(), new CompositeFormula(terms));
         }
 
         return globalKernelEntries;
+    }
+
+    private static State removeLocalStop(State state) {
+        if (state == null)
+            return null;
+
+        State newState = new State();
+        for (StateFeature f : state.getFeatures()) {
+            if (!(f instanceof LocalStop))
+                newState.addFeature(f);
+        }
+
+        return newState;
     }
 }
