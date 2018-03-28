@@ -64,7 +64,7 @@ public class TransientSolution<R, S> {
             double step, Map<S, Integer> statePos, S initialState) {
 
         TransientSolution<S, S> solution = new TransientSolution<>();
-        solution.timeLimit = new BigDecimal(step * probs.length);
+        solution.timeLimit = new BigDecimal(step * (probs.length - 1));
         solution.step = new BigDecimal(step);
         solution.samplesNumber = probs.length;
         solution.initialRegeneration = initialState;
