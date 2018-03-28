@@ -269,7 +269,7 @@ public abstract class CTMCTransient<M, S extends CTMCState<M>>
             double time = timePoints[t];
             if (time > 0.0) {
                 results[t] = initialProbs.createLike();
-                FoxGlynn range = FoxGlynn.compute(unifRate * time, error());
+                FoxGlynn range = FoxGlynn.computeReduced(unifRate * time, error());
                 scannerBuilder.addInterval(range);
                 timePointOf.put(range, t);
 

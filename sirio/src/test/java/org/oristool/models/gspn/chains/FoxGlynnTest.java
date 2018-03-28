@@ -47,6 +47,25 @@ class FoxGlynnTest {
     }
 
     @Test
+    void checkErrorReduced() {
+        List<Double> rates = List.of(0.000001, 0.001, 0.01, 0.1,
+                1.0, 2.0, 5.0, 10.0, 20.0, 25.0, 50.0, 100.0,
+                200.0, 400.0, 600.0, 1000.0, 1e6, 1e9);
+
+        List<Double> errors = List.of(0.5, 0.01, 1e-6, 1e-9, 1e-10);
+
+        for (double lambda : rates) {
+            for (double error : errors) {
+                FoxGlynn probs = FoxGlynn.computeReduced(lambda, error);
+                double sum = 0.0;
+                for (int i = probs.leftPoint(); i <= probs.rightPoint(); i++)
+                    sum += probs.poissonProb(i);
+                assertTrue(1.0 - sum < error);
+            }
+        }
+    }
+
+    @Test
     void checkValues() {
         double lambda = 1.0;
         double error = 1e-6;

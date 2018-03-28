@@ -230,6 +230,7 @@ public class SimpleCycleTest {
         double step = 0.1;
         Pair<Map<Marking, Integer>, double[][]> result = GSPNTransient.builder()
                 .timePoints(0.0, 10.0, step)
+                .error(1e-9)
                 .build().compute(pn, marking);
 
         Map<Marking, Integer> statePos = result.first();
@@ -243,10 +244,10 @@ public class SimpleCycleTest {
 
         for (int t = 0; t < probs.length; t++) {
             double time = t * step;
-            assertEquals(0.6875, probs[t][statePos.get(root2Marking)], 1e-12);
+            assertEquals(0.6875, probs[t][statePos.get(root2Marking)], 1e-9);
             double probRoot1 = kolmogorovProb1(time, 1.0, 0.0, 1.0, 2.0);
-            assertEquals(0.3125 * probRoot1, probs[t][statePos.get(root1Marking)], 1e-12);
-            assertEquals(0.3125 * (1 - probRoot1), probs[t][statePos.get(child1Marking)], 1e-12);
+            assertEquals(0.3125 * probRoot1, probs[t][statePos.get(root1Marking)], 1e-9);
+            assertEquals(0.3125 * (1 - probRoot1), probs[t][statePos.get(child1Marking)], 1e-9);
         }
     }
 

@@ -154,6 +154,7 @@ class TwoReducibleStatesTest {
 
                     Pair<Map<Marking, Integer>, double[][]> result = GSPNTransient.builder()
                             .timePoints(0.0, 10.0, step)
+                            .error(1e-9)
                             .build().compute(pn, marking);
 
                     Map<Marking, Integer> statePos = result.first();
@@ -165,8 +166,8 @@ class TwoReducibleStatesTest {
                     for (int t = 0; t < probs.length; t++) {
                         double time = t * step;
                         double p1 = kolmogorovProb1(time, 1.0, 0.0, 0.5, 0.0);
-                        assertEquals(p1, probs[t][i1], 1e-12);
-                        assertEquals(1.0 - p1, probs[t][i2], 1e-12);
+                        assertEquals(p1, probs[t][i1], 1e-9);
+                        assertEquals(1.0 - p1, probs[t][i2], 1e-9);
                     }
                 }
             }

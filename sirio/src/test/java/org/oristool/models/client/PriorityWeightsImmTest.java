@@ -218,7 +218,10 @@ class PriorityWeightsImmTest {
         assertEquals(Set.of(expectedMarkings.get(3)), steadyProbs.keySet());
         assertEquals(1.0, steadyProbs.get(expectedMarkings.get(3)), 1e-9);
 
-        GSPNTransient transientAnalysis = GSPNTransient.builder().timePoints(0.0, 9.0, 1.0).build();
+        GSPNTransient transientAnalysis = GSPNTransient.builder()
+                .timePoints(0.0, 9.0, 1.0)
+                .error(1e-9).build();
+
         Pair<Map<Marking, Integer>, double[][]> transientProbs =
                 transientAnalysis.compute(pn, marking);
         assertEquals(tangible, transientProbs.first().keySet());

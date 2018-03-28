@@ -136,6 +136,7 @@ class SingleAbsorbingStateTest {
                     double step = 0.1;
                     Pair<Map<Marking, Integer>, double[][]> result = GSPNTransient.builder()
                             .timePoints(0.0, 10.0, step)
+                            .error(1e-9)
                             .build().compute(pn, marking);
 
                     Map<Marking, Integer> statePos = result.first();
@@ -144,7 +145,7 @@ class SingleAbsorbingStateTest {
                     assertEquals(Set.of(marking), statePos.keySet());
 
                     for (int t = 0; t < probs.length; t++) {
-                        assertEquals(1.0, probs[t][0], 1e-12);
+                        assertEquals(1.0, probs[t][0], 1e-9);
                     }
                 }
             }

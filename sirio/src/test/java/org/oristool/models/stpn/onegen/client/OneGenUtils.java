@@ -151,7 +151,7 @@ class OneGenUtils {
         for (int t = 0; t < regen.length; t++) {
             for (int i = 0; i < regen[t].length; i++) {
                 for (int k = 0; k < regen[t][i].length; k++) {
-                    assertEquals(regen[t][i][k], onegen[t][i][k], 0.001);
+                    assertEquals(regen[t][i][k], onegen[t][i][k], 0.0001);
                 }
             }
         }

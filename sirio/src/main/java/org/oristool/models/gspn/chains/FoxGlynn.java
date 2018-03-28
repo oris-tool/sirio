@@ -30,7 +30,7 @@ package org.oristool.models.gspn.chains;
  * </ul>
  */
 public final class FoxGlynn implements Interval {
-    private static final double UF = Double.MIN_VALUE;
+    private static final double UF = Double.MIN_NORMAL;
     private static final double OF = Double.MAX_VALUE;
     private static final double LOG_UF = Math.log(UF);
 
@@ -80,15 +80,17 @@ public final class FoxGlynn implements Interval {
      *
      * @param i time point
      * @return weight for the given point
+     * @throws IndexOutOfBoundsException unless
+     *         {@code leftPoint() <= i <= rightPoint()}
      */
     public double weight(int i) {
         return weights[i - leftPoint];
     }
 
     /**
-     * Returns an accurate sum of the weights in the Poisson approximation.
+     * Returns a normalization constant for the Poisson approximation.
      *
-     * @return sum of weights.
+     * @return normalization constant
      */
     public double totalWeight() {
         return totalWeight;
@@ -102,10 +104,60 @@ public final class FoxGlynn implements Interval {
      *
      * @param i time point
      * @return Poisson probability for the given point
+     * @throws IndexOutOfBoundsException unless
+     *         {@code leftPoint() <= i <= rightPoint()}
      */
     public double poissonProb(int i) {
 
         return weights[i - leftPoint] / totalWeight;
+    }
+
+    /**
+     * Computes a reduced Fox-Glynn approximation of Poisson probabilities.
+     *
+     * <p>After bounding tails and computing Poisson probabilities with Fox-Glynn
+     * algorithm, a simple heuristic is applied to reduce the size of the
+     * distribution (under the target error).
+     *
+     * @param lambda rate of the Poisson distribution
+     * @param error the maximum allowed value of probabilities not included
+     * @return truncation points and weights/probabilities between them
+     * @throws IllegalStateException if underflow can occur or the tails cannot be
+     *         bounded
+     */
+    public static FoxGlynn computeReduced(double lambda, double error) {
+
+        FoxGlynn result = FoxGlynn.compute(lambda, error);
+
+        int mode = (int) lambda;
+        assert result.leftPoint <= mode && mode <= result.rightPoint;
+
+        int left = mode;
+        int right = mode;
+        double totalProb = result.poissonProb(mode);
+
+        // extend left or right until target error is reached
+        while (totalProb < 1.0 - error / 2.0) {
+            if (left > result.leftPoint) {
+                if (right == result.rightPoint
+                        || result.poissonProb(left - 1) >= result.poissonProb(right + 1)) {
+                    totalProb += result.poissonProb(--left);
+                } else {
+                    totalProb += result.poissonProb(++right);
+                }
+
+            } else if (right < result.rightPoint) {
+                totalProb += result.poissonProb(++right);
+
+            } else {
+                return result;
+            }
+        }
+
+        int length = right - left + 1;
+        double[] weights = new double[length];
+        System.arraycopy(result.weights, left - result.leftPoint, weights, 0, length);
+        return new FoxGlynn(left, right, weights, result.totalWeight);
     }
 
     /**
@@ -123,7 +175,7 @@ public final class FoxGlynn implements Interval {
             throw new IllegalStateException("Possible underflow: lambda equal to 0");
 
         if (error < UF)
-            throw new IllegalStateException("Allowed error must be >= Double.MIN_VALUE");
+            throw new IllegalStateException("Allowed error must be >= Double.MIN_NORMAL");
 
         int mode = (int) lambda;
         int leftPoint = findLeftPoint(mode, lambda, error);
@@ -190,6 +242,7 @@ public final class FoxGlynn implements Interval {
 
         if (rightPoint <= 0)
             throw new IllegalStateException("Lambda too large: integer overflow of right point");
+
         return rightPoint;
     }
 
@@ -225,7 +278,6 @@ public final class FoxGlynn implements Interval {
                 throw new IllegalStateException("Possible underflow at right truncation point");
         }
     }
-
 
     private static double[] computeWeights(int mode, double lambda, int leftPoint, int rightPoint) {
 
