@@ -126,8 +126,8 @@ class EnablingRestrictionTransientAnalysis {
         this.log = log;
         this.monitor = monitor;
 
-        if (log != null)
-            log.log("Computing transient analysis under enabling restriction");
+        if (monitor != null)
+            monitor.notifyMessage("Computing transient analysis under enabling restriction...");
 
         this.successionGraph = buildSuccessionGraph(initialMarking, stopCondition);
         this.analyzer = new VanishingStateAnalyzer(successionGraph);
@@ -135,21 +135,20 @@ class EnablingRestrictionTransientAnalysis {
         this.kernel = new HashMap<>();
         for (State state : successionGraph.getStates()) {
             if (monitor != null && monitor.interruptRequested()) {
-                log.log("Interrupted");
+                monitor.notifyMessage("Interrupted\n");
                 break;
             }
             if (state.hasFeature(Regeneration.class)) {
                 kernel.put(state, buildKernelRow(state));
             }
         }
-
-        if (log != null)
-            log.log("Done");
     }
 
     private KernelEvaluator getKernelEvaluator(Ticks ticks, BigDecimal step, BigDecimal error) {
-        if (log != null)
-            log.log("Evaluating kernel...");
+
+        if (monitor != null)
+            monitor.notifyMessage("Evaluating kernel formulas...");
+
         KernelEvaluator evaluator = new KernelEvaluator(ticks);
         for (Entry<State, KernelRow> e : kernel.entrySet()) {
             if (monitor != null && monitor.interruptRequested()) {
@@ -163,8 +162,6 @@ class EnablingRestrictionTransientAnalysis {
             evaluator.rowEvaluators.put(state, kernelRow.getEvaluator(ticks, step, error));
         }
 
-        if (log != null)
-            log.log("Done");
         return evaluator;
     }
 
@@ -212,8 +209,8 @@ class EnablingRestrictionTransientAnalysis {
         this.globalKernel = new double[ticksCount][n][n];
         this.localKernel = new double[ticksCount][n][m];
 
-        if (log != null)
-            log.log("Evaluating local and global kernel...");
+        if (monitor != null)
+            monitor.notifyMessage("Evaluating local and global kernel...");
 
         if (monitor != null && monitor.interruptRequested())
             return null;
@@ -263,7 +260,7 @@ class EnablingRestrictionTransientAnalysis {
 
         // Solves the Markov Renewal Equation employing the trapezoidal rule
         if (monitor != null)
-            monitor.notifyMessage("Solving the system of Markov renewal equations");
+            monitor.notifyMessage("Solving the system of Markov renewal equations...");
 
         TransientSolution<DeterministicEnablingState, Marking> p =
                 new TransientSolution<DeterministicEnablingState, Marking>(
@@ -304,7 +301,7 @@ class EnablingRestrictionTransientAnalysis {
                     + (System.currentTimeMillis() - startTime) / 1000 + "s\n");
 
         if (monitor != null)
-            monitor.notifyMessage("Computation completed");
+            monitor.notifyMessage("Computation completed.");
 
         return p;
     }
