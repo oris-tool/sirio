@@ -309,9 +309,9 @@ public abstract class GSPNTransient
                     c.addError("Transition '" + t + "' is neither EXP nor IMM");
                 }
 
-                if (f.clockRate() != MarkingExpr.ONE && !f.isEXP()) {
+                if (!f.isEXP() && !f.clockRate().equals(MarkingExpr.ONE)) {
                     canAnalyze = false;
-                    c.addError("Transition '" + t + "' has non-unitary rate but is not EXP");
+                    c.addError("GEN transition '" + t + "' has rate different than 1");
                 }
             }
         }

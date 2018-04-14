@@ -362,7 +362,7 @@ public abstract class RegTransient
                     && !t.getFeature(StochasticTransitionFeature.class)
                         .clockRate().equals(MarkingExpr.ONE)) {
                 canAnalyze = false;
-                c.addError("Transition '" + t + "' has rate different than 1");
+                c.addError("GEN transition '" + t + "' has rate different than 1");
             }
         }
 
