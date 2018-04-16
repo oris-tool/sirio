@@ -43,5 +43,10 @@
         <repository location='http://dadacoalition.org/yedit'/>
       </repositories>
     </iu>
+    <iu id='org.jboss.tools.maven.apt.feature.feature.group' name='Maven Integration for Eclipse JDT APT' version='1.4.0.201801121617'>
+      <repositories size='1'>
+        <repository location='http://download.jboss.org/jbosstools/updates/m2e-extensions/m2e-apt/1.4.0-2018-01-12_16-25-02-H6/'/>
+      </repositories>
+    </iu>
   </ius>
 </p2f>
