@@ -132,7 +132,7 @@ public class Variable extends Expression {
 
                     f = findField(className, methodName);
                 } else {
-                    f = findField("it.unifi.oris.sirio.lello.ValueFields", name);
+                    f = findField("org.oristool.lello.ValueFields", name);
 
                     if (f == null) {
                         f = findField("java.lang.Math", name);
