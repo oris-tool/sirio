@@ -281,7 +281,7 @@ public class FunctionCall extends Expression {
 
                 m = findMethod(className, methodName, lelloValues, javaValues);
             } else {
-                m = findMethod("it.unifi.oris.sirio.lello.ValueFuncs", name,
+                m = findMethod("org.oristool.lello.ValueFuncs", name,
                         lelloValues, javaValues);
 
                 if (m == null) {
