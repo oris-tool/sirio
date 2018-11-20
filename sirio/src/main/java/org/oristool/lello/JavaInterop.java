@@ -91,24 +91,26 @@ public class JavaInterop {
 
         Object o = JavaInterop.ValueToObject(v);
 
-        if (o.getClass().equals(Integer.class) && a.equals(Byte.class))
+        if (o.getClass().equals(Integer.class) && a.equals(Boolean.class))
+            return Boolean.valueOf(((Integer) o) != 0);
+        else if (o.getClass().equals(Integer.class) && a.equals(Byte.class))
             return Byte.valueOf((byte) ((Integer) o).intValue());
         else if (o.getClass().equals(Integer.class) && a.equals(Short.class))
             return Short.valueOf((short) ((Integer) o).intValue());
         else if (o.getClass().equals(Integer.class) && a.equals(Integer.class))
             return Integer.valueOf(((Integer) o).intValue());
         else if (o.getClass().equals(Integer.class) && a.equals(Long.class))
-            return Long.valueOf((long) ((Integer) o).intValue());
+            return Long.valueOf(((Integer) o).intValue());
         else if (o.getClass().equals(Integer.class) && a.equals(Float.class))
-            return Float.valueOf((float) ((Integer) o).intValue());
+            return Float.valueOf(((Integer) o).intValue());
         else if (o.getClass().equals(Integer.class) && a.equals(Double.class))
-            return Double.valueOf((double) ((Integer) o).intValue());
+            return Double.valueOf(((Integer) o).intValue());
         else if (o.getClass().equals(Double.class) && a.equals(Float.class))
             return Float.valueOf((float) ((Double) o).doubleValue());
         else if (o.getClass().equals(Double.class) && a.equals(Double.class))
             return Double.valueOf(((Double) o).doubleValue());
         else if (o.getClass().equals(String.class) && a.equals(String.class))
-            return (String) o;
+            return o;
         else if (o.getClass().equals(Boolean.class) && a.equals(Boolean.class))
             return Boolean.valueOf(((Boolean) o).booleanValue());
         else

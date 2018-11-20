@@ -42,7 +42,7 @@ public class Value {
      */
     public enum Type {
 
-        NIL, STRING, INTEGER, REAL, BOOLEAN
+        NIL, STRING, INTEGER, REAL
     }
 
     /** Type of this value. */
@@ -56,9 +56,6 @@ public class Value {
 
     /** Underlying Java field to represent Lello type REAL. */
     private double realValue;
-
-    /** Underlying Java field to represent Lello type BOOLEAN. */
-    private boolean booleanValue;
 
     /**
      * Initializes a value to nil. This is for internal use only, users should
@@ -113,8 +110,8 @@ public class Value {
      */
     public Value(boolean booleanValue) {
 
-        this.type = Type.BOOLEAN;
-        this.booleanValue = booleanValue;
+        this.type = Type.INTEGER;
+        this.integerValue = booleanValue ? 1 : 0;
     }
 
     /**
@@ -132,8 +129,6 @@ public class Value {
             c.integerValue = this.integerValue;
         else if (type.equals(Type.REAL))
             c.realValue = this.realValue;
-        else if (type.equals(Type.BOOLEAN))
-            c.booleanValue = this.booleanValue;
 
         c.type = this.type;
         return c;
@@ -176,7 +171,7 @@ public class Value {
      */
     public boolean isBoolean() {
 
-        return type.equals(Type.BOOLEAN);
+        return isInteger();
     }
 
     /**
@@ -197,7 +192,7 @@ public class Value {
      */
     public boolean isNumeric() {
 
-        return type.equals(Type.INTEGER) || type.equals(Type.REAL);
+        return isInteger() || isReal();
     }
 
     /**
@@ -212,7 +207,7 @@ public class Value {
         if (type.equals(Type.REAL))
             return realValue;
         else if (type.equals(Type.INTEGER))
-            return (double) integerValue;
+            return integerValue;
         else
             throw new ValueException("Non numeric value.");
     }
@@ -256,10 +251,7 @@ public class Value {
         if (s == null)
             throw new NullPointerException("Argument s can not be null.");
 
-        Value n = new Value();
-        n.type = Type.BOOLEAN;
-        n.booleanValue = Boolean.parseBoolean(s);
-        return n;
+        return new Value(Boolean.parseBoolean(s));
     }
 
     /**
@@ -274,10 +266,7 @@ public class Value {
         if (s == null)
             throw new NullPointerException("Argument s can not be null.");
 
-        Value n = new Value();
-        n.type = Type.INTEGER;
-        n.integerValue = Integer.parseInt(s);
-        return n;
+        return new Value(Integer.parseInt(s));
     }
 
     /**
@@ -292,10 +281,7 @@ public class Value {
         if (s == null)
             throw new NullPointerException("Argument s can not be null.");
 
-        Value n = new Value();
-        n.type = Type.REAL;
-        n.realValue = Double.parseDouble(s);
-        return n;
+        return new Value(Double.parseDouble(s));
     }
 
     /**
@@ -310,10 +296,7 @@ public class Value {
         if (s == null)
             throw new NullPointerException("Argument s can not be null.");
 
-        Value n = new Value();
-        n.type = Type.STRING;
-        n.stringValue = s;
-        return n;
+        return new Value(s);
     }
 
     /**
@@ -376,10 +359,10 @@ public class Value {
      */
     public boolean getBooleanValue() {
 
-        if (!type.equals(Type.BOOLEAN))
+        if (!isNumeric())
             throw new ValueException("This Value is not of type BOOLEAN.");
 
-        return booleanValue;
+        return isInteger() ? getIntegerValue() != 0 : getRealValue() != 0.0;
     }
 
     @Override
@@ -391,8 +374,6 @@ public class Value {
             return Integer.valueOf(integerValue).toString();
         else if (type.equals(Type.REAL))
             return Double.valueOf(realValue).toString();
-        else if (type.equals(Type.BOOLEAN))
-            return Boolean.valueOf(booleanValue).toString();
         else if (type.equals(Type.NIL))
             return "nil";
 
@@ -416,8 +397,6 @@ public class Value {
             return integerValue == rhs.integerValue;
         else if (type.equals(Type.REAL))
             return realValue == rhs.realValue;
-        else if (type.equals(Type.BOOLEAN))
-            return booleanValue == rhs.booleanValue;
         else if (type.equals(Type.NIL))
             return true; // nil is always equal to nil
 
@@ -433,8 +412,6 @@ public class Value {
             return Integer.valueOf(integerValue).hashCode();
         else if (type.equals(Type.REAL))
             return Double.valueOf(realValue).hashCode();
-        else if (type.equals(Type.BOOLEAN))
-            return Boolean.valueOf(booleanValue).hashCode();
         else if (type.equals(Type.NIL))
             return 0;
 
