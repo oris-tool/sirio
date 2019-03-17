@@ -5,3 +5,4 @@
 .checkstyle
 .eclipse-pmd
 .factorypath
+/.apt_generated_tests/
