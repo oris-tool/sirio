@@ -18,6 +18,7 @@
 package org.oristool.simulator;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -171,7 +172,7 @@ public class Sequencer {
                             .getFeature(TimedSimulatorStateFeature.class).getTimeToFire(t)
                             .divide(new BigDecimal(
                                     t.getFeature(StochasticTransitionFeature.class)
-                                    .clockRate().evaluate(m)));
+                                    .clockRate().evaluate(m)), MathContext.DECIMAL128);
 
                     if (minTimeToFire == null || minTimeToFire.compareTo(ttf) > 0) {
                         minTimeToFire = ttf;
