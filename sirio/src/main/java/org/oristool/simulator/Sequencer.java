@@ -32,6 +32,7 @@ import org.oristool.math.OmegaBigDecimal;
 import org.oristool.math.function.EXP;
 import org.oristool.math.function.Erlang;
 import org.oristool.math.function.Function;
+import org.oristool.math.function.PartitionedFunction;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.pn.Priority;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
@@ -41,6 +42,7 @@ import org.oristool.petrinet.Transition;
 import org.oristool.simulator.samplers.ErlangSampler;
 import org.oristool.simulator.samplers.ExponentialSampler;
 import org.oristool.simulator.samplers.MetropolisHastings;
+import org.oristool.simulator.samplers.PartitionedFunctionSampler;
 import org.oristool.simulator.samplers.UniformSampler;
 import org.oristool.simulator.stpn.SamplerFeature;
 
@@ -113,11 +115,13 @@ public class Sequencer {
                                 new UniformSampler(eft.bigDecimalValue(), lft.bigDecimalValue())));
 
                     else if (s.density() instanceof Function)
-                        // throw new IllegalArgumentException("No default sampler is available for
-                        // the transition "+t);
                         t.addFeature(new SamplerFeature(
                                 new MetropolisHastings((Function) s.density())));
 
+                    else if (s.density() instanceof PartitionedFunction)
+                        t.addFeature(new SamplerFeature(
+                                new PartitionedFunctionSampler((PartitionedFunction) s.density())));
+                    
                     else
                         new IllegalArgumentException(
                                 "The transition " + t + " has unsupported type");
