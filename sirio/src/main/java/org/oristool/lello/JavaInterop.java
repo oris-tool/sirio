@@ -144,7 +144,7 @@ public class JavaInterop {
         } else if (o instanceof Integer) {
             v = new Value(((Integer) o).intValue());
         } else if (o instanceof Long) {
-            v = new Value(((Long) o).longValue());
+            v = new Value(((Long) o).intValue());
         } else if (o instanceof Float) {
             v = new Value(((Float) o).floatValue());
         } else if (o instanceof Double) {
