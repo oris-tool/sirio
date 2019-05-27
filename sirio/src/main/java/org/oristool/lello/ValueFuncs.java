@@ -64,22 +64,17 @@ public class ValueFuncs {
      *            A list of numeric values.
      * @return The maximum of the list.
      */
-    public static double max(List<Value> params) {
+    public static Value max(List<Value> params) {
 
-        boolean foundOne = false;
-        double m = 0.0;
+        Value m = null;
 
         for (Value v : params) {
-            if (v.getType().equals(Value.Type.INTEGER) && (!foundOne || v.getIntegerValue() > m)) {
-                m = v.getIntegerValue();
-                foundOne = true;
-            } else if (v.getType().equals(Value.Type.REAL) && (!foundOne || v.getRealValue() > m)) {
-                m = v.getRealValue();
-                foundOne = true;
+            if (m == null || v.getNumericValueAsReal() > m.getNumericValueAsReal()) {
+                m = v;
             }
         }
 
-        if (!foundOne) {
+        if (m == null) {
             throw new ValueException(
                     "Function max called with no numeric arguments.");
         }
@@ -94,22 +89,17 @@ public class ValueFuncs {
      *            A list of numeric values.
      * @return The minimum of the list.
      */
-    public static double min(List<Value> params) {
+    public static Value min(List<Value> params) {
 
-        boolean foundOne = false;
-        double m = 0.0;
+        Value m = null;
 
         for (Value v : params) {
-            if (v.getType().equals(Value.Type.INTEGER) && (!foundOne || v.getIntegerValue() < m)) {
-                m = v.getIntegerValue();
-                foundOne = true;
-            } else if (v.getType().equals(Value.Type.REAL) && (!foundOne || v.getRealValue() < m)) {
-                m = v.getRealValue();
-                foundOne = true;
+            if (m == null || v.getNumericValueAsReal() < m.getNumericValueAsReal()) {
+                m = v;
             }
         }
 
-        if (!foundOne) {
+        if (m == null) {
             throw new ValueException(
                     "Function min called with no numeric arguments.");
         }
