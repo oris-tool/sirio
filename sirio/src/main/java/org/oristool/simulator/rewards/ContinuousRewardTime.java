@@ -18,6 +18,7 @@
 package org.oristool.simulator.rewards;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 import org.oristool.analyzer.Succession;
 import org.oristool.models.pn.PetriStateFeature;
@@ -50,6 +51,6 @@ public final class ContinuousRewardTime implements RewardTime {
         BigDecimal rate = new BigDecimal(
                 fired.getFeature(StochasticTransitionFeature.class).clockRate().evaluate(m));
         return succession.getParent().getFeature(TimedSimulatorStateFeature.class)
-                .getTimeToFire(fired).divide(rate);
+                .getTimeToFire(fired).divide(rate, MathContext.DECIMAL128);
     }
 }

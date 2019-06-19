@@ -18,6 +18,7 @@
 package org.oristool.simulator.stpn;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 import org.oristool.analyzer.Succession;
 import org.oristool.analyzer.state.State;
@@ -50,7 +51,7 @@ public final class SimulatorSTPNSuccessorEvaluator implements SimulatorSuccessor
             Marking m = succession.getParent().getFeature(PetriStateFeature.class).getMarking();
             BigDecimal rate = new BigDecimal(
                     t.getFeature(StochasticTransitionFeature.class).clockRate().evaluate(m));
-            BigDecimal elapsed = oldTimedFeature.getTimeToFire(fired).divide(rate);
+            BigDecimal elapsed = oldTimedFeature.getTimeToFire(fired).divide(rate, MathContext.DECIMAL128);
 
             newTimedFeature.setTimeToFire(t, oldTimedFeature.getTimeToFire(t)
                     .subtract(elapsed));
