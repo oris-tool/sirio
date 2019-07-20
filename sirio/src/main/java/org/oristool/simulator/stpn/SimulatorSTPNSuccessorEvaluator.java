@@ -45,15 +45,19 @@ public final class SimulatorSTPNSuccessorEvaluator implements SimulatorSuccessor
                 .getFeature(TimedSimulatorStateFeature.class);
         TimedSimulatorStateFeature newTimedFeature = new TimedSimulatorStateFeature();
 
+        Marking prevMarking = succession.getParent().getFeature(PetriStateFeature.class).getMarking();
+        BigDecimal firedRate = new BigDecimal(
+                fired.getFeature(StochasticTransitionFeature.class).clockRate().evaluate(prevMarking));
+        BigDecimal elapsed = oldTimedFeature.getTimeToFire(fired).multiply(firedRate);
+
         for (Transition t : succession.getChild().getFeature(PetriStateFeature.class)
                 .getPersistent()) {
-            Marking m = succession.getParent().getFeature(PetriStateFeature.class).getMarking();
-            BigDecimal rate = new BigDecimal(
-                    t.getFeature(StochasticTransitionFeature.class).clockRate().evaluate(m));
-            BigDecimal elapsed = oldTimedFeature.getTimeToFire(fired).divide(rate);
-
-            newTimedFeature.setTimeToFire(t, oldTimedFeature.getTimeToFire(t)
-                    .subtract(elapsed));
+            BigDecimal reduction = new BigDecimal(
+                    t.getFeature(StochasticTransitionFeature.class).clockRate().evaluate(prevMarking))
+                    .multiply(elapsed);
+            
+            newTimedFeature.setTimeToFire(t, 
+                    oldTimedFeature.getTimeToFire(t).subtract(reduction));
         }
 
         for (Transition t : succession.getChild().getFeature(PetriStateFeature.class)
