@@ -1,6 +1,6 @@
 language: java
 jdk:
-  - oraclejdk9
+  - openjdk11
 before_install:
   - cd sirio
 install:
@@ -17,7 +17,7 @@ deploy:
     on:
       repo: oris-tool/sirio
       branch: master
-      jdk: oraclejdk9
+      jdk: openjdk11
   -
     provider: script
     script: bash ../.travis/deploy.sh
@@ -25,4 +25,4 @@ deploy:
     on:
       repo: oris-tool/sirio
       tags: true
-      jdk: oraclejdk9
+      jdk: openjdk11
