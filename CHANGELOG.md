@@ -15,7 +15,7 @@
 
 ### Requirements/dependencies
 
-- Upgrade to Java 9
+- Upgrade to Java 11
 - Add dependency on `com.google.auto.value:auto-value:jar:1.5.3`
 - Include a style check using [Checkstyle](http://checkstyle.sourceforge.net/) (Google Java style using 4 spaces)
 - Include static analysis checks using [PMD](https://pmd.github.io/pmd-6.0.1/pmd_rules_java.html)
