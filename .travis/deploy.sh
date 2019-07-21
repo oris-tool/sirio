@@ -84,32 +84,32 @@ echo $GPG_OWNERTRUST  | base64 --decode | $GPG_EXECUTABLE --quiet --import-owner
 echo -e "$INFO Deploying to the Central Repository..."
 mvn clean deploy --settings ../.travis/settings.xml -DskipTests=true -B -U -P release
 
-echo -e "$INFO Publishing new Javadoc to: www.oris-tool.org/apidoc."
+# echo -e "$INFO Publishing new Javadoc to: www.oris-tool.org/apidoc."
 
-echo -e "$INFO Setting up SSH keys..."
-mkdir -p -m 700 ~/.ssh
-echo $GH_WEBSITE | base64 --decode > ~/.ssh/gh_website
-echo $GH_GITHUB  | base64 --decode > ~/.ssh/known_hosts
-chmod 600 ~/.ssh/*
-git config --global user.name "Marco Paolieri"
-git config --global user.email "paolieri@users.noreply.github.com"
+# echo -e "$INFO Setting up SSH keys..."
+# mkdir -p -m 700 ~/.ssh
+# echo $GH_WEBSITE | base64 --decode > ~/.ssh/gh_website
+# echo $GH_GITHUB  | base64 --decode > ~/.ssh/known_hosts
+# chmod 600 ~/.ssh/*
+# git config --global user.name "Marco Paolieri"
+# git config --global user.email "paolieri@users.noreply.github.com"
 
 
-ls target/site
-mvn -B javadoc:javadoc
-ls target/site
+# ls target/site
+# mvn -B javadoc:javadoc
+# ls target/site
 
-cd target/site
+# cd target/site
 
-echo -e "$INFO Updating oris-tool/oris-tool.github.io..."
-GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git clone git@github.com:oris-tool/oris-tool.github.io.git
-cd oris-tool.github.io
-rm -rf ./apidoc/*
-git checkout ./apidoc/LICENSE
-cp -a ../apidocs/* apidoc
-git add apidoc
-git commit -m "Update Javadoc"
-GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git push
-cd ..
+# echo -e "$INFO Updating oris-tool/oris-tool.github.io..."
+# GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git clone git@github.com:oris-tool/oris-tool.github.io.git
+# cd oris-tool.github.io
+# rm -rf ./apidoc/*
+# git checkout ./apidoc/LICENSE
+# cp -a ../apidocs/* apidoc
+# git add apidoc
+# git commit -m "Update Javadoc"
+# GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git push
+# cd ..
 
 echo -e "$SUCCESS Deployment completed."
