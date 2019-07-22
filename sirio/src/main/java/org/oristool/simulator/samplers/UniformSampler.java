@@ -1,5 +1,5 @@
 /* This program is part of the ORIS Tool.
- * Copyright (C) 2011-2018 The ORIS Authors.
+ * Copyright (C) 2011-2019 The ORIS Authors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -14,9 +14,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/**
- *
- */
 
 package org.oristool.simulator.samplers;
 
@@ -30,6 +27,12 @@ public class UniformSampler implements Sampler {
     private BigDecimal min;
     private BigDecimal max;
 
+    /**
+     * Creates a uniform sampler between {@code min} and {@code max}.
+     *
+     * @param min minimum value (inclusive)
+     * @param max maximum value (exclisive)
+     */
     public UniformSampler(BigDecimal min, BigDecimal max) {
         this.min = min;
         this.max = max;

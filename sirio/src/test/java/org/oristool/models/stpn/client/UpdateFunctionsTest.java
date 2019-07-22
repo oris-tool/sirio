@@ -1,5 +1,5 @@
 /* This program is part of the ORIS Tool.
- * Copyright (C) 2011-2018 The ORIS Authors.
+ * Copyright (C) 2011-2019 The ORIS Authors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -48,17 +48,17 @@ public class UpdateFunctionsTest {
             pn.addPrecondition(p0, t0);
             t0.addFeature(new PostUpdater("p1=max(0,p1-1);", pn));
             t0.addFeature(StochasticTransitionFeature.newDeterministicInstance(BigDecimal.ONE));
-            
+
             Marking m = new Marking();
             m.setTokens(p0, 1);
             m.setTokens(p1, value);
-    
+
             RegTransient analysis = RegTransient.builder()
                     .timeBound(new BigDecimal(2))
                     .timeStep(new BigDecimal("0.1")).build();
             TransientSolution<DeterministicEnablingState, Marking> result =
                     analysis.compute(pn, m);
-            
+
             assertEquals(2, result.getRegenerations().size());
             assertEquals(2, result.getColumnStates().size());
 
@@ -68,24 +68,24 @@ public class UpdateFunctionsTest {
 
             Marking q = new Marking();
             q.setTokens(p0, 0);
-            q.setTokens(p1, Math.max(0, value-1));
+            q.setTokens(p1, Math.max(0, value - 1));
             DeterministicEnablingState finalReg =
                     new DeterministicEnablingState(q, pn);
             assertEquals(finalReg, result.getRegenerations().get(1));
 
-    
+
             for (int t = 0; t < result.getSamplesNumber(); t++) {
                 double sum = 0.0;
-    
+
                 for (int j = 0; j < result.getSolution()[t][0].length; j++) {
                     sum += result.getSolution()[t][0][j];
                 }
-    
+
                 assertTrue(Math.abs(sum - 1) < 1e-9);
             }
         }
     }
-    
+
     @Test
     void testMaxMixed() {
         for (Integer value : List.of(0, 1, 2, 3)) {
@@ -96,17 +96,17 @@ public class UpdateFunctionsTest {
             pn.addPrecondition(p0, t0);
             t0.addFeature(new PostUpdater("p1=round(max(0,p1-1,1));", pn));
             t0.addFeature(StochasticTransitionFeature.newDeterministicInstance(BigDecimal.ONE));
-            
+
             Marking m = new Marking();
             m.setTokens(p0, 1);
             m.setTokens(p1, value);
-    
+
             RegTransient analysis = RegTransient.builder()
                     .timeBound(new BigDecimal(2))
                     .timeStep(new BigDecimal("0.1")).build();
             TransientSolution<DeterministicEnablingState, Marking> result =
                     analysis.compute(pn, m);
-            
+
             assertEquals(2, result.getRegenerations().size());
             assertEquals(2, result.getColumnStates().size());
 
@@ -116,19 +116,19 @@ public class UpdateFunctionsTest {
 
             Marking q = new Marking();
             q.setTokens(p0, 0);
-            q.setTokens(p1, Math.max(Math.max(0, value-1), 1));
+            q.setTokens(p1, Math.max(Math.max(0, value - 1), 1));
             DeterministicEnablingState finalReg =
                     new DeterministicEnablingState(q, pn);
             assertEquals(finalReg, result.getRegenerations().get(1));
 
-    
+
             for (int t = 0; t < result.getSamplesNumber(); t++) {
                 double sum = 0.0;
-    
+
                 for (int j = 0; j < result.getSolution()[t][0].length; j++) {
                     sum += result.getSolution()[t][0][j];
                 }
-    
+
                 assertTrue(Math.abs(sum - 1) < 1e-9);
             }
         }

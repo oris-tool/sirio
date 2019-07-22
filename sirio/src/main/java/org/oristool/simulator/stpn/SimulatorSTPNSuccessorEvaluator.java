@@ -1,5 +1,5 @@
 /* This program is part of the ORIS Tool.
- * Copyright (C) 2011-2018 The ORIS Authors.
+ * Copyright (C) 2011-2019 The ORIS Authors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -45,18 +45,20 @@ public final class SimulatorSTPNSuccessorEvaluator implements SimulatorSuccessor
                 .getFeature(TimedSimulatorStateFeature.class);
         TimedSimulatorStateFeature newTimedFeature = new TimedSimulatorStateFeature();
 
-        Marking prevMarking = succession.getParent().getFeature(PetriStateFeature.class).getMarking();
+        Marking prevMarking = succession.getParent()
+                .getFeature(PetriStateFeature.class).getMarking();
         BigDecimal firedRate = new BigDecimal(
-                fired.getFeature(StochasticTransitionFeature.class).clockRate().evaluate(prevMarking));
+                fired.getFeature(StochasticTransitionFeature.class)
+                .clockRate().evaluate(prevMarking));
         BigDecimal elapsed = oldTimedFeature.getTimeToFire(fired).multiply(firedRate);
 
         for (Transition t : succession.getChild().getFeature(PetriStateFeature.class)
                 .getPersistent()) {
             BigDecimal reduction = new BigDecimal(
-                    t.getFeature(StochasticTransitionFeature.class).clockRate().evaluate(prevMarking))
-                    .multiply(elapsed);
-            
-            newTimedFeature.setTimeToFire(t, 
+                    t.getFeature(StochasticTransitionFeature.class)
+                    .clockRate().evaluate(prevMarking)).multiply(elapsed);
+
+            newTimedFeature.setTimeToFire(t,
                     oldTimedFeature.getTimeToFire(t).subtract(reduction));
         }
 

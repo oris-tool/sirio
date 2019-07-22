@@ -57,9 +57,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <junit.version>4.12</junit.version>
-    <junit.jupiter.version>5.0.3</junit.jupiter.version>
-    <junit.vintage.version>${junit.version}.3</junit.vintage.version>
-    <junit.platform.version>1.0.3</junit.platform.version>
+    <junit.jupiter.version>5.5.1</junit.jupiter.version>
   </properties>
 
   <dependencies>
@@ -81,22 +79,27 @@
       <version>${junit.jupiter.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency><!-- remove when Eclipse 4.8 is released -->
+    <!-- <dependency> needed for Eclipse < 4.8 
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-launcher</artifactId>
       <version>${junit.platform.version}</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.auto.value</groupId>
-      <artifactId>auto-value</artifactId>
-      <version>1.5.4</version>
-      <scope>provided</scope>
-    </dependency>
+    </dependency> -->
+	<dependency>
+	  <groupId>com.google.auto.value</groupId>
+	  <artifactId>auto-value-annotations</artifactId>
+	  <version>1.6.5</version>
+	</dependency>
+	<dependency>
+	  <groupId>com.google.auto.value</groupId>
+	  <artifactId>auto-value</artifactId>
+	  <version>1.6.5</version>
+	  <scope>provided</scope>
+	</dependency>
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>24.0-jre</version>
+        <version>28.0-jre</version>
     </dependency>
     <dependency>
       <groupId>org.jfree</groupId>
@@ -111,7 +114,7 @@
     <dependency>
       <groupId>org.ejml</groupId>
       <artifactId>ejml-all</artifactId>
-      <version>0.33</version>
+      <version>0.38</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -126,12 +129,12 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.25</version>
+      <version>1.7.26</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.25</version>
+      <version>1.7.26</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -147,6 +150,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>3.1.1</version>
         <configuration>
+          <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
           <stylesheetfile>${basedir}/javadoc.css</stylesheetfile>
         </configuration>
       </plugin>
@@ -159,6 +163,7 @@
             <excludeTags>slow</excludeTags>
           </properties>
         </configuration>
+        <!-- not needed 
         <dependencies>
           <dependency>
             <groupId>org.junit.platform</groupId>
@@ -171,6 +176,7 @@
               <version>${junit.jupiter.version}</version>
             </dependency>
         </dependencies>
+         -->
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
@@ -225,6 +231,7 @@
           </execution>
         </executions>
       </plugin>
+      <!--  
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
@@ -243,7 +250,7 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin>  -->
       <plugin><!-- for versions:display-{plugin,dependency}-updates -->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
@@ -287,6 +294,10 @@
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
             <version>3.1.1</version>
+            <configuration>
+              <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+              <stylesheetfile>${basedir}/javadoc.css</stylesheetfile>
+            </configuration>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
