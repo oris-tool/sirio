@@ -4,15 +4,15 @@ ERROR="[\e[31;1mERROR\e[0m]"
 INFO="[\e[34;1mINFO\e[0m]"
 SUCCESS="[\e[32;1mSUCCESS\e[0m]"
 
-if [ -z "$GH_GITHUB" ]
+if [ -z "$GITHUB_KNOWN_HOSTS" ]
 then
-    echo -e "$ERROR The environment variable GH_GITHUB is not set."
+    echo -e "$ERROR The environment variable GITHUB_KNOWN_HOSTS is not set."
     exit 1
 fi
 
-if [ -z "$GH_WEBSITE" ]
+if [ -z "$GITHUB_SSH_KEY" ]
 then
-    echo -e "$ERROR The environment variable GH_WEBSITE is not set."
+    echo -e "$ERROR The environment variable GITHUB_SSH_KEY is not set."
     exit 1
 fi
 
@@ -75,41 +75,39 @@ else
     echo -e "$INFO Deploying a new snapshot: $VERSION"
 fi
 
-set -e
+# set -e
 
 echo -e "$INFO Setting up GPG keys..."
-echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --quiet --import
-echo $GPG_OWNERTRUST  | base64 --decode | $GPG_EXECUTABLE --quiet --import-ownertrust
+$GPG_EXECUTABLE --version
+echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --quiet --batch --import
+echo $GPG_OWNERTRUST  | base64 --decode | $GPG_EXECUTABLE --quiet --batch --import-ownertrust
 
 echo -e "$INFO Deploying to the Central Repository..."
 mvn clean deploy --settings ../.travis/settings.xml -DskipTests=true -B -U -P release
 
-# echo -e "$INFO Publishing new Javadoc to: www.oris-tool.org/apidoc."
+echo -e "$INFO Setting up SSH known_hosts..."
+mkdir -p -m 700 ~/.ssh
+echo $GITHUB_KNOWN_HOSTS  | base64 --decode > ~/.ssh/known_hosts
 
-# echo -e "$INFO Setting up SSH keys..."
-# mkdir -p -m 700 ~/.ssh
-# echo $GH_WEBSITE | base64 --decode > ~/.ssh/gh_website
-# echo $GH_GITHUB  | base64 --decode > ~/.ssh/known_hosts
-# chmod 600 ~/.ssh/*
-# git config --global user.name "Marco Paolieri"
-# git config --global user.email "paolieri@users.noreply.github.com"
+echo -e "$INFO Setting up SSH key..."
+echo $GITHUB_SSH_KEY | base64 --decode > ~/.ssh/id_rsa
+chmod 600 ~/.ssh/*
 
+echo -e "$INFO Configuring git..."
+git config --global user.name "ORIS Bot"
+git config --global user.email "oris-bot@users.noreply.github.com"
 
-# ls target/site
-# mvn -B javadoc:javadoc
-# ls target/site
+echo -e "$INFO Generating Javadoc..."
+mvn -B javadoc:javadoc
 
-# cd target/site
-
-# echo -e "$INFO Updating oris-tool/oris-tool.github.io..."
-# GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git clone git@github.com:oris-tool/oris-tool.github.io.git
-# cd oris-tool.github.io
-# rm -rf ./apidoc/*
-# git checkout ./apidoc/LICENSE
-# cp -a ../apidocs/* apidoc
-# git add apidoc
-# git commit -m "Update Javadoc"
-# GIT_SSH_COMMAND="ssh -i ~/.ssh/gh_website" git push
-# cd ..
+echo -e "$INFO Updating oris-tool/java-api..."
+cd target/site/apidocs
+cp ../../../../LICENSE.txt LICENSE
+git init
+git add .
+git commit -m 'Update Java API docs'
+git remote add origin git@github.com:oris-tool/java-api.git
+git clone git@github.com:oris-tool/java-api.git
+git push -u -f --mirror
 
 echo -e "$SUCCESS Deployment completed."
