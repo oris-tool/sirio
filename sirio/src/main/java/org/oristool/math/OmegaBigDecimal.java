@@ -403,9 +403,9 @@ public class OmegaBigDecimal extends Number implements
     }
 
     /**
-     * Returns an {@code OmegaBigDecimal} whose value is <tt>(this &times;
-     * multiplicand)</tt>. In case of a <tt>(0 &times; +/- infinity)</tt>
-     * indeterminate form, an exception is thrown.
+     * Returns an {@code OmegaBigDecimal} whose value is {@code this *
+     * multiplicand}. In case of a {@code 0 * +/- infinity} indeterminate form, an
+     * exception is thrown.
      *
      * @param multiplicand value to be multiplied by this {@code OmegaBigDecimal}.
      * @return {@code this * multiplicand}
@@ -537,18 +537,15 @@ public class OmegaBigDecimal extends Number implements
     }
 
     /**
-     * Returns an {@code OmegaBigDecimal} whose value is
-     * <tt>(this<sup>n</sup>)</tt>, The power is computed exactly, to unlimited
-     * precision.
+     * Returns an {@code OmegaBigDecimal} whose value is {@code this^n}. The power
+     * is computed exactly, to unlimited precision.
      *
      * <p>The parameter {@code n} must be in the range 0 through 999999999,
      * inclusive. {@code ZERO.pow(0)} returns {@link #ONE}.
      *
-     * @param n
-     *            power to raise this {@code BigDecimal} to.
-     * @return <tt>this<sup>n</sup></tt>
-     * @throws ArithmeticException
-     *             if {@code n} is out of range.
+     * @param n power to raise this {@code BigDecimal} to.
+     * @return {@code this^n}
+     * @throws ArithmeticException if {@code n} is out of range.
      * @since 1.5
      */
     public OmegaBigDecimal pow(int n) {
