@@ -202,14 +202,6 @@
     <module name="VariableDeclarationUsageDistance">
             <property name="allowedDistance" value="5" />
     </module>
-    <module name="CustomImportOrder">
-      <property name="customImportOrderRules"
-        value="STATIC###STANDARD_JAVA_PACKAGE###SPECIAL_IMPORTS###THIRD_PARTY_PACKAGE" />
-      <property name="specialImportsRegExp" value="^org\." />
-      <property name="thirdPartyPackageRegExp" value="^com\." />
-      <property name="sortImportsInGroupAlphabetically" value="true" />
-      <property name="separateLineBetweenGroups" value="true" />
-    </module>
     <module name="MethodParamPad" />
     <module name="NoWhitespaceBefore">
       <property name="tokens"
@@ -247,10 +239,8 @@
     <module name="JavadocMethod">
       <property name="scope" value="public" />
       <property name="allowMissingParamTags" value="true" />
-      <property name="allowMissingThrowsTags" value="true" />
       <property name="allowMissingReturnTag" value="true" />
       <property name="allowedAnnotations" value="Override, Test" />
-      <property name="allowThrowsTagsForSubclasses" value="true" />
     </module>
     <module name="MethodName">
       <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9_]*$" />
