@@ -62,8 +62,8 @@ public final class MetropolisHastings implements Sampler {
     @Override
     public BigDecimal getSample() {
         // FIXME: The under-sampling step must be adapted to the specific distribution !
-        // take a sample every 100 (to have independent samples)
-        for (int t = 0; t < 99; t++) {
+        // take a sample every 150 (to have independent samples)
+        for (int t = 0; t < 149; t++) {
             computeSample();
         }
         return computeSample();
