@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 (to be released)
+## 2.0.0 (to be released soon)
 
 ### Functional changes
 

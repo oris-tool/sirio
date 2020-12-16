@@ -1,5 +1,5 @@
 /* This program is part of the ORIS Tool.
- * Copyright (C) 2011-2020 The ORIS Authors.
+ * Copyright (C) 2011-2021 The ORIS Authors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -107,6 +107,16 @@ public abstract class TreeTransient implements
     public abstract Supplier<StopCriterion> stopOn();
 
     /**
+    * Returns the predicate used to select markings for which transient
+    * probabilities are computed by this analysis.
+    *
+    * <p>By default, transient probabilities are computed for all markings.
+    *
+    * @return the filter used for markings
+    */
+   public abstract MarkingCondition markingFilter();
+    
+    /**
      * Returns the monitor used by this analysis. It is used to stop the analysis
      * early and to notify messages to the user.
      *
@@ -135,6 +145,7 @@ public abstract class TreeTransient implements
         return new AutoValue_TreeTransient.Builder()
                 .policy(FIFOPolicy::new)
                 .stopOn(AlwaysFalseStopCriterion::new)
+                .markingFilter(MarkingCondition.ANY)
                 .monitor(NoOpMonitor.INSTANCE)
                 .logger(NoOpLogger.INSTANCE);
     }
@@ -238,6 +249,17 @@ public abstract class TreeTransient implements
         public abstract Builder stopOn(Supplier<StopCriterion> value);
 
         /**
+         * Uses a marking condition to select markings for which transient probabilities
+         * are computed by this analysis.
+         *
+         * <p>By default, transient probabilities are computed for all markings.
+         *
+         * @param value the filter selecting markings for transient analysis
+         * @return this builder instance
+         */
+        public abstract Builder markingFilter(MarkingCondition value);
+        
+        /**
          * Sets the monitor used by this analysis. It is used to stop the analysis early
          * and to notify messages to the user.
          *
@@ -272,7 +294,7 @@ public abstract class TreeTransient implements
      *
      * @param pn the input Petri net
      * @param m the initial marking
-     * @return a succession graph encoding the state class graph
+     * @return transient probabilities from the initial marking
      *
      * @throws IllegalArgumentException if the analysis is not applicable to the
      *         input Petri net
@@ -288,7 +310,7 @@ public abstract class TreeTransient implements
 
         TransientSolution<Marking,Marking> solution = trees
                 .solveDiscretizedBeingProbabilities(timeBound(), timeStep(),
-                        MarkingCondition.ANY, logger(), monitor());
+                        markingFilter(), logger(), monitor());
 
         return solution;
     }

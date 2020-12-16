@@ -1,5 +1,5 @@
 /* This program is part of the ORIS Tool.
- * Copyright (C) 2011-2020 The ORIS Authors.
+ * Copyright (C) 2011-2021 The ORIS Authors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -578,13 +578,20 @@ class RegenerativeTransientAnalysis<R> {
             BigDecimal step, MarkingCondition markingCondition, boolean normalizeGlobalKernel) {
 
         return solveDiscretizedMarkovRenewal(timeLimit, step, markingCondition,
-                normalizeGlobalKernel, new PrintStreamLogger(System.out), null);
+                normalizeGlobalKernel, 1, 1, new PrintStreamLogger(System.out), null);
     }
 
     public TransientSolution<R, Marking> solveDiscretizedMarkovRenewal(BigDecimal timeLimit,
             BigDecimal step, MarkingCondition markingCondition, boolean normalizeGlobalKernel,
+            int localEvaluationPeriod, int globalEvaluationPeriod, 
             AnalysisLogger logger, AnalysisMonitor monitor) {
 
+        if (localEvaluationPeriod < 1)
+            throw new IllegalArgumentException("Kernel evaluation period must be positive");
+
+        if (globalEvaluationPeriod < 1)
+            throw new IllegalArgumentException("Kernel evaluation period must be positive");
+        
         if (logger != null) {
             logger.log(">> Solving in [0, " + timeLimit + "] with step " + step + " ");
             if (markingCondition == MarkingCondition.ANY)
@@ -699,22 +706,25 @@ class RegenerativeTransientAnalysis<R> {
         }
 
         // Discretizes the global and local kernel (one row at a time) for each
-        // time instant before
-        // convergence
+        // time instant (with given period) before convergence
         BigDecimal timeValue = BigDecimal.ZERO;
         for (int t = 0; t < (globalKernel.length > localKernel.length
                 ? globalKernel.length : localKernel.length); ++t) {
-            if (monitor != null)
+            if (monitor != null && (t % localEvaluationPeriod == 0 || t % globalEvaluationPeriod == 0))
                 monitor.notifyMessage("Evaluating kernels at time t=" + timeValue);
 
             for (int i = 0; i < regenerations.size(); ++i) {
                 // Computes the i-th global kernel row at time t (if convergence
                 // has not been reached)
                 if (t < localKernel.length) {
-                    if (localClasses.get(regenerations.get(i)) != null)
+                    if (t % localEvaluationPeriod != 0) {
+                        for (int j = 0; j < columnMarkings.size(); ++j) {
+                            localKernel[t][i][j] = localKernel[t-1][i][j];
+                        }
+                    } else if (localClasses.get(regenerations.get(i)) != null) {
                         // Local kernel is regenerations.size() x
                         // columnMarkings.size()
-                        for (int j = 0; j < columnMarkings.size(); ++j)
+                        for (int j = 0; j < columnMarkings.size(); ++j) {
                             if (localClasses.get(regenerations.get(i))
                                     .get(columnMarkings.get(j)) != null) {
                                 // sums over probabilities of being at time t in
@@ -723,38 +733,45 @@ class RegenerativeTransientAnalysis<R> {
                                 // having reached a regeneration
                                 for (State s : localClasses.get(regenerations.get(i))
                                         .get(columnMarkings.get(j))) {
-                                    if (s.hasFeature(LocalStop.class))
+                                    if (s.hasFeature(LocalStop.class)) {
                                         localKernel[t][i][j] += s
                                                 .getFeature(TransientStochasticStateFeature.class)
                                                 .computeVisitedProbability(OmegaBigDecimal.ZERO,
                                                         new OmegaBigDecimal(timeValue),
                                                         s.getFeature(StochasticStateFeature.class))
                                                 .doubleValue();
-                                    else
+                                    } else {
                                         localKernel[t][i][j] += s
                                                 .getFeature(TransientStochasticStateFeature.class)
                                                 .computeTransientClassProbability(
                                                         new OmegaBigDecimal(timeValue),
                                                         s.getFeature(StochasticStateFeature.class))
                                                 .doubleValue();
-
+                                    }
+                                    
                                     if (monitor != null && monitor.interruptRequested()) {
                                         monitor.notifyMessage("Aborted");
                                         return null;
                                     }
                                 }
                             }
+                        }
+                    }
                 }
 
                 // Computes the i-th global kernel row at time t (if convergence
                 // has not been reached)
                 if (t < globalKernel.length) {
-                    if (regenerationClasses.get(regenerations.get(i)) != null)
+                    if (t % globalEvaluationPeriod != 0) {
+                        for (int j = 0; j < regenerations.size(); ++j) {
+                            globalKernel[t][i][j] = globalKernel[t-1][i][j];
+                        }
+                    } else if (regenerationClasses.get(regenerations.get(i)) != null) {
                         // Global kernel is regenerations.size() x
                         // regenerations.size()
-                        for (int j = 0; j < regenerations.size(); ++j)
+                        for (int j = 0; j < regenerations.size(); ++j)  {
                             if (regenerationClasses.get(regenerations.get(i))
-                                    .get(regenerations.get(j)) != null)
+                                    .get(regenerations.get(j)) != null) {
                                 // sums over probabilities of having visited at
                                 // time t a regeneration class
                                 // with marking j starting the analysis from
@@ -773,7 +790,10 @@ class RegenerativeTransientAnalysis<R> {
                                         return null;
                                     }
                                 }
-
+                            }
+                        }
+                    }
+                    
                     if (normalizeGlobalKernel) {
                         // normalizes as G[i,j] = G[i,j]*(1-sum_k L[i,k])/(sum_k
                         // G[i,k])

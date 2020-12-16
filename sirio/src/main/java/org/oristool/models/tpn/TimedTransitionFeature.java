@@ -1,5 +1,5 @@
 /* This program is part of the ORIS Tool.
- * Copyright (C) 2011-2020 The ORIS Authors.
+ * Copyright (C) 2011-2021 The ORIS Authors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -62,6 +62,10 @@ public final class TimedTransitionFeature implements TransitionFeature {
 
     public boolean isDeterministic() {
         return eft.equals(lft);
+    }
+
+    public boolean isImmediate() {
+        return eft.equals(lft) && lft.equals(new OmegaBigDecimal("0.0"));
     }
 
     @Override

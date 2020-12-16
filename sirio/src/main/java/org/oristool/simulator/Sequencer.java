@@ -1,5 +1,5 @@
 /* This program is part of the ORIS Tool.
- * Copyright (C) 2011-2020 The ORIS Authors.
+ * Copyright (C) 2011-2021 The ORIS Authors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -35,15 +35,12 @@ import org.oristool.math.function.Function;
 import org.oristool.math.function.PartitionedFunction;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.pn.Priority;
+import org.oristool.models.stpn.trees.EmpiricalTransitionFeature;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
-import org.oristool.simulator.samplers.ErlangSampler;
-import org.oristool.simulator.samplers.ExponentialSampler;
-import org.oristool.simulator.samplers.MetropolisHastings;
-import org.oristool.simulator.samplers.PartitionedFunctionSampler;
-import org.oristool.simulator.samplers.UniformSampler;
+import org.oristool.simulator.samplers.*;
 import org.oristool.simulator.stpn.SamplerFeature;
 
 public class Sequencer {
@@ -94,8 +91,11 @@ public class Sequencer {
     public void simulate() {
 
         for (Transition t : net.getTransitions())
-            if (!t.hasFeature(SamplerFeature.class))
-                if (t.hasFeature(StochasticTransitionFeature.class)) {
+            if (!t.hasFeature(SamplerFeature.class)) {
+                if (t.hasFeature(EmpiricalTransitionFeature.class)) {
+                    EmpiricalTransitionFeature e = t.getFeature(EmpiricalTransitionFeature.class);
+                    t.addFeature(new SamplerFeature(new EmpiricalTransitionSampler(e.getHistogramCDF(), e.getLower(), e.getUpper())));
+                } else if (t.hasFeature(StochasticTransitionFeature.class)) {
                     StochasticTransitionFeature s = t.getFeature(StochasticTransitionFeature.class);
                     OmegaBigDecimal eft = s.density().getDomainsEFT();
                     OmegaBigDecimal lft = s.density().getDomainsLFT();
@@ -114,6 +114,14 @@ public class Sequencer {
                         t.addFeature(new SamplerFeature(
                                 new UniformSampler(eft.bigDecimalValue(), lft.bigDecimalValue())));
 
+                    else if (s.density().getDensities().size() == 1
+                            && s.density().getDensities().get(0).isExponential()
+                            && lft.compareTo(OmegaBigDecimal.POSITIVE_INFINITY)!=0)
+                        // Gestisco il caso dei bounded transition
+                        t.addFeature(new SamplerFeature(
+                                new TruncatedExponentialSampler(
+                                        s.density().getDensities().get(0).getExponentialRate(), eft.bigDecimalValue(), lft.bigDecimalValue())));
+
                     else if (s.density() instanceof Function)
                         t.addFeature(new SamplerFeature(
                                 new MetropolisHastings((Function) s.density())));
@@ -125,10 +133,13 @@ public class Sequencer {
                     else
                         new IllegalArgumentException(
                                 "The transition " + t + " has unsupported type");
+
                 } else {
                     throw new IllegalArgumentException(
-                            "The transition " + t + " must have a stochastic feature");
+                            "The transition " + t + " must have a stochastic or empirical feature");
                 }
+
+            }
 
         SimulatorSuccessorEvaluator successorEvaluator = componentsFactory.getSuccessorEvaluator();
         EnabledEventsBuilder<PetriNet, Transition> firableTransitionSetBuilder = componentsFactory

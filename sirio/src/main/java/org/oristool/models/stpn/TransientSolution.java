@@ -1,5 +1,5 @@
 /* This program is part of the ORIS Tool.
- * Copyright (C) 2011-2020 The ORIS Authors.
+ * Copyright (C) 2011-2021 The ORIS Authors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,15 +17,29 @@
 
 package org.oristool.models.stpn;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.MarkingCondition;
 
@@ -128,6 +142,153 @@ public class TransientSolution<R, S> {
         return b.toString();
     }
 
+    public void writeCSV(String filepath, int floatDigits) {
+        try {
+            FileWriter writer = new FileWriter(Path.of(filepath).toFile());
+            this.writeCSV(writer, floatDigits);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public void writeCSV(Writer writer, int floatDigits) {
+        String format = "%." + Integer.toString(floatDigits) + "f";
+        
+        String[] columns = Stream.concat(
+                    Stream.of("initialRegeneration", "time"), 
+                    columnStates.stream()
+                ).map(Object::toString).toArray(String[]::new);
+        
+        int init = regenerations.indexOf(initialRegeneration);
+        
+        CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader(columns).build();
+        try (CSVPrinter csv = new CSVPrinter(writer, csvFormat)) {
+            for (int i = 0; i < regenerations.size(); i++) {
+                // print initial regeneration first
+                i = (i == 0) ? init : (i == init) ? 0 : i;
+                
+                for (int t = 0; t < samplesNumber; t++) {
+                    csv.print(regenerations.get(i));
+                    csv.print(step.multiply(new BigDecimal(t)));
+                    for (int j = 0; j < columnStates.size(); j++) {
+                        csv.print(String.format(format, solution[t][i][j]));
+                    }
+                    csv.println();
+                }
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+    
+    public static TransientSolution<String, String> readCSV(String filepath) {
+        try {
+            //TransientSolution.class.getResourceAsStream(.getClass()
+            FileReader reader = new FileReader(Path.of(filepath).toFile());
+            return readCSV(reader);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static TransientSolution<String, String> readCSV(Reader reader) {
+        CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build();
+        try (CSVParser csv = CSVParser.parse(reader, csvFormat)) {
+            List<String> columnStates = csv.getHeaderNames();
+            columnStates = new ArrayList<>(columnStates.subList(2, columnStates.size()));
+            List<String> regenerations = new ArrayList<>();
+            
+            String prevRegeneration = null;
+            BigDecimal prevTime = null;
+            BigDecimal step = null;
+            Integer samplesNumber = null;
+            
+            Map<String, Map<BigDecimal, double[]>> probs = new LinkedHashMap<>();
+            for (CSVRecord record : csv) {
+                // add a time -> probs map for new regenerations
+                String regeneration = record.get(0);
+                if (!regeneration.equals(prevRegeneration)) {
+                    if (prevRegeneration != null) {
+                        if (probs.containsKey(regeneration)) {
+                            throw new IllegalArgumentException("Multiple row series for regeneration" + 
+                                                               regeneration.toString());
+                        }
+                        
+                        // check that the previous regeneration had the right number of time steps
+                        if (samplesNumber == null) {
+                            samplesNumber = probs.get(prevRegeneration).size(); 
+                        } else if (samplesNumber != probs.get(prevRegeneration).size()) {
+                            throw new IllegalArgumentException(
+                                    String.format("%d steps instead of %d for regeneration %s",
+                                            probs.get(prevRegeneration).size(), samplesNumber, prevRegeneration));
+                        }   
+                    }
+
+                    regenerations.add(regeneration);
+                    probs.put(regeneration, new LinkedHashMap<BigDecimal, double[]>());
+                    prevTime = null;
+                }
+
+                // check that time starts from 0.0 with equal steps
+                BigDecimal time = new BigDecimal(record.get(1)).stripTrailingZeros();
+                if (prevTime == null) {
+                    if (BigDecimal.ZERO.compareTo(time) != 0) {
+                        throw new IllegalArgumentException("Time not starting from 0.0");
+                    }                    
+                    prevTime = BigDecimal.ZERO;
+                } else if (step == null) {
+                    step = time.subtract(prevTime);
+                } else {
+                    if (time.subtract(prevTime).compareTo(step) != 0) {
+                        throw new IllegalArgumentException("Different time step at "+record.toString());
+                    }
+                }
+                
+                
+                // parse and save probs of each column state
+                double[] values = IntStream.range(0, columnStates.size())
+                        .mapToDouble(i -> Double.parseDouble(record.get(i + 2)))
+                        .toArray();
+                probs.get(regeneration).put(time,  values);
+
+                prevTime = time;
+                prevRegeneration = regeneration;
+            }
+
+            // check that the last regeneration had the right number of time steps
+            if (samplesNumber == null) {
+                samplesNumber = probs.get(prevRegeneration).size(); 
+            } else if (samplesNumber != probs.get(prevRegeneration).size()) {
+                throw new IllegalArgumentException(
+                        String.format("%d steps instead of %d for regeneration %s",
+                                probs.get(prevRegeneration).size(), samplesNumber, prevRegeneration));
+            }   
+
+            // prepare and return the TransientSolution instance
+            TransientSolution<String, String> result = new TransientSolution<>();
+            result.columnStates = columnStates;
+            result.regenerations = regenerations;
+            result.initialRegeneration = regenerations.get(0);
+            result.samplesNumber = samplesNumber;
+            result.step = step;
+            result.timeLimit = new BigDecimal(samplesNumber-1).multiply(step);
+            
+            result.solution = new double[samplesNumber][regenerations.size()][];
+            for (int t = 0; t < samplesNumber; t++) {
+                BigDecimal time = new BigDecimal(t).multiply(step).stripTrailingZeros();
+                for (int i = 0; i < regenerations.size(); i++) {
+                    String reg = regenerations.get(i);
+                    result.solution[t][i] = probs.get(reg).get(time);
+                }
+            }
+
+            return result;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    
     /**
      * Returns the first initial state of the analysis.
      *
@@ -168,7 +329,7 @@ public class TransientSolution<R, S> {
      */
     public TransientSolution<R, S> computeIntegralSolution() {
         TransientSolution<R, S> integralSolution = new TransientSolution<R, S>(this.timeLimit,
-                this.step, this.regenerations, this.columnStates, this.regenerations.get(0));
+                this.step, this.regenerations, this.columnStates, this.initialRegeneration);
 
         for (int t = 1; t < integralSolution.solution.length; ++t)
             for (int i = 0; i < integralSolution.solution[t].length; ++i)
@@ -178,6 +339,91 @@ public class TransientSolution<R, S> {
                                     * (solution[t][i][j] + solution[t - 1][i][j]);
 
         return integralSolution;
+    }
+
+    /**
+     * Computes the derivative of each time series.
+     * 
+     * @return a transient solution with finite differences
+     */
+    public TransientSolution<R, S> computeDerivativeSolution() {
+        TransientSolution<R, S> derivative = new TransientSolution<R, S>(this.timeLimit,
+                this.step, this.regenerations, this.columnStates, this.initialRegeneration);
+
+        for (int t = 1; t < derivative.solution.length; ++t)
+            for (int i = 0; i < derivative.solution[t].length; ++i)
+                for (int j = 0; j < derivative.solution[t][i].length; ++j)
+                    derivative.solution[t][i][j] = (solution[t][i][j] - solution[t - 1][i][j]) / step.doubleValue();
+
+        return derivative;
+    }
+    
+    /**
+     * Computes the Kullback-Leibler divergence on the input probability values.
+     * 
+     * @param px probability value according to PDF X
+     * @param py probability value according to PDF Y
+     * @return KL divergence
+     */
+    public static double klDivergence(double px, double py) {
+        if (px > 0.0 && py > 0.0) {
+            return px * Math.log(px / py);
+        } else if (px == 0.0 && py >= 0) {
+            return 0.0;
+        } else {
+            return Double.POSITIVE_INFINITY;
+        }
+    }
+
+    /**
+     * Computes the Kullback-Leibler divergence between the time series of state (i,j) 
+     * for this solution, and (u,v) for the other.
+     * 
+     * @param other another solution
+     * @param i initial regeneration of this solution
+     * @param j state of this solution solution (over time should give a PDF)
+     * @param u initial regeneration of the other solution
+     * @param v state of the other solution solution (over time should give a PDF)
+     * @return KL divergence
+     */
+    public <T, U> double klDivergence(TransientSolution<T, U> other, int i, int j, int u, int v) {
+        if (solution.length != other.solution.length)
+            throw new IllegalArgumentException("Should have the same number of samples");
+        
+        double result = 0.0;
+        for (int t = 0; t < solution.length; ++t) {
+            double x = solution[t][i][j];
+            double y = other.solution[t][u][v];
+            result += klDivergence(x, y);
+        }
+        
+        return result;
+    }
+
+    /**
+     * Computes the Jensen-Shannon distance between the time series of state (i,j) 
+     * for this solution, and (u,v) for the other.
+     * 
+     * @param other another solution
+     * @param i initial regeneration of this solution
+     * @param j state of this solution solution (over time should give a PDF)
+     * @param u initial regeneration of the other solution
+     * @param v state of the other solution solution (over time should give a PDF)
+     * @return JS distance
+     */
+    public <U, T> double jsDistance(TransientSolution<T, U> other, int i, int j, int u, int v) {
+        if (solution.length != other.solution.length)
+            throw new IllegalArgumentException("Should have the same number of samples");
+        
+        double result = 0.0;
+        for (int t = 0; t < solution.length; ++t) {
+            double x = solution[t][i][j];
+            double y = other.solution[t][u][v];
+            double m = (x + y)/2.0;
+            result += (klDivergence(x, m) + klDivergence(y, m)) / 2.0; 
+        }
+        
+        return result;
     }
 
     /**
@@ -231,6 +477,22 @@ public class TransientSolution<R, S> {
     }
 
     /**
+     * Creates reward evaluators from a string of expressions separated by semicolon.
+     *
+     * @param rewardRates list of rewards separated by semicolon
+     * @return reward rate evaluators
+     */
+    public static RewardRate[] rewardRates(String rewardRates) {
+
+        String[] c = rewardRates.split(";");
+        RewardRate[] rs = new RewardRate[c.length];
+        for (int i = 0; i < c.length; ++i)
+            rs[i] = RewardRate.fromString(c[i]);
+
+        return rs;
+    }
+    
+    /**
      * Computes rewards from a transient solution (only for the first initial state).
      *
      * @param <R> type of initial states (such as regenerations)
@@ -242,12 +504,7 @@ public class TransientSolution<R, S> {
     public static <R> TransientSolution<R, RewardRate> computeRewards(boolean cumulative,
             TransientSolution<R, Marking> solution, String rewardRates) {
 
-        String[] c = rewardRates.split(";");
-        RewardRate[] rs = new RewardRate[c.length];
-        for (int i = 0; i < c.length; ++i)
-            rs[i] = RewardRate.fromString(c[i]);
-
-        return computeRewards(cumulative, solution,  rs);
+        return computeRewards(cumulative, solution,  rewardRates(rewardRates));
     }
 
     /**
@@ -312,5 +569,54 @@ public class TransientSolution<R, S> {
         }
 
         return rewards;
+    }
+    
+    public boolean isClose(TransientSolution<String, String> other, double epsilon) {
+        if (samplesNumber != other.samplesNumber)
+            return false;
+        
+        if (step.compareTo(other.step) != 0)
+            return false;
+        
+        if (regenerations.size() != other.regenerations.size())
+            return false;
+
+        if (columnStates.size() != other.columnStates.size())
+            return false;
+
+        for (int i = 0; i < regenerations.size(); i++) {
+            int io = other.regenerations.indexOf(regenerations.get(i).toString());
+            if (io == -1) return false;
+            
+            for (int j = 0; j < columnStates.size(); j++) {
+                int jo = other.columnStates.indexOf(columnStates.get(j).toString());
+                if (jo == -1) return false;
+                
+                for (int t = 0; t < samplesNumber; t++) {
+                    if (Math.abs(solution[t][i][j] - other.solution[t][io][jo]) > epsilon) {
+                        return false;
+                    }
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    public boolean sumsToOne(double epsilon) {
+        for (int t = 0; t < samplesNumber; t++) {
+            for (int i = 0; i < solution[t].length; i++) {
+                double sum = 0.0;
+                for (int j = 0; j < solution[t][i].length; j++) {
+                      sum += solution[t][i][j];
+                }
+                
+                if (Math.abs(sum - 1.0) > epsilon) {
+                    return false;
+                }
+            }
+        }
+        
+        return true; 
     }
 }

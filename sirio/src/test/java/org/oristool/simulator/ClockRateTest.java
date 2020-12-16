@@ -1,5 +1,5 @@
 /* This program is part of the ORIS Tool.
- * Copyright (C) 2011-2018 The ORIS Authors.
+ * Copyright (C) 2011-2021 The ORIS Authors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -44,18 +44,18 @@ class ClockRateTest {
     void detUnif() {
         PetriNet pn = new PetriNet();
         Place p0 = pn.addPlace("p0");
-        Place p1 = pn.addPlace("p1");
-        
+
         Transition t0 = pn.addTransition("t0");
         Transition t1 = pn.addTransition("t1");
-        
+
         t0.addFeature(StochasticTransitionFeature.newDeterministicInstance(BigDecimal.ONE));
         t1.addFeature(StochasticTransitionFeature.newUniformInstance(
                 new BigDecimal(2), new BigDecimal(4), MarkingExpr.of(2)));
-        
+
         pn.addPrecondition(p0, t0);
+        Place p1 = pn.addPlace("p1");
         pn.addPrecondition(p1, t1);
-        
+
         Marking m = new Marking();
         m.addTokens(p0, 1);
         m.addTokens(p1, 1);
@@ -65,24 +65,25 @@ class ClockRateTest {
         int timePoints = (timeLimit.divide(timeStep)).intValue() + 1;
         long runs = 50000;
 
-        Sequencer s = new Sequencer(pn, m, new STPNSimulatorComponentsFactory(), NoOpLogger.INSTANCE);
-        
-        TransientMarkingConditionProbability r1 = 
-                new TransientMarkingConditionProbability(s, 
-                        new ContinuousRewardTime(timeStep), timePoints, 
+        Sequencer s = new Sequencer(pn, m,
+                new STPNSimulatorComponentsFactory(), NoOpLogger.INSTANCE);
+
+        TransientMarkingConditionProbability r1 =
+                new TransientMarkingConditionProbability(s,
+                        new ContinuousRewardTime(timeStep), timePoints,
                         MarkingCondition.fromString("p1"));
-        RewardEvaluator re1 = new RewardEvaluator(r1, runs);    
-        
+        RewardEvaluator re1 = new RewardEvaluator(r1, runs);
+
         s.simulate();
         TimeSeriesRewardResult result = (TimeSeriesRewardResult) re1.getResult();
-        
+
         m.removeTokens(p0, 1);
         int a = 10;
         int b = 20;
         for (int t = 0; t < timePoints; t++) {
-            double expected = (t < a || t > b ? 0.0 : 1-(1.0*t-a)/(b-a));
+            double expected = (t < a || t > b ? 0.0 : 1 - (1.0 * t - a) / (b - a));
             assertEquals(expected, result.getTimeSeries(m)[t].doubleValue(), 0.01);
-        }            
+        }
     }
 
 }
