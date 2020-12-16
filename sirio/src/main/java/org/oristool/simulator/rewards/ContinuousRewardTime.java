@@ -1,5 +1,5 @@
 /* This program is part of the ORIS Tool.
- * Copyright (C) 2011-2018 The ORIS Authors.
+ * Copyright (C) 2011-2020 The ORIS Authors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -18,6 +18,7 @@
 package org.oristool.simulator.rewards;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 import org.oristool.analyzer.Succession;
 import org.oristool.models.pn.PetriStateFeature;
@@ -50,6 +51,6 @@ public final class ContinuousRewardTime implements RewardTime {
         BigDecimal rate = new BigDecimal(
                 fired.getFeature(StochasticTransitionFeature.class).clockRate().evaluate(m));
         return succession.getParent().getFeature(TimedSimulatorStateFeature.class)
-                .getTimeToFire(fired).divide(rate);
+                .getTimeToFire(fired).divide(rate, MathContext.DECIMAL128);
     }
 }

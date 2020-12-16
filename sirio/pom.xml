@@ -52,14 +52,12 @@
   </distributionManagement>
 
   <properties>
-    <maven.compiler.source>9</maven.compiler.source>
-    <maven.compiler.target>9</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <junit.version>4.12</junit.version>
-    <junit.jupiter.version>5.0.3</junit.jupiter.version>
-    <junit.vintage.version>${junit.version}.3</junit.vintage.version>
-    <junit.platform.version>1.0.3</junit.platform.version>
+    <junit.version>4.13</junit.version>
+    <junit.jupiter.version>5.6.2</junit.jupiter.version>
   </properties>
 
   <dependencies>
@@ -81,22 +79,15 @@
       <version>${junit.jupiter.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency><!-- remove when Eclipse 4.8 is released -->
-      <groupId>org.junit.platform</groupId>
-      <artifactId>junit-platform-launcher</artifactId>
-      <version>${junit.platform.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.auto.value</groupId>
-      <artifactId>auto-value</artifactId>
-      <version>1.5.4</version>
-      <scope>provided</scope>
-    </dependency>
+	<dependency>
+	  <groupId>com.google.auto.value</groupId>
+	  <artifactId>auto-value-annotations</artifactId>
+	  <version>1.7</version>
+	</dependency>
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>24.0-jre</version>
+        <version>28.2-jre</version>
     </dependency>
     <dependency>
       <groupId>org.jfree</groupId>
@@ -111,7 +102,7 @@
     <dependency>
       <groupId>org.ejml</groupId>
       <artifactId>ejml-all</artifactId>
-      <version>0.33</version>
+      <version>0.39</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -126,12 +117,12 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.25</version>
+      <version>1.7.30</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.25</version>
+      <version>1.7.30</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -140,42 +131,60 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
+        <version>3.8.1</version>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>com.google.auto.value</groupId>
+              <artifactId>auto-value</artifactId>
+              <version>1.7</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.0.0-M3</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.6.3</version>
+                </requireMavenVersion>
+              </rules>    
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.2.0</version>
         <configuration>
+          <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
           <stylesheetfile>${basedir}/javadoc.css</stylesheetfile>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.19.1</version>
+        <version>2.22.2</version>
         <configuration>
           <properties>
             <excludeTags>slow</excludeTags>
           </properties>
         </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>${junit.platform.version}</version>
-            </dependency>
-            <dependency>
-              <groupId>org.junit.jupiter</groupId>
-              <artifactId>junit-jupiter-engine</artifactId>
-              <version>${junit.jupiter.version}</version>
-            </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.0</version>
+        <version>0.8.5</version>
         <executions>
           <execution>
             <goals>
@@ -194,12 +203,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.1.1</version>
         <dependencies>
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>8.8</version>
+            <version>8.31</version>
           </dependency>
         </dependencies>
         <executions>
@@ -225,10 +234,11 @@
           </execution>
         </executions>
       </plugin>
+      <!--  
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
-        <version>3.9.0</version>
+        <version>3.12.0</version>
         <configuration>
           <failOnViolation>false</failOnViolation>
           <printFailingErrors>true</printFailingErrors>
@@ -243,11 +253,11 @@
             </goals>
           </execution>
         </executions>
-      </plugin>
+      </plugin>  -->
       <plugin><!-- for versions:display-{plugin,dependency}-updates -->
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.5</version>
+        <version>2.7</version>
         <configuration>
           <rulesUri>file://${basedir}/versions_maven_rules.xml</rulesUri>
         </configuration>
@@ -273,7 +283,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
-            <version>3.0.1</version>
+            <version>3.2.1</version>
             <executions>
               <execution>
                 <id>attach-sources</id>
@@ -286,7 +296,11 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.0.0</version>
+            <version>3.2.0</version>
+            <configuration>
+              <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+              <stylesheetfile>${basedir}/javadoc.css</stylesheetfile>
+            </configuration>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
@@ -307,6 +321,14 @@
                 <goals>
                   <goal>sign</goal>
                 </goals>
+		<!-- for gpg2
+                <configuration>
+                  <gpgArguments>
+                    <arg>dash dash pinentry-mode</arg>
+                    <arg>loopback</arg>
+                  </gpgArguments>
+                </configuration>
+		-->
               </execution>
             </executions>
           </plugin>

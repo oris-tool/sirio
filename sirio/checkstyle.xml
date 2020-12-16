@@ -3,11 +3,11 @@
           "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
           "http://checkstyle.sourceforge.net/dtds/configuration_1_3.dtd">
 
-<!-- Checkstyle configuration that checks the Google coding conventions from 
-  Google Java Style that can be found at https://google.github.io/styleguide/javaguide.html. 
-  Checkstyle is very configurable. Be sure to read the documentation at http://checkstyle.sf.net 
-  (or in your downloaded distribution). To completely disable a check, just 
-  comment it out or delete it from the file. Authors: Max Vetrenko, Ruslan 
+<!-- Checkstyle configuration that checks the Google coding conventions from
+  Google Java Style that can be found at https://google.github.io/styleguide/javaguide.html.
+  Checkstyle is very configurable. Be sure to read the documentation at http://checkstyle.sf.net
+  (or in your downloaded distribution). To completely disable a check, just
+  comment it out or delete it from the file. Authors: Max Vetrenko, Ruslan
   Diachenko, Roman Ivanov. -->
 
 <module name="Checker">
@@ -36,13 +36,19 @@
     <property name="eachLine" value="true" />
   </module>
 
+  <module name="LineLength">
+    <property name="max" value="100" />
+    <property name="ignorePattern"
+              value="^package.*|^import.*|a href|href|http://|https://|ftp://" />
+  </module>
+
   <module name="TreeWalker">
     <module name="Regexp">
       <property name="format" value="[ \t]+$" />
       <property name="illegalPattern" value="true" />
       <property name="message" value="Trailing whitespace" />
     </module>
-    
+
     <module name="OuterTypeFilename" />
     <module name="IllegalTokenText">
       <property name="tokens" value="STRING_LITERAL, CHAR_LITERAL" />
@@ -55,11 +61,6 @@
       <property name="allowEscapesForControlCharacters" value="true" />
       <property name="allowByTailComment" value="true" />
       <property name="allowNonPrintableEscapes" value="true" />
-    </module>
-    <module name="LineLength">
-      <property name="max" value="100" />
-      <property name="ignorePattern"
-        value="^package.*|^import.*|a href|href|http://|https://|ftp://" />
     </module>
     <module name="AvoidStarImport" />
     <module name="OneTopLevelClass" />
@@ -198,14 +199,8 @@
       <property name="allowedAbbreviationLength" value="5" />
     </module>
     <module name="OverloadMethodsDeclarationOrder" />
-    <module name="VariableDeclarationUsageDistance" />
-    <module name="CustomImportOrder">
-      <property name="customImportOrderRules"
-        value="STATIC###STANDARD_JAVA_PACKAGE###SPECIAL_IMPORTS###THIRD_PARTY_PACKAGE" />
-      <property name="specialImportsRegExp" value="^org\." />
-      <property name="thirdPartyPackageRegExp" value="^com\." />
-      <property name="sortImportsInGroupAlphabetically" value="true" />
-      <property name="separateLineBetweenGroups" value="true" />
+    <module name="VariableDeclarationUsageDistance">
+            <property name="allowedDistance" value="5" />
     </module>
     <module name="MethodParamPad" />
     <module name="NoWhitespaceBefore">
@@ -244,11 +239,8 @@
     <module name="JavadocMethod">
       <property name="scope" value="public" />
       <property name="allowMissingParamTags" value="true" />
-      <property name="allowMissingThrowsTags" value="true" />
       <property name="allowMissingReturnTag" value="true" />
-      <property name="minLineCount" value="2" />
       <property name="allowedAnnotations" value="Override, Test" />
-      <property name="allowThrowsTagsForSubclasses" value="true" />
     </module>
     <module name="MethodName">
       <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9_]*$" />

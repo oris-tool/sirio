@@ -1,5 +1,5 @@
 /* This program is part of the ORIS Tool.
- * Copyright (C) 2011-2018 The ORIS Authors.
+ * Copyright (C) 2011-2020 The ORIS Authors.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -18,6 +18,7 @@
 package org.oristool.simulator;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -31,6 +32,7 @@ import org.oristool.math.OmegaBigDecimal;
 import org.oristool.math.function.EXP;
 import org.oristool.math.function.Erlang;
 import org.oristool.math.function.Function;
+import org.oristool.math.function.PartitionedFunction;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.pn.Priority;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
@@ -40,6 +42,7 @@ import org.oristool.petrinet.Transition;
 import org.oristool.simulator.samplers.ErlangSampler;
 import org.oristool.simulator.samplers.ExponentialSampler;
 import org.oristool.simulator.samplers.MetropolisHastings;
+import org.oristool.simulator.samplers.PartitionedFunctionSampler;
 import org.oristool.simulator.samplers.UniformSampler;
 import org.oristool.simulator.stpn.SamplerFeature;
 
@@ -112,10 +115,12 @@ public class Sequencer {
                                 new UniformSampler(eft.bigDecimalValue(), lft.bigDecimalValue())));
 
                     else if (s.density() instanceof Function)
-                        // throw new IllegalArgumentException("No default sampler is available for
-                        // the transition "+t);
                         t.addFeature(new SamplerFeature(
                                 new MetropolisHastings((Function) s.density())));
+
+                    else if (s.density() instanceof PartitionedFunction)
+                        t.addFeature(new SamplerFeature(
+                                new PartitionedFunctionSampler((PartitionedFunction) s.density())));
 
                     else
                         new IllegalArgumentException(
@@ -171,7 +176,7 @@ public class Sequencer {
                             .getFeature(TimedSimulatorStateFeature.class).getTimeToFire(t)
                             .divide(new BigDecimal(
                                     t.getFeature(StochasticTransitionFeature.class)
-                                    .clockRate().evaluate(m)));
+                                    .clockRate().evaluate(m)), MathContext.DECIMAL128);
 
                     if (minTimeToFire == null || minTimeToFire.compareTo(ttf) > 0) {
                         minTimeToFire = ttf;

@@ -27,13 +27,13 @@ your `pom.xml`:
 </dependencies>
 ```
 
-Since Sirio requires Java 9, you will also need to set the following
+Since Sirio requires Java 11, you will also need to set the following
 properties in `pom.xml`:
 
 ```xml
 <properties>
-  <maven.compiler.source>9</maven.compiler.source>
-  <maven.compiler.target>9</maven.compiler.target>
+  <maven.compiler.source>11</maven.compiler.source>
+  <maven.compiler.target>11</maven.compiler.target>
 </properties>
 ```
 
@@ -95,7 +95,7 @@ timer (instead of a probability distribution).
   can read the [wiki of this project](https://github.com/oris-tool/sirio/wiki).
 - To learn more about the API, you can consult the [online Sirio Javadoc](https://www.oris-tool.org/apidoc).
 
-If you encounter a problem with Sirio, <a
-href="mailto:paolieri@usc.edu">write to us</a>. We also keep track of
-open issues and improvement proposals on our <a
-href="https://github.com/oris-tool/sirio/issues">issue tracker</a>.
+If you encounter a problem with Sirio,
+<a href="mailto:paolieri@usc.edu">write to us</a>.
+We also keep track of open issues and improvement proposals on our
+<a href="https://github.com/oris-tool/sirio/issues">issue tracker</a>.
