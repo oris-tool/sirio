@@ -354,14 +354,12 @@
                 <goals>
                   <goal>sign</goal>
                 </goals>
-		<!-- for gpg2
                 <configuration>
                   <gpgArguments>
-                    <arg>dash dash pinentry-mode</arg>
+                    <arg>--pinentry-mode</arg>
                     <arg>loopback</arg>
                   </gpgArguments>
                 </configuration>
-		-->
               </execution>
             </executions>
           </plugin>
