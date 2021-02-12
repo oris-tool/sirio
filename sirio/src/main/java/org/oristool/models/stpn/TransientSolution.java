@@ -231,6 +231,22 @@ public class TransientSolution<R, S> {
     }
 
     /**
+     * Creates reward evaluators from a string of expressions separated by semicolon.
+     *
+     * @param rewardRates list of rewards separated by semicolon
+     * @return reward rate evaluators
+     */
+    public static RewardRate[] rewardRates(String rewardRates) {
+
+        String[] c = rewardRates.split(";");
+        RewardRate[] rs = new RewardRate[c.length];
+        for (int i = 0; i < c.length; ++i)
+            rs[i] = RewardRate.fromString(c[i]);
+
+        return rs;
+    }
+    
+    /**
      * Computes rewards from a transient solution (only for the first initial state).
      *
      * @param <R> type of initial states (such as regenerations)
@@ -242,12 +258,7 @@ public class TransientSolution<R, S> {
     public static <R> TransientSolution<R, RewardRate> computeRewards(boolean cumulative,
             TransientSolution<R, Marking> solution, String rewardRates) {
 
-        String[] c = rewardRates.split(";");
-        RewardRate[] rs = new RewardRate[c.length];
-        for (int i = 0; i < c.length; ++i)
-            rs[i] = RewardRate.fromString(c[i]);
-
-        return computeRewards(cumulative, solution,  rs);
+        return computeRewards(cumulative, solution,  rewardRates(rewardRates));
     }
 
     /**
