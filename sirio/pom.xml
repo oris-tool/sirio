@@ -125,6 +125,11 @@
       <version>1.7.30</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-csv</artifactId>
+        <version>1.8</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

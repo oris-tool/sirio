@@ -55,9 +55,8 @@ import com.google.auto.value.AutoValue;
  * regenerations.
  */
 @AutoValue
-public abstract class RegTransient
-        implements Engine<PetriNet, Marking,
-            TransientSolution<DeterministicEnablingState, Marking>> {
+public abstract class RegTransient implements
+        Engine<PetriNet, Marking, TransientSolution<DeterministicEnablingState, Marking>> {
 
     /**
      * Forbids subclassing outside of this package.
@@ -100,6 +99,18 @@ public abstract class RegTransient
     public abstract Supplier<EnumerationPolicy> policy();
 
     /**
+     * Returns the number of time steps after which kernels are evaluated.
+     *
+     * <p>When greater than 1, most recent kernels are repeated until the next
+     * evaluation.
+     *
+     * <p>By default, kernels are evaluated at each time step.
+     *
+     * @return period for the evaluation of kernels (in time steps)
+     */
+    public abstract int kernelsEvaluationPeriod();
+
+    /**
      * Checks whether normalization of rows in local and global kernels is enabled.
      *
      * <p>Without normalization, defective kernel rows produce probabilities that
@@ -138,7 +149,7 @@ public abstract class RegTransient
      * @return the filter used for markings
      */
     public abstract MarkingCondition markingFilter();
-    
+
     /**
      * Returns the monitor used by this analysis. It is used to stop the analysis
      * early and to notify messages to the user.
@@ -168,6 +179,7 @@ public abstract class RegTransient
         return new AutoValue_RegTransient.Builder()
                 .policy(FIFOPolicy::new)
                 .normalizeKernels(false)
+                .kernelsEvaluationPeriod(1)
                 .stopOn(AlwaysFalseStopCriterion::new)
                 .markingFilter(MarkingCondition.ANY)
                 .monitor(NoOpMonitor.INSTANCE)
@@ -251,6 +263,19 @@ public abstract class RegTransient
         }
 
         /**
+         * Sets the evaluation period for the kernels (in time steps).
+         *
+         * <p>When the period is greater than 1, kernel values are repeated until the
+         * next evaluation.
+         *
+         * <p>By default, kernels are evaluated at each step
+         *
+         * @param steps the kernel evaluation period
+         * @return this builder instance
+         */
+        public abstract Builder kernelsEvaluationPeriod(int steps);
+
+        /**
          * Enables the normalization of rows in local and global kernels.
          *
          * <p>Without normalization, defective kernel rows produce probabilities that
@@ -277,8 +302,8 @@ public abstract class RegTransient
          * @return this builder instance
          */
         public Builder stopOn(MarkingCondition value) {
-            Predicate<State> p = s ->
-                value.evaluate(s.getFeature(PetriStateFeature.class).getMarking());
+            Predicate<State> p = s -> value
+                    .evaluate(s.getFeature(PetriStateFeature.class).getMarking());
             stopOn(() -> new StateStopCriterion(p));
             return this;
         }
@@ -355,17 +380,16 @@ public abstract class RegTransient
             throw new IllegalArgumentException("Cannot analyze the input Petri net");
 
         DeterministicEnablingState r = new DeterministicEnablingState(m, pn);
-        StateBuilder<DeterministicEnablingState> stateBuilder =
-                new DeterministicEnablingStateBuilder(pn, true);
+        StateBuilder<DeterministicEnablingState> stateBuilder = new DeterministicEnablingStateBuilder(
+                pn, true);
 
-        RegenerativeTransientAnalysis<DeterministicEnablingState> trees =
-                RegenerativeTransientAnalysis.compute(pn, r, timeBound(),
-                    stateBuilder, new EnablingSyncsEvaluator(),
-                    policy().get(), stopOn().get(), false, false, logger(), monitor(), false);
+        RegenerativeTransientAnalysis<DeterministicEnablingState> trees = RegenerativeTransientAnalysis
+                .compute(pn, r, timeBound(), stateBuilder, new EnablingSyncsEvaluator(),
+                        policy().get(), stopOn().get(), false, false, logger(), monitor(), false);
 
-        TransientSolution<DeterministicEnablingState, Marking> solution =
-                trees.solveDiscretizedMarkovRenewal(timeBound(), timeStep(),
-                        markingFilter(), normalizeKernels(), logger(), monitor());
+        TransientSolution<DeterministicEnablingState, Marking> solution = trees
+                .solveDiscretizedMarkovRenewal(timeBound(), timeStep(), markingFilter(),
+                        normalizeKernels(), kernelsEvaluationPeriod(), logger(), monitor());
 
         return solution;
     }
@@ -381,8 +405,8 @@ public abstract class RegTransient
                 c.addError("Transition '" + t + "' is not stochastic");
 
             } else if (!t.getFeature(StochasticTransitionFeature.class).isEXP()
-                    && !t.getFeature(StochasticTransitionFeature.class)
-                        .clockRate().equals(MarkingExpr.ONE)) {
+                    && !t.getFeature(StochasticTransitionFeature.class).clockRate()
+                            .equals(MarkingExpr.ONE)) {
                 canAnalyze = false;
                 c.addError("GEN transition '" + t + "' has rate different than 1");
             }
