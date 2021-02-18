@@ -99,16 +99,28 @@ public abstract class RegTransient implements
     public abstract Supplier<EnumerationPolicy> policy();
 
     /**
-     * Returns the number of time steps after which kernels are evaluated.
+     * Returns the number of time steps after which the local kernel is evaluated.
      *
-     * <p>When greater than 1, most recent kernels are repeated until the next
-     * evaluation.
+     * <p>When greater than 1, the most recent sample is repeated until the next
+     * evaluation tick.
      *
-     * <p>By default, kernels are evaluated at each time step.
+     * <p>By default, the local kernel is evaluated at each time step.
      *
-     * @return period for the evaluation of kernels (in time steps)
+     * @return period for the evaluation of the local kernels (in time steps)
      */
-    public abstract int kernelsEvaluationPeriod();
+    public abstract int localEvaluationPeriod();
+
+    /**
+     * Returns the number of time steps after which the global kernel is evaluated.
+     *
+     * <p>When greater than 1, the most recent sample is repeated until the next
+     * evaluation tick.
+     *
+     * <p>By default, the global kernel is evaluated at each time step.
+     *
+     * @return period for the evaluation of the global kernels (in time steps)
+     */
+    public abstract int globalEvaluationPeriod();
 
     /**
      * Checks whether normalization of rows in local and global kernels is enabled.
@@ -179,7 +191,8 @@ public abstract class RegTransient implements
         return new AutoValue_RegTransient.Builder()
                 .policy(FIFOPolicy::new)
                 .normalizeKernels(false)
-                .kernelsEvaluationPeriod(1)
+                .localEvaluationPeriod(1)
+                .globalEvaluationPeriod(1)
                 .stopOn(AlwaysFalseStopCriterion::new)
                 .markingFilter(MarkingCondition.ANY)
                 .monitor(NoOpMonitor.INSTANCE)
@@ -261,20 +274,33 @@ public abstract class RegTransient implements
             policy(() -> new TruncationPolicy(error, new OmegaBigDecimal(timeBound)));
             return this;
         }
-
+        
         /**
-         * Sets the evaluation period for the kernels (in time steps).
+         * Sets the evaluation period for the local kernel (in time steps).
          *
-         * <p>When the period is greater than 1, kernel values are repeated until the
-         * next evaluation.
+         * <p>When greater than 1, the most recent sample is repeated until the next
+         * evaluation tick.
          *
-         * <p>By default, kernels are evaluated at each step
+         * <p>By default, the local kernel is evaluated at each time step.
          *
-         * @param steps the kernel evaluation period
+         * @param steps the local kernel evaluation period
          * @return this builder instance
          */
-        public abstract Builder kernelsEvaluationPeriod(int steps);
+        public abstract Builder localEvaluationPeriod(int steps);
 
+        /**
+         * Sets the evaluation period for the global kernel (in time steps).
+         *
+         * <p>When greater than 1, the most recent sample is repeated until the next
+         * evaluation tick.
+         *
+         * <p>By default, the global kernel is evaluated at each time step.
+         *
+         * @param steps the global kernel evaluation period
+         * @return this builder instance
+         */
+        public abstract Builder globalEvaluationPeriod(int steps);
+        
         /**
          * Enables the normalization of rows in local and global kernels.
          *
@@ -389,7 +415,8 @@ public abstract class RegTransient implements
 
         TransientSolution<DeterministicEnablingState, Marking> solution = trees
                 .solveDiscretizedMarkovRenewal(timeBound(), timeStep(), markingFilter(),
-                        normalizeKernels(), kernelsEvaluationPeriod(), logger(), monitor());
+                        normalizeKernels(), localEvaluationPeriod(), globalEvaluationPeriod(), 
+                        logger(), monitor());
 
         return solution;
     }

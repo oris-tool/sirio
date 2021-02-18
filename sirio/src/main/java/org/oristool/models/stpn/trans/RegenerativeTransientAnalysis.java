@@ -578,15 +578,19 @@ class RegenerativeTransientAnalysis<R> {
             BigDecimal step, MarkingCondition markingCondition, boolean normalizeGlobalKernel) {
 
         return solveDiscretizedMarkovRenewal(timeLimit, step, markingCondition,
-                normalizeGlobalKernel, 1, new PrintStreamLogger(System.out), null);
+                normalizeGlobalKernel, 1, 1, new PrintStreamLogger(System.out), null);
     }
 
     public TransientSolution<R, Marking> solveDiscretizedMarkovRenewal(BigDecimal timeLimit,
             BigDecimal step, MarkingCondition markingCondition, boolean normalizeGlobalKernel,
-            int kernelsEvaluationPeriod, AnalysisLogger logger, AnalysisMonitor monitor) {
+            int localEvaluationPeriod, int globalEvaluationPeriod, 
+            AnalysisLogger logger, AnalysisMonitor monitor) {
 
-        if (kernelsEvaluationPeriod < 1)
-            throw new IllegalArgumentException("Kernel evaluatio period must be positive");
+        if (localEvaluationPeriod < 1)
+            throw new IllegalArgumentException("Kernel evaluation period must be positive");
+
+        if (globalEvaluationPeriod < 1)
+            throw new IllegalArgumentException("Kernel evaluation period must be positive");
         
         if (logger != null) {
             logger.log(">> Solving in [0, " + timeLimit + "] with step " + step + " ");
@@ -706,14 +710,14 @@ class RegenerativeTransientAnalysis<R> {
         BigDecimal timeValue = BigDecimal.ZERO;
         for (int t = 0; t < (globalKernel.length > localKernel.length
                 ? globalKernel.length : localKernel.length); ++t) {
-            if (monitor != null && (t % kernelsEvaluationPeriod == 0))
+            if (monitor != null && (t % localEvaluationPeriod == 0 || t % globalEvaluationPeriod == 0))
                 monitor.notifyMessage("Evaluating kernels at time t=" + timeValue);
 
             for (int i = 0; i < regenerations.size(); ++i) {
                 // Computes the i-th global kernel row at time t (if convergence
                 // has not been reached)
                 if (t < localKernel.length) {
-                    if (t % kernelsEvaluationPeriod != 0) {
+                    if (t % localEvaluationPeriod != 0) {
                         for (int j = 0; j < columnMarkings.size(); ++j) {
                             localKernel[t][i][j] = localKernel[t-1][i][j];
                         }
@@ -758,7 +762,7 @@ class RegenerativeTransientAnalysis<R> {
                 // Computes the i-th global kernel row at time t (if convergence
                 // has not been reached)
                 if (t < globalKernel.length) {
-                    if (t % kernelsEvaluationPeriod != 0) {
+                    if (t % globalEvaluationPeriod != 0) {
                         for (int j = 0; j < regenerations.size(); ++j) {
                             globalKernel[t][i][j] = globalKernel[t-1][i][j];
                         }

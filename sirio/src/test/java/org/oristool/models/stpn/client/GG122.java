@@ -165,7 +165,8 @@ class GG122 {
         builder.timeBound(timeBound);
         builder.timeStep(timeStep);
         builder.greedyPolicy(timeBound, error);
-        builder.kernelsEvaluationPeriod(4);
+        builder.localEvaluationPeriod(4);
+        builder.globalEvaluationPeriod(4);
         
         RegTransient analysis = builder.build();
 
