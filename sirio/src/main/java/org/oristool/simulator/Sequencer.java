@@ -35,15 +35,12 @@ import org.oristool.math.function.Function;
 import org.oristool.math.function.PartitionedFunction;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.pn.Priority;
+import org.oristool.models.stpn.trees.EmpiricalTransitionFeature;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Transition;
-import org.oristool.simulator.samplers.ErlangSampler;
-import org.oristool.simulator.samplers.ExponentialSampler;
-import org.oristool.simulator.samplers.MetropolisHastings;
-import org.oristool.simulator.samplers.PartitionedFunctionSampler;
-import org.oristool.simulator.samplers.UniformSampler;
+import org.oristool.simulator.samplers.*;
 import org.oristool.simulator.stpn.SamplerFeature;
 
 public class Sequencer {
@@ -100,31 +97,36 @@ public class Sequencer {
                     OmegaBigDecimal eft = s.density().getDomainsEFT();
                     OmegaBigDecimal lft = s.density().getDomainsLFT();
 
-                    if (s.density() instanceof EXP)
-                        t.addFeature(new SamplerFeature(
-                                new ExponentialSampler(((EXP) s.density()))));
+                    if(t.hasFeature(EmpiricalTransitionFeature.class)){
+                        EmpiricalTransitionFeature e = t.getFeature(EmpiricalTransitionFeature.class);
+                        t.addFeature(new SamplerFeature(new EmpiricalTransitionSampler(e.getHistogramCDF(), e.getLower(), e.getUpper())));
+                    } else {
+                        if (s.density() instanceof EXP)
+                            t.addFeature(new SamplerFeature(
+                                    new ExponentialSampler(((EXP) s.density()))));
 
-                    else if (s.density() instanceof Erlang)
-                        t.addFeature(new SamplerFeature(
-                                new ErlangSampler((Erlang) s.density())));
+                        else if (s.density() instanceof Erlang)
+                            t.addFeature(new SamplerFeature(
+                                    new ErlangSampler((Erlang) s.density())));
 
-                    else if (s.density().getDensities().size() == 1
-                            && s.density().getDensities().get(0).isConstant())
-                        // assumes a uniform distribution on the domain
-                        t.addFeature(new SamplerFeature(
-                                new UniformSampler(eft.bigDecimalValue(), lft.bigDecimalValue())));
+                        else if (s.density().getDensities().size() == 1
+                                && s.density().getDensities().get(0).isConstant())
+                            // assumes a uniform distribution on the domain
+                            t.addFeature(new SamplerFeature(
+                                    new UniformSampler(eft.bigDecimalValue(), lft.bigDecimalValue())));
 
-                    else if (s.density() instanceof Function)
-                        t.addFeature(new SamplerFeature(
-                                new MetropolisHastings((Function) s.density())));
+                        else if (s.density() instanceof Function)
+                            t.addFeature(new SamplerFeature(
+                                    new MetropolisHastings((Function) s.density())));
 
-                    else if (s.density() instanceof PartitionedFunction)
-                        t.addFeature(new SamplerFeature(
-                                new PartitionedFunctionSampler((PartitionedFunction) s.density())));
+                        else if (s.density() instanceof PartitionedFunction)
+                            t.addFeature(new SamplerFeature(
+                                    new PartitionedFunctionSampler((PartitionedFunction) s.density())));
 
-                    else
-                        new IllegalArgumentException(
-                                "The transition " + t + " has unsupported type");
+                        else
+                            new IllegalArgumentException(
+                                    "The transition " + t + " has unsupported type");
+                    }
                 } else {
                     throw new IllegalArgumentException(
                             "The transition " + t + " must have a stochastic feature");
