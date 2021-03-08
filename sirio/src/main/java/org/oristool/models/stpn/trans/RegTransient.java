@@ -55,9 +55,8 @@ import com.google.auto.value.AutoValue;
  * regenerations.
  */
 @AutoValue
-public abstract class RegTransient
-        implements Engine<PetriNet, Marking,
-            TransientSolution<DeterministicEnablingState, Marking>> {
+public abstract class RegTransient implements
+        Engine<PetriNet, Marking, TransientSolution<DeterministicEnablingState, Marking>> {
 
     /**
      * Forbids subclassing outside of this package.
@@ -100,6 +99,30 @@ public abstract class RegTransient
     public abstract Supplier<EnumerationPolicy> policy();
 
     /**
+     * Returns the number of time steps after which the local kernel is evaluated.
+     *
+     * <p>When greater than 1, the most recent sample is repeated until the next
+     * evaluation tick.
+     *
+     * <p>By default, the local kernel is evaluated at each time step.
+     *
+     * @return period for the evaluation of the local kernels (in time steps)
+     */
+    public abstract int localEvaluationPeriod();
+
+    /**
+     * Returns the number of time steps after which the global kernel is evaluated.
+     *
+     * <p>When greater than 1, the most recent sample is repeated until the next
+     * evaluation tick.
+     *
+     * <p>By default, the global kernel is evaluated at each time step.
+     *
+     * @return period for the evaluation of the global kernels (in time steps)
+     */
+    public abstract int globalEvaluationPeriod();
+
+    /**
      * Checks whether normalization of rows in local and global kernels is enabled.
      *
      * <p>Without normalization, defective kernel rows produce probabilities that
@@ -130,6 +153,16 @@ public abstract class RegTransient
     public abstract Supplier<StopCriterion> stopOn();
 
     /**
+     * Returns the predicate used to select markings for which transient
+     * probabilities are computed by this analysis.
+     *
+     * <p>By default, transient probabilities are computed for all markings.
+     *
+     * @return the filter used for markings
+     */
+    public abstract MarkingCondition markingFilter();
+
+    /**
      * Returns the monitor used by this analysis. It is used to stop the analysis
      * early and to notify messages to the user.
      *
@@ -158,7 +191,10 @@ public abstract class RegTransient
         return new AutoValue_RegTransient.Builder()
                 .policy(FIFOPolicy::new)
                 .normalizeKernels(false)
+                .localEvaluationPeriod(1)
+                .globalEvaluationPeriod(1)
                 .stopOn(AlwaysFalseStopCriterion::new)
+                .markingFilter(MarkingCondition.ANY)
                 .monitor(NoOpMonitor.INSTANCE)
                 .logger(NoOpLogger.INSTANCE);
     }
@@ -238,7 +274,33 @@ public abstract class RegTransient
             policy(() -> new TruncationPolicy(error, new OmegaBigDecimal(timeBound)));
             return this;
         }
+        
+        /**
+         * Sets the evaluation period for the local kernel (in time steps).
+         *
+         * <p>When greater than 1, the most recent sample is repeated until the next
+         * evaluation tick.
+         *
+         * <p>By default, the local kernel is evaluated at each time step.
+         *
+         * @param steps the local kernel evaluation period
+         * @return this builder instance
+         */
+        public abstract Builder localEvaluationPeriod(int steps);
 
+        /**
+         * Sets the evaluation period for the global kernel (in time steps).
+         *
+         * <p>When greater than 1, the most recent sample is repeated until the next
+         * evaluation tick.
+         *
+         * <p>By default, the global kernel is evaluated at each time step.
+         *
+         * @param steps the global kernel evaluation period
+         * @return this builder instance
+         */
+        public abstract Builder globalEvaluationPeriod(int steps);
+        
         /**
          * Enables the normalization of rows in local and global kernels.
          *
@@ -266,8 +328,8 @@ public abstract class RegTransient
          * @return this builder instance
          */
         public Builder stopOn(MarkingCondition value) {
-            Predicate<State> p = s ->
-                value.evaluate(s.getFeature(PetriStateFeature.class).getMarking());
+            Predicate<State> p = s -> value
+                    .evaluate(s.getFeature(PetriStateFeature.class).getMarking());
             stopOn(() -> new StateStopCriterion(p));
             return this;
         }
@@ -285,6 +347,17 @@ public abstract class RegTransient
          * @return this builder instance
          */
         public abstract Builder stopOn(Supplier<StopCriterion> value);
+
+        /**
+         * Uses a marking condition to select markings for which transient probabilities
+         * are computed by this analysis.
+         *
+         * <p>By default, transient probabilities are computed for all markings.
+         *
+         * @param value the filter selecting markings for transient analysis
+         * @return this builder instance
+         */
+        public abstract Builder markingFilter(MarkingCondition value);
 
         /**
          * Sets the monitor used by this analysis. It is used to stop the analysis early
@@ -321,7 +394,7 @@ public abstract class RegTransient
      *
      * @param pn the input Petri net
      * @param m the initial marking
-     * @return a succession graph encoding the state class graph
+     * @return transient probabilities from each reachable regeneration
      *
      * @throws IllegalArgumentException if the analysis is not applicable to the
      *         input Petri net
@@ -333,17 +406,17 @@ public abstract class RegTransient
             throw new IllegalArgumentException("Cannot analyze the input Petri net");
 
         DeterministicEnablingState r = new DeterministicEnablingState(m, pn);
-        StateBuilder<DeterministicEnablingState> stateBuilder =
-                new DeterministicEnablingStateBuilder(pn, true);
+        StateBuilder<DeterministicEnablingState> stateBuilder = new DeterministicEnablingStateBuilder(
+                pn, true);
 
-        RegenerativeTransientAnalysis<DeterministicEnablingState> trees =
-                RegenerativeTransientAnalysis.compute(pn, r, timeBound(),
-                    stateBuilder, new EnablingSyncsEvaluator(),
-                    policy().get(), stopOn().get(), false, false, logger(), monitor(), false);
+        RegenerativeTransientAnalysis<DeterministicEnablingState> trees = RegenerativeTransientAnalysis
+                .compute(pn, r, timeBound(), stateBuilder, new EnablingSyncsEvaluator(),
+                        policy().get(), stopOn().get(), false, false, logger(), monitor(), false);
 
-        TransientSolution<DeterministicEnablingState, Marking> solution =
-                trees.solveDiscretizedMarkovRenewal(timeBound(), timeStep(),
-                        MarkingCondition.ANY, normalizeKernels(), logger(), monitor());
+        TransientSolution<DeterministicEnablingState, Marking> solution = trees
+                .solveDiscretizedMarkovRenewal(timeBound(), timeStep(), markingFilter(),
+                        normalizeKernels(), localEvaluationPeriod(), globalEvaluationPeriod(), 
+                        logger(), monitor());
 
         return solution;
     }
@@ -359,8 +432,8 @@ public abstract class RegTransient
                 c.addError("Transition '" + t + "' is not stochastic");
 
             } else if (!t.getFeature(StochasticTransitionFeature.class).isEXP()
-                    && !t.getFeature(StochasticTransitionFeature.class)
-                        .clockRate().equals(MarkingExpr.ONE)) {
+                    && !t.getFeature(StochasticTransitionFeature.class).clockRate()
+                            .equals(MarkingExpr.ONE)) {
                 canAnalyze = false;
                 c.addError("GEN transition '" + t + "' has rate different than 1");
             }
