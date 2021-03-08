@@ -183,7 +183,9 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
      * @return the added precondition
      */
     public Precondition addPrecondition(Place p, Transition t, int multiplicity) {
-
+        if (p == null || t == null)
+            throw new IllegalArgumentException();
+        
         Map<Place, Precondition> transitionPreconditions = preconditions.get(t);
         if (transitionPreconditions == null) {
             transitionPreconditions = new LinkedHashMap<Place, Precondition>();
@@ -263,6 +265,8 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
      * @return the added inhibitor arc
      */
     public InhibitorArc addInhibitorArc(Place p, Transition t, int multiplicity) {
+        if (p == null || t == null)
+            throw new IllegalArgumentException();
 
         Map<Place, InhibitorArc> transitionInhibitorArcs = inhibitorArcs.get(t);
         if (transitionInhibitorArcs == null) {
@@ -342,11 +346,12 @@ public final class PetriNet extends Featurizable<PetriNetFeature> {
      * @param multiplicity postcondition multiplicity
      * @return the added postcondition
      */
-    public Postcondition addPostcondition(Transition t, Place p,
-            int multiplicity) {
+    public Postcondition addPostcondition(Transition t, Place p, int multiplicity) {
 
-        Map<Place, Postcondition> transitionPostconditions = postconditions
-                .get(t);
+        if (p == null || t == null)
+            throw new IllegalArgumentException();
+
+        Map<Place, Postcondition> transitionPostconditions = postconditions.get(t);
         if (transitionPostconditions == null) {
             transitionPostconditions = new LinkedHashMap<Place, Postcondition>();
             postconditions.put(t, transitionPostconditions);
