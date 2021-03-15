@@ -327,7 +327,7 @@ public class TransientSolution<R, S> {
      */
     public TransientSolution<R, S> computeIntegralSolution() {
         TransientSolution<R, S> integralSolution = new TransientSolution<R, S>(this.timeLimit,
-                this.step, this.regenerations, this.columnStates, this.regenerations.get(0));
+                this.step, this.regenerations, this.columnStates, this.initialRegeneration);
 
         for (int t = 1; t < integralSolution.solution.length; ++t)
             for (int i = 0; i < integralSolution.solution[t].length; ++i)
@@ -337,6 +337,91 @@ public class TransientSolution<R, S> {
                                     * (solution[t][i][j] + solution[t - 1][i][j]);
 
         return integralSolution;
+    }
+
+    /**
+     * Computes the derivative of each time series.
+     * 
+     * @return a transient solution with finite differences
+     */
+    public TransientSolution<R, S> computeDerivativeSolution() {
+        TransientSolution<R, S> derivative = new TransientSolution<R, S>(this.timeLimit,
+                this.step, this.regenerations, this.columnStates, this.initialRegeneration);
+
+        for (int t = 1; t < derivative.solution.length; ++t)
+            for (int i = 0; i < derivative.solution[t].length; ++i)
+                for (int j = 0; j < derivative.solution[t][i].length; ++j)
+                    derivative.solution[t][i][j] = (solution[t][i][j] - solution[t - 1][i][j]) / step.doubleValue();
+
+        return derivative;
+    }
+    
+    /**
+     * Computes the Kullback-Leibler divergence on the input probability values.
+     * 
+     * @param px probability value according to PDF X
+     * @param py probability value according to PDF Y
+     * @return KL divergence
+     */
+    public static double klDivergence(double px, double py) {
+        if (px > 0.0 && py > 0.0) {
+            return px * Math.log(px / py);
+        } else if (px == 0.0 && py >= 0) {
+            return 0.0;
+        } else {
+            return Double.POSITIVE_INFINITY;
+        }
+    }
+
+    /**
+     * Computes the Kullback-Leibler divergence between the time series of state (i,j) 
+     * for this solution, and (u,v) for the other.
+     * 
+     * @param other another solution
+     * @param i initial regeneration of this solution
+     * @param j state of this solution solution (over time should give a PDF)
+     * @param u initial regeneration of the other solution
+     * @param v state of the other solution solution (over time should give a PDF)
+     * @return KL divergence
+     */
+    public <T, U> double klDivergence(TransientSolution<T, U> other, int i, int j, int u, int v) {
+        if (solution.length != other.solution.length)
+            throw new IllegalArgumentException("Should have the same number of samples");
+        
+        double result = 0.0;
+        for (int t = 0; t < solution.length; ++t) {
+            double x = solution[t][i][j];
+            double y = other.solution[t][u][v];
+            result += klDivergence(x, y);
+        }
+        
+        return result;
+    }
+
+    /**
+     * Computes the Jensen-Shannon distance between the time series of state (i,j) 
+     * for this solution, and (u,v) for the other.
+     * 
+     * @param other another solution
+     * @param i initial regeneration of this solution
+     * @param j state of this solution solution (over time should give a PDF)
+     * @param u initial regeneration of the other solution
+     * @param v state of the other solution solution (over time should give a PDF)
+     * @return JS distance
+     */
+    public <U, T> double jsDistance(TransientSolution<T, U> other, int i, int j, int u, int v) {
+        if (solution.length != other.solution.length)
+            throw new IllegalArgumentException("Should have the same number of samples");
+        
+        double result = 0.0;
+        for (int t = 0; t < solution.length; ++t) {
+            double x = solution[t][i][j];
+            double y = other.solution[t][u][v];
+            double m = (x + y)/2.0;
+            result += (klDivergence(x, m) + klDivergence(y, m)) / 2.0; 
+        }
+        
+        return result;
     }
 
     /**
