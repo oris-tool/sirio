@@ -91,46 +91,47 @@ public class Sequencer {
     public void simulate() {
 
         for (Transition t : net.getTransitions())
-            if (!t.hasFeature(SamplerFeature.class))
-                if (t.hasFeature(StochasticTransitionFeature.class)) {
+            if (!t.hasFeature(SamplerFeature.class)) {
+                if (t.hasFeature(EmpiricalTransitionFeature.class)) {
+                    EmpiricalTransitionFeature e = t.getFeature(EmpiricalTransitionFeature.class);
+                    t.addFeature(new SamplerFeature(new EmpiricalTransitionSampler(e.getHistogramCDF(), e.getLower(), e.getUpper())));
+                } else if (t.hasFeature(StochasticTransitionFeature.class)) {
                     StochasticTransitionFeature s = t.getFeature(StochasticTransitionFeature.class);
                     OmegaBigDecimal eft = s.density().getDomainsEFT();
                     OmegaBigDecimal lft = s.density().getDomainsLFT();
 
-                    if(t.hasFeature(EmpiricalTransitionFeature.class)){
-                        EmpiricalTransitionFeature e = t.getFeature(EmpiricalTransitionFeature.class);
-                        t.addFeature(new SamplerFeature(new EmpiricalTransitionSampler(e.getHistogramCDF(), e.getLower(), e.getUpper())));
-                    } else {
-                        if (s.density() instanceof EXP)
-                            t.addFeature(new SamplerFeature(
-                                    new ExponentialSampler(((EXP) s.density()))));
+                    if (s.density() instanceof EXP)
+                        t.addFeature(new SamplerFeature(
+                                new ExponentialSampler(((EXP) s.density()))));
 
-                        else if (s.density() instanceof Erlang)
-                            t.addFeature(new SamplerFeature(
-                                    new ErlangSampler((Erlang) s.density())));
+                    else if (s.density() instanceof Erlang)
+                        t.addFeature(new SamplerFeature(
+                                new ErlangSampler((Erlang) s.density())));
 
-                        else if (s.density().getDensities().size() == 1
-                                && s.density().getDensities().get(0).isConstant())
-                            // assumes a uniform distribution on the domain
-                            t.addFeature(new SamplerFeature(
-                                    new UniformSampler(eft.bigDecimalValue(), lft.bigDecimalValue())));
+                    else if (s.density().getDensities().size() == 1
+                            && s.density().getDensities().get(0).isConstant())
+                        // assumes a uniform distribution on the domain
+                        t.addFeature(new SamplerFeature(
+                                new UniformSampler(eft.bigDecimalValue(), lft.bigDecimalValue())));
 
-                        else if (s.density() instanceof Function)
-                            t.addFeature(new SamplerFeature(
-                                    new MetropolisHastings((Function) s.density())));
+                    else if (s.density() instanceof Function)
+                        t.addFeature(new SamplerFeature(
+                                new MetropolisHastings((Function) s.density())));
 
-                        else if (s.density() instanceof PartitionedFunction)
-                            t.addFeature(new SamplerFeature(
-                                    new PartitionedFunctionSampler((PartitionedFunction) s.density())));
+                    else if (s.density() instanceof PartitionedFunction)
+                        t.addFeature(new SamplerFeature(
+                                new PartitionedFunctionSampler((PartitionedFunction) s.density())));
 
-                        else
-                            new IllegalArgumentException(
-                                    "The transition " + t + " has unsupported type");
-                    }
+                    else
+                        new IllegalArgumentException(
+                                "The transition " + t + " has unsupported type");
+
                 } else {
                     throw new IllegalArgumentException(
-                            "The transition " + t + " must have a stochastic feature");
+                            "The transition " + t + " must have a stochastic or empirical feature");
                 }
+
+            }
 
         SimulatorSuccessorEvaluator successorEvaluator = componentsFactory.getSuccessorEvaluator();
         EnabledEventsBuilder<PetriNet, Transition> firableTransitionSetBuilder = componentsFactory
