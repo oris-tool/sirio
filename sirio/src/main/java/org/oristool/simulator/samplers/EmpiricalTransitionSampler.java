@@ -30,7 +30,7 @@ public class EmpiricalTransitionSampler implements Sampler {
             selectedBin++;
         }
 
-        double secondDraw = Math.random() * (lower.doubleValue() + (upper.doubleValue() - lower.doubleValue()) * (selectedBin + 1) / binsNumber.intValue());
+        double secondDraw =  lower.doubleValue() + Math.random() * ((upper.doubleValue() - lower.doubleValue()) * (selectedBin + 1) / binsNumber.intValue());
         return new BigDecimal(secondDraw);
     }
 }
