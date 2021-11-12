@@ -64,6 +64,10 @@ public final class TimedTransitionFeature implements TransitionFeature {
         return eft.equals(lft);
     }
 
+    public boolean isImmediate() {
+        return eft.equals(lft) && lft.equals(new OmegaBigDecimal("0.0"));
+    }
+
     @Override
     public boolean equals(Object other) {
 

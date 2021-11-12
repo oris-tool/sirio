@@ -114,6 +114,14 @@ public class Sequencer {
                         t.addFeature(new SamplerFeature(
                                 new UniformSampler(eft.bigDecimalValue(), lft.bigDecimalValue())));
 
+                    else if (s.density().getDensities().size() == 1
+                            && s.density().getDensities().get(0).isExponential()
+                            && lft.compareTo(OmegaBigDecimal.POSITIVE_INFINITY)!=0)
+                        // Gestisco il caso dei bounded transition
+                        t.addFeature(new SamplerFeature(
+                                new TruncatedExponentialSampler(
+                                        s.density().getDensities().get(0).getExponentialRate(), eft.bigDecimalValue(), lft.bigDecimalValue())));
+
                     else if (s.density() instanceof Function)
                         t.addFeature(new SamplerFeature(
                                 new MetropolisHastings((Function) s.density())));
