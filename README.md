@@ -1,10 +1,8 @@
 # ORIS Tool: The Sirio Library
 
-[![Build Status](https://travis-ci.org/oris-tool/sirio.svg?branch=master)](https://travis-ci.org/oris-tool/sirio)
-
 ## Installation
 
-Currently, we recommend version `2.0.0-SNAPSHOT` of Sirio. To add this
+Currently, we recommend version `2.0.0` of Sirio. To add this
 dependency to your Maven project, just insert the following lines into
 your `pom.xml`:
 
@@ -22,7 +20,7 @@ your `pom.xml`:
   <dependency>
     <groupId>org.oris-tool</groupId>
     <artifactId>sirio</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0</version>
   </dependency>
 </dependencies>
 ```
@@ -32,8 +30,7 @@ properties in `pom.xml`:
 
 ```xml
 <properties>
-  <maven.compiler.source>11</maven.compiler.source>
-  <maven.compiler.target>11</maven.compiler.target>
+  <maven.compiler.release>11</maven.compiler.release>
 </properties>
 ```
 
