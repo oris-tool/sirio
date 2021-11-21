@@ -169,7 +169,7 @@
         <version>3.3.1</version>
         <configuration>
           <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
-          <stylesheetfile>${basedir}/javadoc.css</stylesheetfile>
+          <!-- <stylesheetfile>${basedir}/javadoc.css</stylesheetfile> -->
         </configuration>
       </plugin>
       <plugin>
@@ -305,8 +305,8 @@
             <version>1.6.8</version>
             <extensions>true</extensions>
             <configuration>
-              <serverid>ossrh</serverid>
-              <nexusurl>https://oss.sonatype.org/</nexusurl>
+              <serverId>ossrh</serverId>
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
           </plugin>
