@@ -1,7 +1,5 @@
 package org.oristool.simulator.samplers;
 
-import org.oristool.models.stpn.trees.EmpiricalTransitionFeature;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;

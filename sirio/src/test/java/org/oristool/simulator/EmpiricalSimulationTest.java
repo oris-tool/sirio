@@ -1,20 +1,23 @@
 package org.oristool.simulator;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.oristool.analyzer.log.NoOpLogger;
-import org.oristool.models.stpn.MarkingExpr;
 import org.oristool.models.stpn.trees.EmpiricalTransitionFeature;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
-import org.oristool.petrinet.*;
+import org.oristool.petrinet.Marking;
+import org.oristool.petrinet.MarkingCondition;
+import org.oristool.petrinet.PetriNet;
+import org.oristool.petrinet.Place;
+import org.oristool.petrinet.Transition;
 import org.oristool.simulator.rewards.ContinuousRewardTime;
 import org.oristool.simulator.rewards.RewardEvaluator;
 import org.oristool.simulator.stpn.STPNSimulatorComponentsFactory;
 import org.oristool.simulator.stpn.TransientMarkingConditionProbability;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class EmpiricalSimulationTest {
     @Test
@@ -83,45 +86,6 @@ public class EmpiricalSimulationTest {
 
         s.simulate();
         TimeSeriesRewardResult result = (TimeSeriesRewardResult) re1.getResult();
-
-        // Creating PetriNet Bis
-        PetriNet pnBis = new PetriNet();
-        Place p0Bis = pnBis.addPlace("p0");
-        Place p1Bis = pnBis.addPlace("p1");
-        Place p2Bis = pnBis.addPlace("p2");
-
-        Transition t0Bis = pnBis.addTransition("t0");
-        Transition t1Bis = pnBis.addTransition("t1");
-
-        t0Bis.addFeature(StochasticTransitionFeature.newUniformInstance(low0, upp0));
-        t1Bis.addFeature(StochasticTransitionFeature.newUniformInstance(low1, upp1));
-
-        pnBis.addPrecondition(p0Bis, t0Bis);
-        pnBis.addPostcondition(t0Bis, p1Bis);
-        pnBis.addPrecondition(p1Bis, t1Bis);
-        pnBis.addPostcondition(t1Bis, p2Bis);
-
-        Marking mBis = new Marking();
-        mBis.addTokens(p0Bis, 1);
-        mBis.addTokens(p1Bis, 0);
-        mBis.addTokens(p2Bis, 0);
-
-        BigDecimal timeLimitBis = new BigDecimal(30);
-        BigDecimal timeStepBis = new BigDecimal("0.1");
-        int timePointsBis = (timeLimitBis.divide(timeStepBis)).intValue() + 1;
-        long runsBis = 50000;
-
-        Sequencer sBis = new Sequencer(pnBis, mBis,
-                new STPNSimulatorComponentsFactory(), NoOpLogger.INSTANCE);
-
-        TransientMarkingConditionProbability r1Bis =
-                new TransientMarkingConditionProbability(sBis,
-                        new ContinuousRewardTime(timeStepBis), timePointsBis,
-                        MarkingCondition.fromString("p2"));
-        RewardEvaluator re1Bis = new RewardEvaluator(r1Bis, runsBis);
-
-        sBis.simulate();
-        TimeSeriesRewardResult resultBis = (TimeSeriesRewardResult) re1Bis.getResult();
         Assert.assertTrue(result.isValid(BigDecimal.valueOf(3)));
     }
 }

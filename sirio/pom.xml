@@ -4,12 +4,12 @@
 
   <groupId>org.oris-tool</groupId>
   <artifactId>sirio</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>2.0.0</version>
   <packaging>jar</packaging>
 
   <name>Sirio</name>
   <description>Library for the analysis of stochastic Petri nets</description>
-  <url>http://www.oris-tool.org/</url>
+  <url>https://www.oris-tool.org/</url>
 
   <scm>
     <url>https://github.com/oris-tool/sirio</url>
@@ -52,47 +52,39 @@
   </distributionManagement>
  
   <properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.release>11</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <junit.version>4.13.1</junit.version>
-    <junit.jupiter.version>5.7.0</junit.jupiter.version>
+    <auto-value.version>1.8.2</auto-value.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>${junit.jupiter.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <version>${junit.jupiter.version}</version>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.8.1</version>
       <scope>test</scope>
     </dependency>
 	<dependency>
 	  <groupId>com.google.auto.value</groupId>
 	  <artifactId>auto-value-annotations</artifactId>
-	  <version>1.7.4</version>
+	  <version>${auto-value.version}</version>
 	</dependency>
     <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>30.1-jre</version>
+        <version>31.0.1-jre</version>
     </dependency>
     <dependency>
       <groupId>org.jfree</groupId>
       <artifactId>jfreechart</artifactId>
-      <version>1.5.2</version>
+      <version>1.5.3</version>
     </dependency>
     <dependency>
       <groupId>org.tinyjee.jgraphx</groupId>
@@ -102,7 +94,7 @@
     <dependency>
       <groupId>org.ejml</groupId>
       <artifactId>ejml-all</artifactId>
-      <version>0.40</version>
+      <version>0.41</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -117,18 +109,18 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.7.30</version>
+      <version>1.7.32</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <version>1.7.30</version>
+      <version>1.7.32</version>
       <scope>test</scope>
     </dependency>
     <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-csv</artifactId>
-        <version>1.8</version>
+        <version>1.9.0</version>
     </dependency>
   </dependencies>
   <build>
@@ -138,11 +130,12 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
+          <release>${maven.compiler.release}</release>
           <annotationProcessorPaths>
             <path>
               <groupId>com.google.auto.value</groupId>
               <artifactId>auto-value</artifactId>
-              <version>1.7</version>
+              <version>${auto-value.version}</version>
             </path>
           </annotationProcessorPaths>
         </configuration>
@@ -150,7 +143,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.0.0-M3</version>
+        <version>3.0.0</version>
         <executions>
           <execution>
             <id>enforce-versions</id>
@@ -163,7 +156,7 @@
                   <version>3.6.3</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
-                  <version>${maven.compiler.source}</version>
+                  <version>${maven.compiler.release}</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -173,7 +166,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>3.3.1</version>
         <configuration>
           <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
           <stylesheetfile>${basedir}/javadoc.css</stylesheetfile>
@@ -222,7 +215,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.6</version>
+        <version>0.8.7</version>
         <executions>
           <execution>
             <goals>
@@ -241,12 +234,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>3.1.1</version>
+        <version>3.1.2</version>
         <dependencies>
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>8.38</version>
+            <version>9.1</version>
           </dependency>
         </dependencies>
         <executions>
@@ -264,7 +257,6 @@
               <failOnViolation>false</failOnViolation>
               <violationSeverity>error</violationSeverity>
               <logViolationsToConsole>true</logViolationsToConsole>
-              <linkXRef>false</linkXRef>
             </configuration>
             <goals>
               <goal>check</goal>
@@ -334,7 +326,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.2.0</version>
+            <version>3.3.1</version>
             <configuration>
               <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
               <stylesheetfile>${basedir}/javadoc.css</stylesheetfile>
@@ -351,7 +343,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
+            <version>3.0.1</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>

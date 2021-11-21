@@ -1,12 +1,10 @@
 package org.oristool.models.stpn.trees;
 
-import org.oristool.math.function.PartitionedFunction;
-import org.oristool.models.stpn.MarkingExpr;
-import org.oristool.petrinet.TransitionFeature;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+
+import org.oristool.petrinet.TransitionFeature;
 
 public class EmpiricalTransitionFeature implements TransitionFeature {
     // TODO - TBD: note that histogramPDF can be provided, and then CDF can be computed starting from PDF

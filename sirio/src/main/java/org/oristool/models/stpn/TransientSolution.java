@@ -161,7 +161,8 @@ public class TransientSolution<R, S> {
         
         int init = regenerations.indexOf(initialRegeneration);
         
-        try (CSVPrinter csv = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(columns))) {
+        CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader(columns).build();
+        try (CSVPrinter csv = new CSVPrinter(writer, csvFormat)) {
             for (int i = 0; i < regenerations.size(); i++) {
                 // print initial regeneration first
                 i = (i == 0) ? init : (i == init) ? 0 : i;
@@ -191,7 +192,8 @@ public class TransientSolution<R, S> {
     }
 
     public static TransientSolution<String, String> readCSV(Reader reader) {
-        try (CSVParser csv = CSVParser.parse(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader())) {
+        CSVFormat csvFormat = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build();
+        try (CSVParser csv = CSVParser.parse(reader, csvFormat)) {
             List<String> columnStates = csv.getHeaderNames();
             columnStates = new ArrayList<>(columnStates.subList(2, columnStates.size()));
             List<String> regenerations = new ArrayList<>();
