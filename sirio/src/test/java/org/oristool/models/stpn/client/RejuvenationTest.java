@@ -12,6 +12,7 @@ import org.oristool.math.OmegaBigDecimal;
 import org.oristool.models.pn.PostUpdater;
 import org.oristool.models.stpn.RewardRate;
 import org.oristool.models.stpn.TransientSolution;
+import org.oristool.models.stpn.TransientSolutionViewer;
 import org.oristool.models.stpn.trans.RegTransient;
 import org.oristool.models.stpn.trees.DeterministicEnablingState;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
@@ -157,5 +158,46 @@ class RejuvenationTest {
         assertTrue(rewards.isClose(expectedRewards, 1e-9));
 
         // try { new TransientSolutionViewer(rewards); Thread.sleep(100000); } catch (InterruptedException e) { }
+	}
+
+    @Test
+    void regTransientLocalPeriod() {
+        BigDecimal timeBound = new BigDecimal("5000");
+        BigDecimal timeStep = new BigDecimal("1");
+        BigDecimal error = new BigDecimal("0");
+        int localEvaluationPeriod = 10;
+        int globalEvaluationPeriod = 1;
+
+        RegTransient.Builder builder = RegTransient.builder();
+        builder.timeBound(timeBound);
+        builder.timeStep(timeStep);
+        builder.greedyPolicy(timeBound, error);
+        builder.localEvaluationPeriod(localEvaluationPeriod);
+        builder.globalEvaluationPeriod(globalEvaluationPeriod);
+
+        RegTransient analysis = builder.build();
+
+        // check that parameters are set correctly
+        assertEquals(timeBound, analysis.timeBound());
+        assertEquals(timeStep, analysis.timeStep());
+        TruncationPolicy p = (TruncationPolicy) analysis.policy().get();
+        assertEquals(p.getEpsilon(), error);
+        assertEquals(p.getTauAgeLimit(), new OmegaBigDecimal(timeBound));
+        assertEquals(AlwaysFalseStopCriterion.class, analysis.stopOn().get().getClass());
+        assertEquals(localEvaluationPeriod, analysis.localEvaluationPeriod());
+        assertEquals(globalEvaluationPeriod, analysis.globalEvaluationPeriod());
+
+        // compute and check result
+        TransientSolution<DeterministicEnablingState, Marking> result =
+                analysis.compute(pn, marking);
+
+        // assertTrue(result.sumsToOne(0.5));
+
+        // result.writeCSV("src/test/resources/Rejuvenation_regTransientLocalPeriod.csv", 9);
+        TransientSolution<String,String> expected =
+                TransientSolution.readCSV("src/test/resources/Rejuvenation_regTransientLocalPeriod.csv");
+        assertTrue(result.isClose(expected, 1e-9));
+
+        // try { new TransientSolutionViewer(result); Thread.sleep(100000); } catch (InterruptedException e) { }
 	}
 }

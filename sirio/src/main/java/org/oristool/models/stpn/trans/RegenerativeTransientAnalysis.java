@@ -719,7 +719,7 @@ class RegenerativeTransientAnalysis<R> {
                 if (t < localKernel.length) {
                     if (t % localEvaluationPeriod != 0) {
                         for (int j = 0; j < columnMarkings.size(); ++j) {
-                            localKernel[t][i][j] = localKernel[t-1][i][j];
+                            localKernel[t][i][j] = (t == localKernel.length-1) ? 0.0 : localKernel[t-1][i][j];
                         }
                     } else if (localClasses.get(regenerations.get(i)) != null) {
                         // Local kernel is regenerations.size() x
