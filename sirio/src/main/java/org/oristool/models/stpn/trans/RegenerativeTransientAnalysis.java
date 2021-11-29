@@ -655,7 +655,7 @@ class RegenerativeTransientAnalysis<R> {
                             for (State s : localClasses.get(i).get(j)) {
                                 OmegaBigDecimal timeUpperBound = s
                                         .getFeature(TransientStochasticStateFeature.class)
-                                        .getEnteringTimeUpperBound(
+                                        .getTimeUpperBound(
                                                 s.getFeature(StochasticStateFeature.class));
                                 if (timeUpperBound.compareTo(maxTimeUpperBound) > 0)
                                     maxTimeUpperBound = timeUpperBound;

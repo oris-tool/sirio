@@ -56,7 +56,7 @@ public abstract class MarkingCondition {
             return "FALSE";
         }
     };
-
+  
     /**
      * Builds a marking condition that matches only one of the input markings.
      *

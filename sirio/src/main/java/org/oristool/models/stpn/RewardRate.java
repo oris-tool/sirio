@@ -27,6 +27,7 @@ import org.oristool.lello.parse.LelloParser;
 import org.oristool.lello.parse.ListTerminalStream;
 import org.oristool.lello.parse.Terminal;
 import org.oristool.petrinet.Marking;
+import org.oristool.petrinet.MarkingCondition;
 
 /**
  * A marking-dependent rate expression.
@@ -39,6 +40,25 @@ public abstract class RewardRate {
         return new LelloRewardRate(expression);
     }
 
+    /**
+     * Builds a marking condition that matches markings with nonzero reward.
+     *
+     * @param givenMarkings markings to match
+     * @return true a marking condition matching the input markings
+     */
+    public static final MarkingCondition nonZero(double time, RewardRate[] rewardRates) {
+    	return new MarkingCondition() {
+    	    @Override public boolean evaluate(Marking m) {
+    	        for (RewardRate r: rewardRates) {
+    	            if (r.evaluate(time, m) != 0)
+    	                return true;
+    	        }
+    	        
+    	        return false;
+    	    }
+    	};
+    }
+    
     private static class LelloRewardRate extends RewardRate {
 
         private Expression expr;
