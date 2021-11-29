@@ -43,8 +43,9 @@ public abstract class RewardRate {
     /**
      * Builds a marking condition that matches markings with nonzero reward.
      *
-     * @param givenMarkings markings to match
-     * @return true a marking condition matching the input markings
+     * @param time time, for time-dependant rewards
+     * @param rewardRates reward rates
+     * @return a marking condition matching markings with nonzero reward rate
      */
     public static final MarkingCondition nonZero(double time, RewardRate[] rewardRates) {
     	return new MarkingCondition() {
