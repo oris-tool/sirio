@@ -26,6 +26,7 @@ import org.oristool.simulator.SequencerObserver;
 public interface Reward extends SequencerObserver {
 
     public enum RewardEvent {
+        SIMULATION_START,
         RUN_END
     }
 

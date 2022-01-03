@@ -449,14 +449,14 @@ class ForwardTransientAnalysis {
             BigDecimal timeLimit, BigDecimal step,
             MarkingCondition markingCondition, AnalysisLogger l) {
 
-        return solveDiscretized(timeLimit, step, markingCondition, false, l, null);
+        return solveDiscretized(timeLimit, step, markingCondition, false, false, l, null);
     }
 
     public TransientSolution<Marking, Marking> solveDiscretizedBeingProbabilities(
             BigDecimal timeLimit, BigDecimal step,
             MarkingCondition markingCondition) {
 
-        return solveDiscretized(timeLimit, step, markingCondition, false,
+        return solveDiscretized(timeLimit, step, markingCondition, false, false,
                 new PrintStreamLogger(System.out), null);
     }
 
@@ -465,7 +465,15 @@ class ForwardTransientAnalysis {
             MarkingCondition markingCondition, AnalysisLogger l,
             AnalysisMonitor m) {
 
-        return solveDiscretized(timeLimit, step, markingCondition, false, l, m);
+        return solveDiscretized(timeLimit, step, markingCondition, false, false, l, m);
+    }
+
+    public TransientSolution<Marking, Marking> solveDiscretizedBeingProbabilities(
+            BigDecimal timeLimit, BigDecimal step,
+            MarkingCondition markingCondition, boolean solveByClass, 
+            AnalysisLogger l, AnalysisMonitor m) {
+
+        return solveDiscretized(timeLimit, step, markingCondition, solveByClass, false, l, m);
     }
 
     /**
@@ -486,14 +494,14 @@ class ForwardTransientAnalysis {
             BigDecimal timeLimit, BigDecimal step,
             MarkingCondition markingCondition, AnalysisLogger l) {
 
-        return solveDiscretized(timeLimit, step, markingCondition, true, l, null);
+        return solveDiscretized(timeLimit, step, markingCondition, false, true, l, null);
     }
 
     public TransientSolution<Marking, Marking> solveDiscretizedVisitedProbabilities(
             BigDecimal timeLimit, BigDecimal step,
             MarkingCondition markingCondition) {
 
-        return solveDiscretized(timeLimit, step, markingCondition, true,
+        return solveDiscretized(timeLimit, step, markingCondition, false, true,
                 new PrintStreamLogger(System.out), null);
     }
 
@@ -502,7 +510,7 @@ class ForwardTransientAnalysis {
             MarkingCondition markingCondition, AnalysisLogger l,
             AnalysisMonitor m) {
 
-        return solveDiscretized(timeLimit, step, markingCondition, true, l, m);
+        return solveDiscretized(timeLimit, step, markingCondition, false, true, l, m);
     }
 
     public TransientSolution<Marking, Marking> solveDiscretizedVisitedProbabilities(
@@ -510,7 +518,7 @@ class ForwardTransientAnalysis {
             MarkingCondition markingCondition, MarkingCondition stopCondition,
             AnalysisLogger l, AnalysisMonitor m) {
 
-        return solveDiscretized(timeLimit, step, markingCondition, true, l, m);
+        return solveDiscretized(timeLimit, step, markingCondition, false, true, l, m);
     }
 
     /**
@@ -526,13 +534,15 @@ class ForwardTransientAnalysis {
      *            time step for evaluation points
      * @param visitedProbabilies
      *            selects visited probabilities instead of being ones
+     * @param evaluateByClass
+     *            computes probabilities of all time ticks together, for each marking 
      * @return A representation of the solution
      */
     private TransientSolution<Marking, Marking> solveDiscretized(
             BigDecimal timeLimit, BigDecimal step,
             MarkingCondition markingCondition,
-            boolean visitedProbabilies, AnalysisLogger l,
-            AnalysisMonitor monitor) {
+            boolean evaluateByClass, boolean visitedProbabilies, 
+            AnalysisLogger l, AnalysisMonitor monitor) {
 
         if (l != null) {
             l.log(">> Solving in [0, " + timeLimit + "] with step " + step
@@ -564,50 +574,99 @@ class ForwardTransientAnalysis {
         TransientSolution<Marking, Marking> p = new TransientSolution<Marking, Marking>(
                 timeLimit, step, rowMarkings, columnMarkings, this.getInitialMarking());
 
-        // Computes the solution for each time instant and each marking
-        OmegaBigDecimal timeValue = OmegaBigDecimal.ZERO;
-        OmegaBigDecimal timeStep = new OmegaBigDecimal(step);
-        for (int t = 0; t < p.getSamplesNumber(); ++t) {
-
-            if (l != null)
-                l.log(timeValue.toString());
-
-            if (monitor != null)
-                monitor.notifyMessage("Computing probabilities at time t="
-                        + timeValue);
-
+        if (!evaluateByClass) {
+            // Computes the solution for each time instant and each marking
+            OmegaBigDecimal timeValue = OmegaBigDecimal.ZERO;
+            OmegaBigDecimal timeStep = new OmegaBigDecimal(step);
+            for (int t = 0; t < p.getSamplesNumber(); ++t) {
+    
+                if (l != null)
+                    l.log(timeValue.toString());
+    
+                if (monitor != null)
+                    monitor.notifyMessage("Computing probabilities at time t="
+                            + timeValue);
+    
+                for (int j = 0; j < columnMarkings.size(); ++j) {
+                    if (stateClasses.get(columnMarkings.get(j)) != null)
+                        // sums over probabilities of being (having visited) at time
+                        // t in any class with marking j
+                        for (State s : stateClasses.get(columnMarkings.get(j))) {
+                            TransientStochasticStateFeature transientFeature = s
+                                    .getFeature(TransientStochasticStateFeature.class);
+                            StochasticStateFeature stochasticFeature = s
+                                    .getFeature(StochasticStateFeature.class);
+                            p.getSolution()[t][0][j] += (!visitedProbabilies
+                                    && !s.hasFeature(LocalStop.class) ? transientFeature
+                                    .computeTransientClassProbability(timeValue,
+                                            stochasticFeature).doubleValue()
+                                    : transientFeature.computeVisitedProbability(
+                                            OmegaBigDecimal.ZERO, timeValue,
+                                            stochasticFeature).doubleValue());
+    
+                            if (monitor != null && monitor.interruptRequested()) {
+                                monitor.notifyMessage("Aborted");
+                                return null;
+                            }
+                        }
+    
+                    if (l != null)
+                        l.log(" " + p.getSolution()[t][0][j]);
+                }
+    
+                if (l != null)
+                    l.log("\n");
+                timeValue = timeValue.add(timeStep);
+            }
+        } else {
+            // Computes the solution for each marking and each time instant
             for (int j = 0; j < columnMarkings.size(); ++j) {
-                if (stateClasses.get(columnMarkings.get(j)) != null)
-                    // sums over probabilities of being (having visited) at time
-                    // t in any class with marking j
-                    for (State s : stateClasses.get(columnMarkings.get(j))) {
+                Marking m = columnMarkings.get(j);
+                Set<State> classes = stateClasses.get(m);
+                if (classes != null) {
+                    if (monitor != null) {
+                        monitor.notifyMessage("Computing probabilities for marking m=" + m);
+                    }
+                    // sums over probabilities of being in any class with marking j
+                    for (State s : classes) {
                         TransientStochasticStateFeature transientFeature = s
                                 .getFeature(TransientStochasticStateFeature.class);
                         StochasticStateFeature stochasticFeature = s
                                 .getFeature(StochasticStateFeature.class);
-                        p.getSolution()[t][0][j] += (!visitedProbabilies
-                                && !s.hasFeature(LocalStop.class) ? transientFeature
-                                .computeTransientClassProbability(timeValue,
-                                        stochasticFeature).doubleValue()
-                                : transientFeature.computeVisitedProbability(
-                                        OmegaBigDecimal.ZERO, timeValue,
-                                        stochasticFeature).doubleValue());
 
-                        if (monitor != null && monitor.interruptRequested()) {
-                            monitor.notifyMessage("Aborted");
-                            return null;
-                        }
+                        OmegaBigDecimal timeStep = new OmegaBigDecimal(step);                
+                        if (visitedProbabilies || s.hasFeature(LocalStop.class) || stochasticFeature.isAbsorbing()) {
+                            StateDensityFunction agePDF = transientFeature.getEnteringTimeDensity(stochasticFeature);
+                            BigDecimal reachingProb = transientFeature.getReachingProbability();
+                            OmegaBigDecimal timeValue = new OmegaBigDecimal(step.multiply(new BigDecimal(p.getSamplesNumber() - 1)));
+                            for (int t = p.getSamplesNumber() - 1; t >= 0 ; --t) {
+                                agePDF.imposeInterval(Variable.AGE, timeValue.negate(), OmegaBigDecimal.ZERO);
+                                BigDecimal prob = agePDF.measure().multiply(reachingProb);
+                                p.getSolution()[t][0][j] += prob.doubleValue();
+                                if (monitor != null && monitor.interruptRequested()) {
+                                    monitor.notifyMessage("Aborted");
+                                    return null;
+                                }
+                                timeValue = timeValue.subtract(timeStep);
+                            }
+                        } else {
+                            OmegaBigDecimal timeValue = OmegaBigDecimal.ZERO;
+                            for (int t = 0; t < p.getSamplesNumber(); ++t) {                            
+                                p.getSolution()[t][0][j] += transientFeature
+                                        .computeTransientClassProbability(timeValue,
+                                                stochasticFeature).doubleValue();
+                                if (monitor != null && monitor.interruptRequested()) {
+                                    monitor.notifyMessage("Aborted");
+                                    return null;
+                                }
+                                timeValue = timeValue.add(timeStep);
+                            }
+                        }                            
                     }
-
-                if (l != null)
-                    l.log(" " + p.getSolution()[t][0][j]);
+                }
             }
-
-            if (l != null)
-                l.log("\n");
-            timeValue = timeValue.add(timeStep);
         }
-
+        
         if (l != null)
             l.log(">> Discretization took "
                     + (System.currentTimeMillis() - startTime) / 1000 + "s\n");

@@ -183,7 +183,7 @@ public class StochasticSuccessionEvaluator implements
             TransientStochasticStateFeature tssf = new TransientStochasticStateFeature();
             tssf.setReachingProbability(state
                     .getFeature(TransientStochasticStateFeature.class)
-                    .getReachingProbability().multiply(prob));
+                    .getReachingProbability().multiply(prob, MathContext.DECIMAL128));
 
             if (nextStateDensity.getVariables().equals(
                     Collections.singleton(Variable.AGE)))

@@ -115,7 +115,17 @@ public abstract class TreeTransient implements
     * @return the filter used for markings
     */
    public abstract MarkingCondition markingFilter();
-    
+
+   /**
+   * Whether transient probabilities should be evaluated by stochastic state class 
+   * (for each time tick until the time bound).
+   *
+   * <p>By default, transient probabilities are evaluated by time tick.
+   *
+   * @return {@code true} if probabilities are evaluated by class
+   */
+   public abstract boolean evaluateByClass();
+  
     /**
      * Returns the monitor used by this analysis. It is used to stop the analysis
      * early and to notify messages to the user.
@@ -146,6 +156,7 @@ public abstract class TreeTransient implements
                 .policy(FIFOPolicy::new)
                 .stopOn(AlwaysFalseStopCriterion::new)
                 .markingFilter(MarkingCondition.ANY)
+                .evaluateByClass(false)
                 .monitor(NoOpMonitor.INSTANCE)
                 .logger(NoOpLogger.INSTANCE);
     }
@@ -260,6 +271,17 @@ public abstract class TreeTransient implements
         public abstract Builder markingFilter(MarkingCondition value);
         
         /**
+         * Whether transient probabilities should be evaluated by stochastic state class 
+         * (for each time tick until the time bound).
+         *
+         * <p>By default, transient probabilities are evaluated by time tick.
+         *
+         * @param value {@code true} if probabilities should be evaluated by class
+         * @return this builder instance
+         */
+        public abstract Builder evaluateByClass(boolean value);
+        
+        /**
          * Sets the monitor used by this analysis. It is used to stop the analysis early
          * and to notify messages to the user.
          *
@@ -310,7 +332,7 @@ public abstract class TreeTransient implements
 
         TransientSolution<Marking,Marking> solution = trees
                 .solveDiscretizedBeingProbabilities(timeBound(), timeStep(),
-                        markingFilter(), logger(), monitor());
+                        markingFilter(), evaluateByClass(), logger(), monitor());
 
         return solution;
     }

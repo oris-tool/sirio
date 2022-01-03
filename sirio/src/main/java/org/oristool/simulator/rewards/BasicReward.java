@@ -77,6 +77,7 @@ public abstract class BasicReward implements Reward {
                 break;
 
             case SIMULATION_START:
+                notifyObservers(RewardEvent.SIMULATION_START);
                 break;
 
             default:

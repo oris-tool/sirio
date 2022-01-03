@@ -1077,6 +1077,23 @@ public class StateDensityFunction {
     }
 
     /**
+     * Intersects the support with the input bound {@code min <= v <= max} on the support, 
+     * keeping only subzones with nonzero measure.
+     *
+     * <p>Densities are not normalized on the new support.
+     *
+     * @param v target variable
+     * @param min lower bound
+     * @param max upper bound
+     */
+    public void imposeInterval(Variable v, OmegaBigDecimal min, OmegaBigDecimal max) {
+        DBMZone z = new DBMZone(v, Variable.TSTAR);
+        z.imposeBound(v, Variable.TSTAR, max);
+        z.imposeBound(Variable.TSTAR, v, min.negate());
+        imposeZone(z);
+    }
+    
+    /**
      * Intersects the support with the input zone, keeping only subzones with
      * nonzero measure.
      *
