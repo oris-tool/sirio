@@ -19,7 +19,6 @@ package org.oristool.models.gspn.reachability;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,7 +37,7 @@ import com.google.common.graph.MutableValueGraph;
 import com.google.common.graph.ValueGraphBuilder;
 
 /**
- * Analysis of a {@link StateGraph} that computes the underlying CTMC by
+ * Analysis of a {@link SuccessionGraph} that computes the underlying CTMC by
  * eliminating vanishing states.
  *
  * <p>Vanishing states are detected by inspecting the {@link SPNState} feature
@@ -46,11 +45,13 @@ import com.google.common.graph.ValueGraphBuilder;
  * {@code exitRate() == Double.POSITIVE_INFINITY}.
  *
  * <p>Transition probabilities are read from the graph by extracting
- * {@link FiringProbability} features from its successions between states.
+ * {@link FiringProbability} features of {@link Succession} between states.
  *
  * <p>The underlying CTMC is returned as a {@link DTMC} where each state is
- * associated with a marking and an exit rate (encoded by the same
- * {@link SPNState} instance used in the input graph).
+ * associated with a marking and an exit rate (the sojourn time rate, encoded by
+ * the same {@link SPNState} instance used in the input graph). Self-loops can
+ * be present in the DTMC.
+ *
  */
 class TangibleReduction {
 
@@ -70,7 +71,7 @@ class TangibleReduction {
 
     /**
      * Computes the DTMC embedded at tangible states. States include a marking (used
-     * to compare states) and the exit rate.
+     * to compare states) and an exit rate (the rate of the sojourn time).
      *
      * <p>If invoked more than once, the cached result is returned.
      *
@@ -85,6 +86,7 @@ class TangibleReduction {
         Set<Succession> visited = new HashSet<>(graph.getSuccessions().size());
 
         for (Succession succ : graph.getSuccessions()) {
+            // successions can be marked as visited by buildVanishingDTMC
             if (visited.contains(succ))
                 continue;
 
@@ -95,14 +97,20 @@ class TangibleReduction {
                 addProb(i, j, prob(succ), result.probsGraph());
                 visited.add(succ);
 
-            } else if (!isVanishing(i) && isVanishing(j) || i == root) {
-                Node startNode = graph.getNode(succ.getParent());
-                List<Succession> tangibleToVanishing = new ArrayList<>();
-                AbsorptionProbs<SPNState> absorption = AbsorptionProbs.compute(
-                        buildVanishingDTMC(startNode, tangibleToVanishing, visited));
-                validate(absorption.bscc());
+            } else if ((!isVanishing(i) && isVanishing(j)) ||
+                       (i == root && isVanishing(root))) {
 
-                for (Succession succToVanishing : tangibleToVanishing) {
+                List<Succession> tangibleToVanishingEdges = new ArrayList<>();
+                AbsorptionProbs<SPNState> absorption = AbsorptionProbs.compute(
+                        buildVanishingDTMC(succ, tangibleToVanishingEdges, visited));
+
+                for (Set<SPNState> b : absorption.bscc()) {
+                    if (b.size() != 1 || isVanishing(b.iterator().next())) {
+                        throw new IllegalStateException("The input graph contains a timelock");
+                    }
+                }
+
+                for (Succession succToVanishing : tangibleToVanishingEdges) {
                     SPNState tangible  = feature(succToVanishing.getParent());
                     SPNState vanishing = feature(succToVanishing.getChild());
                     int vanishingIndex = absorption.transientIndex(vanishing);
@@ -115,11 +123,10 @@ class TangibleReduction {
                             addProb(tangible, nextTangible, absProb, result.probsGraph());
                         }
                     }
-
-                    visited.add(succToVanishing);
                 }
 
                 if (i == root && isVanishing(root)) {
+                    // we have just processed the vanishing DTMC containing the root
                     int rootIndex = absorption.transientIndex(root);
                     for (int t = 0; t < absorption.bscc().size(); t++) {
                         double absProb = absorption.probs(rootIndex, t);
@@ -130,8 +137,6 @@ class TangibleReduction {
                             result.probsGraph().addNode(nextTangible);  // for absorbing roots
                         }
                     }
-
-                    visited.addAll(graph.getOutgoingSuccessions(startNode));
                 }
             }
         }
@@ -179,17 +184,9 @@ class TangibleReduction {
         probsGraph.putEdgeValue(i, j, currentProb + prob);
     }
 
-    private static void validate(List<Set<SPNState>> bscc) {
-        for (Set<SPNState> b : bscc) {
-            if (b.size() != 1 || isVanishing(b.iterator().next()))
-                throw new IllegalStateException("The input graph contains a timelock");
-        }
-    }
-
     /**
-     * Computes the undirected reachability set of a given node, stopping only on
-     * tangible ones. If the initial node is tangible, only its successors are
-     * explored; if it is vanishing, also its predecessors are explored.
+     * Computes the undirected (i.e., forward and backward) reachability set of
+     * a vanishing node, stopping on tangible nodes.
      *
      * <p>Successions from tangible states to vanishing ones (including a vanishing
      * root) are added to the input list {@code tangibleToVanishig}.
@@ -197,58 +194,69 @@ class TangibleReduction {
      * <p>All successions explored in this vanishing subgraph are added to the input
      * set {@code visited}.
      *
-     * @param i initial state (tangible or vanishing)
-     * @param tangibleToVanishig list of successions from tangible states to
-     *        vanishing ones (including vanishing root)
-     * @param visited set of graph successions visited by the analysis
-     * @returns graph of vanishing transitions
+     * @param initialSucc Initial transition to a vanishing node
+     * @param tangibleToVanishingEdges list where successions from tangible to vanishing are added
+     * @param visited set where visited successions are added
+     * @returns DTMC of vanishing transitions
      */
-    private MutableValueGraph<SPNState, Double> buildVanishingDTMC(final Node root,
-            final List<Succession> tangibleToVanishing, final Set<Succession> visited) {
+    private MutableValueGraph<SPNState, Double> buildVanishingDTMC(final Succession initialSucc,
+            final List<Succession> tangibleToVanishingEdges, final Set<Succession> visited) {
 
         MutableValueGraph<SPNState, Double> dtmc = ValueGraphBuilder
                 .directed().allowsSelfLoops(true).build();
 
-        Set<Node> opened = new HashSet<>();
+        Set<Node> found = new HashSet<>();
         Deque<NeighborIterator> stack = new ArrayDeque<>();
 
-        opened.add(root);
-        stack.push(new NeighborIterator(root, graph, isVanishing(root)));
+        Node a = graph.getNode(initialSucc.getParent());
+        Node b = graph.getNode(initialSucc.getChild());
+        if (isVanishing(a)) {
+            // vanishing initial node
+            found.add(a);
+            stack.push(new NeighborIterator(a, graph));
+        } else {
+            // (a, b) was an edge from tangible to vanishing
+            assert isVanishing(b);
+            found.add(b);
+            stack.push(new NeighborIterator(b, graph));
+        }
 
         while (!stack.isEmpty()) {
-            if (stack.peek().hasNext()) {
-                boolean outgoingEdge = stack.peek().isNextSucc();
-                Node next = stack.peek().next();
-                Node i = outgoingEdge ? stack.peek().node() : next;
-                Node j = outgoingEdge ? next : stack.peek().node();
-
-                if (outgoingEdge) {  // add edges only when visited outward
-                    Set<Succession> succIJ = graph.getSuccessions(i, j);
-                    if (!isVanishing(i) && isVanishing(j)) {
-                        // record succession from tangible node to vanishing one
-                        tangibleToVanishing.addAll(succIJ);
-                    } else {
-                        // add succession from vanishing to vanishing/tangible into the graph
-                        for (Succession succ : succIJ) {
-                            addProb(feature(i), feature(j), prob(succ), dtmc);
-                        }
-                    }
-                    visited.addAll(succIJ);
-                }
-
-                if (!opened.contains(next)) {
-                    opened.add(next);
-                    if (isVanishing(next)) {
-                        // visit all neighbors of vanishing nodes (except root)
-                        stack.push(new NeighborIterator(next, graph, true));
-                    } else if (outgoingEdge) {
-                        // outward tangible nodes are absorbing: add self loop and stop there
-                        dtmc.putEdgeValue(feature(next), feature(next), 1.0);
-                    }   // inward tangible nodes are not added to the graph
-                }
-
-            } else {
+            if (!stack.peek().hasNext()) {
                 stack.pop();
+            } else {
+                boolean isForward = stack.peek().isNextSuccessor();
+                Node i = stack.peek().node();  // current DFS node
+                Node j = stack.peek().next();  // the neighbor
+
+                if (isForward) {
+                    // connect vanishing/tangible nodes on forward edge (i,j)
+                    Set<Succession> succIJ = graph.getSuccessions(i, j);
+                    for (Succession succ : succIJ) {
+                        addProb(feature(i), feature(j), prob(succ), dtmc);
+                        visited.add(succ);
+                    }
+                    // if j is tangible, it is a BSCC of the DTMC
+                    if (!isVanishing(j)) {
+                        dtmc.putEdgeValue(feature(j), feature(j), 1.0);
+                    }
+
+                } else {
+                    // use backward edges (j,i) to find incoming tangible nodes
+                    if (!isVanishing(j)) {
+                        // (j,i) enters the vanishing zone
+                        Set<Succession> succJI = graph.getSuccessions(j, i);
+                        tangibleToVanishingEdges.addAll(succJI);
+                        visited.addAll(succJI);
+                    }
+                }
+
+                if (!found.contains(j) && isVanishing(j)) {
+                    // if we find a new vanishing node (forward or backward)
+                    // we start exploring it (forward and backward)
+                    found.add(j);
+                    stack.push(new NeighborIterator(j, graph));
+                }
             }
         }
 
@@ -262,12 +270,11 @@ class TangibleReduction {
         private final Node node;
         private final Iterator<Node> pre;
         private final Iterator<Node> succ;
-        private boolean isNextSucc = false;
+        private boolean finishedPredecessors = false;
 
-        NeighborIterator(Node n, SuccessionGraph graph, boolean visitRootPredecessors) {
+        NeighborIterator(Node n, SuccessionGraph graph) {
             this.node = n;
-            this.pre = visitRootPredecessors
-                    ? graph.getPredecessors(n).iterator() : Collections.emptyIterator();
+            this.pre = graph.getPredecessors(n).iterator();
             this.succ = graph.getSuccessors(n).iterator();
         }
 
@@ -275,18 +282,21 @@ class TangibleReduction {
             return node;
         }
 
-        public boolean isNextSucc() {
-            if (!isNextSucc && !pre.hasNext())
-                isNextSucc = true;
-            return isNextSucc;
+        public boolean isNextSuccessor() {
+            if (!finishedPredecessors && !pre.hasNext()) {
+                finishedPredecessors = true;
+            }
+            return finishedPredecessors;
         }
 
-        @Override public boolean hasNext() {
-            return isNextSucc() ? succ.hasNext() : pre.hasNext();
+        @Override
+        public boolean hasNext() {
+            return isNextSuccessor() ? succ.hasNext() : pre.hasNext();
         }
 
-        @Override public Node next() {
-            return isNextSucc() ? succ.next() : pre.next();
+        @Override
+        public Node next() {
+            return isNextSuccessor() ? succ.next() : pre.next();
         }
     }
 }
