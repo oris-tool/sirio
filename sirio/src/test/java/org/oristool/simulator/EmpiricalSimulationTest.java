@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.oristool.analyzer.log.NoOpLogger;
 import org.oristool.models.stpn.trees.EmpiricalTransitionFeature;
@@ -18,6 +17,8 @@ import org.oristool.simulator.rewards.ContinuousRewardTime;
 import org.oristool.simulator.rewards.RewardEvaluator;
 import org.oristool.simulator.stpn.STPNSimulatorComponentsFactory;
 import org.oristool.simulator.stpn.TransientMarkingConditionProbability;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmpiricalSimulationTest {
     @Test
@@ -86,6 +87,6 @@ public class EmpiricalSimulationTest {
 
         s.simulate();
         TimeSeriesRewardResult result = (TimeSeriesRewardResult) re1.getResult();
-        Assert.assertTrue(result.isValid(BigDecimal.valueOf(3)));
+        assertTrue(result.isValid(BigDecimal.valueOf(3)));
     }
 }

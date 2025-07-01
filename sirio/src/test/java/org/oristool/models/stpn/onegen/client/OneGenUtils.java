@@ -17,16 +17,6 @@
 
 package org.oristool.models.stpn.onegen.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.awt.EventQueue;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
 import org.oristool.analyzer.state.State;
 import org.oristool.models.pn.PetriStateFeature;
 import org.oristool.models.stpn.TransientSolution;
@@ -34,6 +24,14 @@ import org.oristool.models.stpn.TransientSolutionViewer;
 import org.oristool.models.stpn.trees.DeterministicEnablingState;
 import org.oristool.models.stpn.trees.Regeneration;
 import org.oristool.petrinet.Marking;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OneGenUtils {
 
@@ -191,7 +189,7 @@ class OneGenUtils {
                     break;
                 }
             }
-            assertTrue("Regeneration not found: " + regenerationRegen.toString(), found != null);
+            assertTrue(found != null, "Regeneration not found: " + regenerationRegen.toString());
             found = null;
         }
     }

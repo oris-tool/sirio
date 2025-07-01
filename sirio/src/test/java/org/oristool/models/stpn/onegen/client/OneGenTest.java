@@ -17,8 +17,6 @@
 
 package org.oristool.models.stpn.onegen.client;
 
-import java.math.BigDecimal;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.oristool.models.stpn.TransientSolution;
@@ -30,6 +28,8 @@ import org.oristool.petrinet.Marking;
 import org.oristool.petrinet.PetriNet;
 import org.oristool.petrinet.Place;
 import org.oristool.petrinet.Transition;
+
+import java.math.BigDecimal;
 
 
 /**

@@ -17,8 +17,6 @@
 
 package org.oristool.simulator;
 
-import static org.junit.Assert.assertEquals;
-
 import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Test;
@@ -34,6 +32,8 @@ import org.oristool.simulator.rewards.ContinuousRewardTime;
 import org.oristool.simulator.rewards.RewardEvaluator;
 import org.oristool.simulator.stpn.STPNSimulatorComponentsFactory;
 import org.oristool.simulator.stpn.TransientMarkingConditionProbability;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Test STPNs with multiple rates.

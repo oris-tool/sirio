@@ -2,7 +2,7 @@
 
 ## Installation
 
-Currently, we recommend version `2.0.3` of Sirio. To add this
+Currently, we recommend version `2.0.4` of Sirio. To add this
 dependency to your Maven project, just insert the following lines into
 your `pom.xml`:
 
@@ -20,24 +20,19 @@ your `pom.xml`:
   <dependency>
     <groupId>org.oris-tool</groupId>
     <artifactId>sirio</artifactId>
-    <version>2.0.3</version>
+    <version>2.0.4</version>
   </dependency>
 </dependencies>
 ```
 
-Since Sirio requires Java 11, you will also need to set the following
+Since Sirio requires Java 24, you will also need to set the following
 properties in `pom.xml`:
 
 ```xml
 <properties>
-  <maven.compiler.release>11</maven.compiler.release>
+  <maven.compiler.release>24</maven.compiler.release>
 </properties>
 ```
-
-If you are looking for a **ready-to-use project to import into Eclipse**,
-please check the
-[sirio-examples](https://github.com/oris-tool/sirio-examples)
-repository.
 
 
 ## Introduction

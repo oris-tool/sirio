@@ -17,14 +17,8 @@
 
 package org.oristool.models.stpn.client;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.math.BigDecimal;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.oristool.analyzer.log.PrintStreamLogger;
 import org.oristool.analyzer.stop.AlwaysFalseStopCriterion;
 import org.oristool.math.OmegaBigDecimal;
 import org.oristool.models.pn.Priority;
@@ -32,11 +26,12 @@ import org.oristool.models.stpn.TransientSolution;
 import org.oristool.models.stpn.trans.TreeTransient;
 import org.oristool.models.stpn.trees.StochasticTransitionFeature;
 import org.oristool.models.stpn.trees.TruncationPolicy;
-import org.oristool.petrinet.Marking;
-import org.oristool.petrinet.MarkingCondition;
-import org.oristool.petrinet.PetriNet;
-import org.oristool.petrinet.Place;
-import org.oristool.petrinet.Transition;
+import org.oristool.petrinet.*;
+
+import java.math.BigDecimal;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * A complex DAG with a single absorbing marking (p15).
